@@ -1,0 +1,11 @@
+# Compilación
+target/
+
+# Configuración local con claves: NO se sube a GitHub
+.vscode/
+.env
+
+# Sistema / editores
+.DS_Store
+*.log
+.idea/

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castillo · Panel</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <span class="marca">Castillo</span>
+    <nav class="menu">
+      <a href="/panel.html" class="activo">Panel</a>
+      <!-- HU-02 / HU-03: Beneficiarios y Nueva obligación se agregan aquí -->
+    </nav>
+    <div class="usuario">
+      <span id="usuario-nombre"></span>
+      <span id="usuario-rol" class="insignia"></span>
+      <button type="button" class="boton boton-secundario" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main class="contenido">
+    <h1>Panel</h1>
+    <p id="saludo"></p>
+    <p class="nota">Aquí irán el resumen del mes (HU-04) y las alertas de pago (HU-05).</p>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/panel.js"></script>
+</body>
+</html>
