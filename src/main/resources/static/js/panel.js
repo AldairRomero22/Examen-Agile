@@ -1,4 +1,5 @@
-// HU-04 (panel y pagos del mes) + HU-05 (alertas de vencimiento)
+// HU-04 (resumen del mes: total y tarjetas por estado) + HU-05 (alertas de vencimiento).
+// El listado completo con filtros vive en pagos.js (menú "Pagos").
 (async () => {
   await iniciarPagina('panel');
 
@@ -22,45 +23,24 @@
   };
 
   const params = new URLSearchParams(window.location.search);
-  const modoUrgentes = params.has('urgentes');
   const campoMes = document.getElementById('mes');
-  const filtroCategoria = document.getElementById('filtro-categoria');
   let lista = [];
-  let estadoElegido = params.get('estado') || '';
 
   if (params.has('registrado')) mostrarAviso('Obligación registrada correctamente', 'ok');
 
-  // Categorías para el filtro
-  const rCat = await api('/api/categorias');
-  if (rCat.ok) {
-    (await rCat.json()).forEach(c => {
-      filtroCategoria.insertAdjacentHTML('beforeend', '<option value="' + esc(c.nombre) + '">' + esc(c.nombre) + '</option>');
-    });
-  }
-  filtroCategoria.addEventListener('change', pintar);
-
   await cargarAlertas();
 
-  if (modoUrgentes) {
-    // "Ver todos" de las alertas: lista de urgentes de todos los meses
-    document.getElementById('titulo-lista').textContent = 'Pagos urgentes';
-    document.getElementById('subtitulo-lista').textContent = 'Pagos Vencidos o Por vencer de cualquier mes.';
-    document.getElementById('titulo-tabla').textContent = 'Pagos urgentes';
-    document.getElementById('caja-mes').hidden = true;
-    document.getElementById('volver-mes').hidden = false;
-    document.getElementById('bloque-resumen').hidden = true;
-    document.getElementById('alertas').hidden = true;
-    document.getElementById('vacio').textContent = 'No tienes pagos urgentes';
-    const r = await api('/api/obligaciones/urgentes');
-    lista = r.ok ? await r.json() : [];
-    pintar();
-  } else {
-    campoMes.value = params.get('mes') || hoyIso().slice(0, 7);
-    campoMes.addEventListener('change', cargarMes);
-    await cargarMes();
+  campoMes.value = params.get('mes') || hoyIso().slice(0, 7);
+  campoMes.addEventListener('change', cargarMes);
+  await cargarMes();
+
+  // Ir a Pagos conservando el mes elegido (y el estado si se toca una tarjeta)
+  function irAPagos(estado) {
+    const q = new URLSearchParams({ mes: campoMes.value });
+    if (estado) q.set('estado', estado);
+    window.location.href = '/pagos.html?' + q.toString();
   }
 
-  // ---------- HU-05: alertas ----------
   async function cargarAlertas() {
     const r = await api('/api/obligaciones/urgentes');
     if (!r.ok) return;
@@ -105,7 +85,7 @@
     }
     lista = await r.json();
     pintarResumen();
-    pintar();
+    document.getElementById('ir-pagos').href = '/pagos.html?mes=' + encodeURIComponent(campoMes.value);
   }
 
   // Criterio 1: total del mes y, por estado, cantidad y suma
@@ -150,55 +130,6 @@
     });
     document.getElementById('resumen').innerHTML = html;
     document.querySelectorAll('#bloque-resumen .tarjeta-resumen').forEach(b =>
-      b.addEventListener('click', () => { estadoElegido = b.dataset.estado; pintar(); }));
-  }
-
-  // Criterios 3, 4, 5 y 6
-  function pintar() {
-    const categoria = filtroCategoria.value;
-    const porCategoria = lista.filter(o => !categoria || o.categoria === categoria);
-    const visibles = porCategoria.filter(o => !estadoElegido || o.estado === estadoElegido);
-
-    // Chips de estado con la cantidad de cada uno
-    const chips = [['', 'Todos']].concat(ORDEN_ESTADOS).map(([codigo, etiqueta], i) => {
-      const cantidad = codigo ? porCategoria.filter(o => o.estado === codigo).length : porCategoria.length;
-      if (codigo && i > SIEMPRE_VISIBLES && cantidad === 0) return '';
-      const activo = codigo === estadoElegido ? ' chip-activo' : '';
-      return '<button type="button" class="chip' + activo + '" data-estado="' + codigo + '" aria-pressed="' + (codigo === estadoElegido) + '">' +
-        etiqueta + ' <span class="chip-cantidad">' + cantidad + '</span></button>';
-    }).join('');
-    const cajaChips = document.getElementById('chips-estado');
-    cajaChips.innerHTML = chips;
-    cajaChips.querySelectorAll('.chip').forEach(b =>
-      b.addEventListener('click', () => { estadoElegido = b.dataset.estado; pintar(); }));
-
-    document.querySelectorAll('.tarjeta-resumen').forEach(t =>
-      t.classList.toggle('tarjeta-activa', t.dataset.estado === estadoElegido && estadoElegido !== ''));
-
-    document.getElementById('filas').innerHTML = visibles.map(o =>
-      // HU-10 criterio 2: el pago en espera se distingue en la lista
-      '<tr class="fila-click' + (o.estado === 'EN_ESPERA' ? ' fila-en-espera' : '') + '" data-id="' + o.id + '" tabindex="0">' +
-        '<td><a href="/pago.html?id=' + o.id + '">' + esc(o.concepto) + '</a></td>' +
-        '<td>' + esc(o.categoria) + '</td>' +
-        '<td>' + esc(o.beneficiario) + '</td>' +
-        '<td>' + formatearFecha(o.fechaVencimiento) + '</td>' +
-        '<td class="num">' + formatearMonto(o.monto) + '</td>' +
-        '<td>' + insigniaEstado(o.estado, o.estadoEtiqueta) + '</td>' +
-      '</tr>').join('');
-    document.querySelectorAll('#filas .fila-click').forEach(fila => {
-      const abrir = () => { window.location.href = '/pago.html?id=' + fila.dataset.id; };
-      fila.addEventListener('click', abrir);
-      fila.addEventListener('keydown', e => { if (e.key === 'Enter') abrir(); });
-    });
-
-    const vacio = document.getElementById('vacio');
-    if (!modoUrgentes) {
-      vacio.textContent = lista.length === 0
-        ? 'Aún no hay pagos registrados este mes'
-        : 'Ningún pago cumple los filtros elegidos';
-    }
-    vacio.hidden = visibles.length > 0;
-    document.getElementById('envoltorio').hidden = visibles.length === 0;
-    document.getElementById('filtros').hidden = lista.length === 0;
+      b.addEventListener('click', () => irAPagos(b.dataset.estado)));
   }
 })();

@@ -1,7 +1,7 @@
 // HU-07: subir el comprobante con lectura automática
 // HU-08: enviarlo, verlo verificado u observado, y reenviar otro si queda Observado
 (async () => {
-  await iniciarPagina('panel');
+  await iniciarPagina('pagos');
   const el = id => document.getElementById(id);
   const MAXIMO = 5 * 1024 * 1024;
   const TIPOS_OK = ['image/jpeg', 'image/png', 'application/pdf'];

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castillo · Pagos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <header id="barra"></header>
+
+  <main class="contenido">
+    <section class="encabezado-editorial" id="encabezado-mes">
+      <div>
+        <span class="etiqueta-seccion"><span class="cuadro">C</span> Castillo · Pagos</span>
+        <h1 id="titulo-lista">Pagos</h1>
+        <p id="subtitulo-lista">Todos los pagos del mes: busca, filtra y abre el detalle de cada uno.</p>
+      </div>
+      <div class="acciones-cabecera">
+        <label class="selector-mes" id="caja-mes">Mes
+          <input type="month" id="mes">
+        </label>
+        <a href="/obligacion-nueva.html" class="boton boton-primario solo-asistente" id="nueva-obligacion">+ Nueva obligación</a>
+        <a href="/pagos.html" id="volver-mes" class="boton boton-secundario" hidden>← Volver a Pagos del mes</a>
+      </div>
+    </section>
+
+    <div class="motivo-almena" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><b></b></div>
+
+    <div id="aviso" class="aviso" hidden></div>
+
+    <!-- HU-04: lista del mes con filtros combinables -->
+    <section class="lista-tarjeta">
+      <div class="lista-cabecera">
+        <h2 id="titulo-tabla">Pagos del mes</h2>
+        <span class="lista-contador" id="contador-lista"></span>
+      </div>
+      <div class="filtros" id="filtros">
+        <div class="chips" id="chips-estado" role="group" aria-label="Filtrar por estado"></div>
+        <div class="filtros-campos">
+          <input type="search" id="buscar" class="buscador" placeholder="Buscar concepto o beneficiario" aria-label="Buscar por concepto o beneficiario" autocomplete="off">
+          <select id="filtro-categoria" aria-label="Filtrar por categoría">
+            <option value="">Todas las categorías</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="vacio" class="vacio" hidden>Aún no hay pagos registrados este mes</div>
+      <div class="tabla-envoltorio" id="envoltorio" hidden>
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Concepto</th><th>Categoría</th><th>Beneficiario</th>
+              <th>Vence</th><th class="num">Monto</th><th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="filas"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/pagos.js"></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 // HU-06: ver el detalle del pago
 // HU-10: poner en espera y liberar (gerente); aviso y bloqueo de subida (asistente)
 (async () => {
-  const yo = await iniciarPagina('panel');
+  const yo = await iniciarPagina('pagos');
   const el = id => document.getElementById(id);
   const esGerente = yo.rol === 'GERENTE';
 
@@ -136,7 +136,7 @@
       el('observacion').textContent = p.observacion;
       el('caja-observacion').hidden = false;
     }
-    el('volver').href = '/panel.html?mes=' + p.fechaVencimiento.slice(0, 7);
+    el('volver').href = '/pagos.html?mes=' + p.fechaVencimiento.slice(0, 7);
 
     // HU-10 criterios 2 y 3: nota del gerente visible para los dos roles
     el('caja-espera').hidden = !p.enEspera;

@@ -1,6 +1,6 @@
 // HU-09: ver el comprobante de un pago Pagado u Observado (solo lectura para gerente y asistente)
 (async () => {
-  await iniciarPagina('panel');
+  await iniciarPagina('pagos');
   const el = id => document.getElementById(id);
 
   const id = new URLSearchParams(window.location.search).get('id');

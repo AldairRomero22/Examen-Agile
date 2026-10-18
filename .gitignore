@@ -4,7 +4,6 @@ target/
 # Configuración local con claves: NO se sube a GitHub
 .vscode/
 .env
-.variables/
 
 # Sistema / editores
 .DS_Store

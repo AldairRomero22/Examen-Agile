@@ -104,7 +104,7 @@
           el('concepto').focus();
         } else {
           // Criterio 5: aparece en "Pagos del mes"
-          window.location.href = '/panel.html?registrado=1&mes=' + datos.fechaVencimiento.slice(0, 7);
+          window.location.href = '/pagos.html?registrado=1&mes=' + datos.fechaVencimiento.slice(0, 7);
         }
         return;
       }

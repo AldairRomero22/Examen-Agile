@@ -30,7 +30,7 @@ Avance por HU:
 | HU-01 Iniciar sesión según mi rol | hecha |
 | HU-02 Gestionar beneficiarios | hecha |
 | HU-03 Registrar obligación | hecha |
-| HU-04 Panel y pagos del mes | hecha |
+| HU-04 Panel y pagos del mes | hecha (Panel = resumen y alertas; menú Pagos = listado con búsqueda y filtros) |
 | HU-05 Alertas de vencimiento | hecha |
 | HU-06 Detalle del pago | hecha (`pago.html`) |
 | HU-07 Subir voucher y leerlo | hecha con Tesseract (`comprobante-subir.html`) |

@@ -503,3 +503,33 @@ button.tarjeta-total .tarjeta-cantidad { color: var(--carbon); margin-top: 6px; 
   .matriz-sello { grid-column: 2; }
   .visor iframe { height: 460px; }
 }
+
+
+/* ---------- Menú "Pagos": búsqueda, contador y panel más espaciado ---------- */
+.filtros-campos { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.buscador { padding: 8px 12px; min-height: 38px; min-width: 290px; border: 1px solid var(--carbon); border-radius: 8px; font: inherit; background: var(--blanco); }
+.lista-contador { font-size: .85rem; font-weight: 600; color: var(--carbon); opacity: .75; font-variant-numeric: tabular-nums; }
+.ir-a-pagos { margin: 8px 0 0; text-align: right; font-weight: 600; }
+.alertas { margin-bottom: 32px; }
+.bloque-resumen { margin-bottom: 32px; gap: 28px; }
+.resumen { gap: 16px; }
+@media (max-width: 520px) {
+  .buscador { min-width: 0; width: 100%; }
+  .filtros-campos { width: 100%; }
+  .filtros-campos select { flex: 1; }
+}
+
+/* Panel: total arriba a lo ancho y tarjetas por estado en una fila que respira */
+.bloque-resumen { grid-template-columns: 1fr; }
+.resumen { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+button.tarjeta-total { flex-direction: row; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap; }
+button.tarjeta-total > span:last-child { flex: 1 1 320px; max-width: 520px; }
+.tarjeta-resumen .tarjeta-monto { white-space: nowrap; }
+/* Pagos: la tabla cabe sin recortar la columna Estado */
+.lista-tarjeta .tabla th, .lista-tarjeta .tabla td { padding: 13px 12px; }
+.lista-tarjeta .tabla td:nth-child(2), .lista-tarjeta .tabla td:nth-child(3) { white-space: normal; }
+
+/* Navegación más fluida: el contenido aparece con un fade suave y el menú no parpadea */
+@keyframes aparecer { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.contenido { animation: aparecer .22s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .contenido { animation: none; } }
