@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castillo · Detalle del pago</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <header id="barra"></header>
+
+  <main class="contenido contenido-medio">
+    <p><a href="/panel.html" id="volver">← Volver a Pagos del mes</a></p>
+
+    <div id="no-existe" class="vacio" hidden>
+      Pago no encontrado. <a href="/panel.html">Volver a Pagos del mes</a>
+    </div>
+
+    <section id="contenido" hidden>
+      <div class="encabezado-pagina">
+        <h1 id="concepto"></h1>
+        <span id="estado"></span>
+      </div>
+      <div id="aviso" class="aviso" hidden></div>
+
+      <dl class="datos">
+        <div><dt>Monto</dt><dd id="monto"></dd></div>
+        <div><dt>Vencimiento</dt><dd id="vencimiento"></dd></div>
+        <div><dt>Categoría</dt><dd id="categoria"></dd></div>
+        <div><dt>Registrado por</dt><dd id="registrado-por"></dd></div>
+        <div><dt>Registrado el</dt><dd id="registrado-en"></dd></div>
+        <div id="caja-observacion" hidden><dt>Observación</dt><dd id="observacion"></dd></div>
+      </dl>
+
+      <section class="datos-pago">
+        <div class="encabezado-pagina">
+          <h2>Datos de pago</h2>
+          <button type="button" class="boton boton-primario" id="copiar">Copiar datos de pago</button>
+        </div>
+        <dl class="datos">
+          <div><dt>Beneficiario</dt><dd><a id="beneficiario" href="#"></a></dd></div>
+          <div><dt id="etiqueta-documento">Documento</dt><dd id="documento"></dd></div>
+          <div><dt>Banco</dt><dd id="banco"></dd></div>
+          <div><dt>Cuenta o CCI</dt><dd id="cuenta"></dd></div>
+        </dl>
+      </section>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/pago.js"></script>
+</body>
+</html>

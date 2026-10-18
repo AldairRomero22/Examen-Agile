@@ -100,3 +100,26 @@ function mostrarAviso(texto, tipo) {
   aviso.className = 'aviso aviso-' + (tipo || 'info');
   aviso.hidden = false;
 }
+
+/** HU-05 criterio 3: "vence en 2 días", "vence hoy", "vencido hace 5 días". */
+function textoDias(dias) {
+  const n = Math.abs(Number(dias));
+  const d = n === 1 ? 'día' : 'días';
+  if (dias < 0) return 'vencido hace ' + n + ' ' + d;
+  if (dias === 0) return 'vence hoy';
+  return 'vence en ' + n + ' ' + d;
+}
+
+/** Suma montos sin errores de decimales (trabaja en céntimos). */
+function sumarMontos(lista) {
+  return lista.reduce((total, o) => total + Math.round(Number(o.monto) * 100), 0) / 100;
+}
+
+/** "2026-10-17T23:40:12-05:00" -> "17/10/2026 23:40" en hora de Lima */
+function formatearFechaHora(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('es-PE', {
+    timeZone: 'America/Lima', day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
+}

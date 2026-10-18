@@ -19,13 +19,16 @@
 
   // Criterio 4: los gastos asociados, cada uno con su estado
   document.getElementById('filas').innerHTML = datos.gastos.map(o =>
-    '<tr>' +
-      '<td>' + esc(o.concepto) + '</td>' +
+    '<tr class="fila-click" data-id="' + o.id + '">' +
+      '<td><a href="/pago.html?id=' + o.id + '">' + esc(o.concepto) + '</a></td>' +
       '<td>' + esc(o.categoria) + '</td>' +
       '<td>' + formatearFecha(o.fechaVencimiento) + '</td>' +
       '<td class="num">' + formatearMonto(o.monto) + '</td>' +
       '<td>' + insigniaEstado(o.estado, o.estadoEtiqueta) + '</td>' +
     '</tr>').join('');
+
+  document.querySelectorAll('#filas .fila-click').forEach(fila =>
+    fila.addEventListener('click', () => { window.location.href = '/pago.html?id=' + fila.dataset.id; }));
 
   document.getElementById('vacio').hidden = datos.gastos.length > 0;
   document.getElementById('envoltorio').hidden = datos.gastos.length === 0;

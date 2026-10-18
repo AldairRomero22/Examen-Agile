@@ -10,15 +10,36 @@
   <header id="barra"></header>
 
   <main class="contenido">
-    <div class="encabezado-pagina">
-      <h1>Pagos del mes</h1>
-      <label class="selector-mes">Mes
+    <div id="aviso" class="aviso" hidden></div>
+
+    <!-- HU-05: alertas de pago (de cualquier mes) -->
+    <section class="alertas" id="alertas" aria-live="polite">
+      <div class="alertas-cabecera">
+        <h2>Alertas de pago</h2>
+        <a href="/panel.html?urgentes=1" id="ver-todos" hidden>Ver todos</a>
+      </div>
+      <p class="alertas-resumen" id="alertas-resumen"></p>
+      <ul class="alertas-lista" id="alertas-lista"></ul>
+    </section>
+
+    <!-- HU-04: resumen del mes -->
+    <div class="encabezado-pagina" id="encabezado-mes">
+      <h1 id="titulo-lista">Pagos del mes</h1>
+      <label class="selector-mes" id="caja-mes">Mes
         <input type="month" id="mes">
       </label>
+      <a href="/panel.html" id="volver-mes" hidden>← Volver a Pagos del mes</a>
     </div>
 
-    <div id="aviso" class="aviso" hidden></div>
-    <p class="nota">Lista provisional. El resumen con totales, filtros y alertas llega con las HU-04 y HU-05.</p>
+    <section class="resumen" id="resumen"></section>
+
+    <!-- HU-04 criterio 4: filtros combinables -->
+    <div class="filtros" id="filtros">
+      <div class="chips" id="chips-estado" role="group" aria-label="Filtrar por estado"></div>
+      <select id="filtro-categoria" aria-label="Filtrar por categoría">
+        <option value="">Todas las categorías</option>
+      </select>
+    </div>
 
     <div id="vacio" class="vacio" hidden>Aún no hay pagos registrados este mes</div>
     <div class="tabla-envoltorio" id="envoltorio" hidden>

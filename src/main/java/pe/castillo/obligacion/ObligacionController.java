@@ -3,6 +3,7 @@ package pe.castillo.obligacion;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import pe.castillo.beneficiario.Beneficiario;
+import pe.castillo.beneficiario.BeneficiarioFila;
 import pe.castillo.beneficiario.BeneficiarioRepository;
 import pe.castillo.categoria.Categoria;
 import pe.castillo.categoria.CategoriaRepository;
@@ -26,12 +29,15 @@ import pe.castillo.config.NegocioException;
 import pe.castillo.usuario.UsuarioRepository;
 
 /**
- * HU-03: registrar obligaciones (solo asistente; lo exige SecurityConfig).
- * El listado por mes es provisional: la HU-04 le agrega totales y filtros.
+ * HU-03 registrar obligaciones (solo asistente; lo exige SecurityConfig).
+ * HU-04 lista del mes, HU-05 urgentes, HU-06 detalle.
  */
 @RestController
 @RequestMapping("/api/obligaciones")
 public class ObligacionController {
+
+    /** HU-05: "Por vencer" cuando faltan 3 días o menos. */
+    private static final int DIAS_POR_VENCER = 3;
 
     private final ObligacionRepository obligaciones;
     private final CategoriaRepository categorias;
@@ -48,7 +54,7 @@ public class ObligacionController {
         this.usuarios = usuarios;
     }
 
-    /** Obligaciones cuyo vencimiento cae en el mes (formato AAAA-MM), del más próximo al más lejano. */
+    /** HU-04: obligaciones cuyo vencimiento cae en el mes (AAAA-MM), del más próximo al más lejano. */
     @GetMapping
     public List<ObligacionResumen> listar(@RequestParam(required = false) String mes) {
         YearMonth ym;
@@ -66,8 +72,42 @@ public class ObligacionController {
                 .toList();
     }
 
+    /** HU-05: pagos Por vencer y Vencidos de cualquier mes, del más urgente al menos urgente. */
+    @GetMapping("/urgentes")
+    public List<ObligacionResumen> urgentes() {
+        LocalDate hoy = Fechas.hoy();
+        return obligaciones.buscarUrgentes(hoy.plusDays(DIAS_POR_VENCER)).stream()
+                .map(o -> ObligacionResumen.de(o, hoy))
+                .toList();
+    }
+
+    /** HU-06: detalle del pago con los datos para pagar. Si no existe: "Pago no encontrado". */
+    @GetMapping("/{id}")
+    public ObligacionDetalle detalle(@PathVariable Long id) {
+        Obligacion o = obligaciones.findByIdAndActivoTrue(id)
+                .orElseThrow(() -> new NegocioException(HttpStatus.NOT_FOUND, "Pago no encontrado"));
+        LocalDate hoy = Fechas.hoy();
+        EstadoMostrado estado = EstadoMostrado.de(o, hoy);
+        String registradoPor = usuarios.findById(o.getRegistradoPor())
+                .map(u -> u.getNombre() + " (" + u.getCorreo() + ")")
+                .orElse("—");
+        return new ObligacionDetalle(
+                o.getId(),
+                o.getConcepto(),
+                o.getCategoria().getNombre(),
+                o.getFechaVencimiento(),
+                o.getMonto(),
+                o.getObservacion(),
+                estado.name(),
+                estado.getEtiqueta(),
+                ChronoUnit.DAYS.between(hoy, o.getFechaVencimiento()),
+                registradoPor,
+                o.getRegistradoEn(),
+                BeneficiarioFila.de(o.getBeneficiario()));
+    }
+
     /**
-     * Criterios 4 y 5: si la fecha ya pasó queda "Vencido"; si no, "Por pagar" (se calcula al consultar).
+     * HU-03 criterios 4 y 5: si la fecha ya pasó queda "Vencido"; si no, "Por pagar" (se calcula al consultar).
      * Guarda quién la registró y cuándo.
      */
     @PostMapping
