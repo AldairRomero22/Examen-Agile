@@ -1,3 +1,0 @@
-"SPRING_DATASOURCE_URL": "jdbc:postgresql://ep-curly-darkness-b4l4r3ov.c-6.us-east-2.aws.neon.tech/castillo?sslmode=require",
-        "SPRING_DATASOURCE_USERNAME": "neondb_owner",
-        "SPRING_DATASOURCE_PASSWORD": "npg_pODI52hblicF",
