@@ -132,7 +132,8 @@
       t.classList.toggle('tarjeta-activa', t.dataset.estado === estadoElegido && estadoElegido !== ''));
 
     document.getElementById('filas').innerHTML = visibles.map(o =>
-      '<tr class="fila-click" data-id="' + o.id + '" tabindex="0">' +
+      // HU-10 criterio 2: el pago en espera se distingue en la lista
+      '<tr class="fila-click' + (o.estado === 'EN_ESPERA' ? ' fila-en-espera' : '') + '" data-id="' + o.id + '" tabindex="0">' +
         '<td><a href="/pago.html?id=' + o.id + '">' + esc(o.concepto) + '</a></td>' +
         '<td>' + esc(o.categoria) + '</td>' +
         '<td>' + esc(o.beneficiario) + '</td>' +

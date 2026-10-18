@@ -1,6 +1,7 @@
 package pe.castillo.obligacion;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -31,6 +32,7 @@ import pe.castillo.usuario.UsuarioRepository;
 /**
  * HU-03 registrar obligaciones (solo asistente; lo exige SecurityConfig).
  * HU-04 lista del mes, HU-05 urgentes, HU-06 detalle.
+ * HU-10 poner en espera y liberar (solo gerente; lo exige SecurityConfig).
  */
 @RestController
 @RequestMapping("/api/obligaciones")
@@ -84,13 +86,60 @@ public class ObligacionController {
     /** HU-06: detalle del pago con los datos para pagar. Si no existe: "Pago no encontrado". */
     @GetMapping("/{id}")
     public ObligacionDetalle detalle(@PathVariable Long id) {
-        Obligacion o = obligaciones.findByIdAndActivoTrue(id)
+        return detalleDe(buscar(id));
+    }
+
+    /**
+     * HU-10 criterios 1 y 2: el gerente pone en espera un pago que no esté Pagado, con nota obligatoria.
+     * Se guardan la nota, el usuario y la fecha. Un pago en espera deja de ser vencido o urgente.
+     */
+    @PostMapping("/{id}/espera")
+    public ObligacionDetalle ponerEnEspera(@PathVariable Long id, @Valid @RequestBody EsperaForm form,
+                                           Authentication auth) {
+        Obligacion o = buscar(id);
+        if ("PAGADO".equals(o.getEstadoPago())) {
+            throw new NegocioException(HttpStatus.CONFLICT, "Un pago Pagado no se puede poner en espera");
+        }
+        if (o.isEnEspera()) {
+            throw new NegocioException(HttpStatus.CONFLICT, "Este pago ya está en espera");
+        }
+        o.ponerEnEspera(form.nota().trim(), usuarioId(auth), OffsetDateTime.now(Fechas.LIMA));
+        return detalleDe(obligaciones.save(o));
+    }
+
+    /** HU-10 criterio 4: "Liberar pago"; vuelve al estado que le toca por su fecha. */
+    @PostMapping("/{id}/liberar")
+    public ObligacionDetalle liberar(@PathVariable Long id, Authentication auth) {
+        Obligacion o = buscar(id);
+        if (!o.isEnEspera()) {
+            throw new NegocioException(HttpStatus.CONFLICT, "Este pago no está en espera");
+        }
+        o.liberar(usuarioId(auth), OffsetDateTime.now(Fechas.LIMA));
+        return detalleDe(obligaciones.save(o));
+    }
+
+    private Obligacion buscar(Long id) {
+        return obligaciones.findByIdAndActivoTrue(id)
                 .orElseThrow(() -> new NegocioException(HttpStatus.NOT_FOUND, "Pago no encontrado"));
-        LocalDate hoy = Fechas.hoy();
-        EstadoMostrado estado = EstadoMostrado.de(o, hoy);
-        String registradoPor = usuarios.findById(o.getRegistradoPor())
+    }
+
+    private Long usuarioId(Authentication auth) {
+        return usuarios.findByCorreoIgnoreCase(auth.getName()).orElseThrow().getId();
+    }
+
+    /** "Nombre (correo)" del usuario, o null si no hay usuario. */
+    private String nombreUsuario(Long id) {
+        if (id == null) {
+            return null;
+        }
+        return usuarios.findById(id)
                 .map(u -> u.getNombre() + " (" + u.getCorreo() + ")")
                 .orElse("—");
+    }
+
+    private ObligacionDetalle detalleDe(Obligacion o) {
+        LocalDate hoy = Fechas.hoy();
+        EstadoMostrado estado = EstadoMostrado.de(o, hoy);
         return new ObligacionDetalle(
                 o.getId(),
                 o.getConcepto(),
@@ -101,9 +150,15 @@ public class ObligacionController {
                 estado.name(),
                 estado.getEtiqueta(),
                 ChronoUnit.DAYS.between(hoy, o.getFechaVencimiento()),
-                registradoPor,
+                nombreUsuario(o.getRegistradoPor()),
                 o.getRegistradoEn(),
-                BeneficiarioFila.de(o.getBeneficiario()));
+                BeneficiarioFila.de(o.getBeneficiario()),
+                o.isEnEspera(),
+                o.isEnEspera() ? o.getNotaEspera() : null,
+                o.isEnEspera() ? nombreUsuario(o.getEsperaPor()) : null,
+                o.isEnEspera() ? o.getEsperaEn() : null,
+                o.isEnEspera() ? null : nombreUsuario(o.getLiberadoPor()),
+                o.isEnEspera() ? null : o.getLiberadoEn());
     }
 
     /**
@@ -122,7 +177,7 @@ public class ObligacionController {
 
         String observacion = form.observacion() == null || form.observacion().isBlank()
                 ? null : form.observacion().trim();
-        Long usuarioId = usuarios.findByCorreoIgnoreCase(auth.getName()).orElseThrow().getId();
+        Long usuarioId = usuarioId(auth);
 
         Obligacion guardada = obligaciones.save(new Obligacion(
                 form.concepto().trim(), categoria, beneficiario, form.monto(),

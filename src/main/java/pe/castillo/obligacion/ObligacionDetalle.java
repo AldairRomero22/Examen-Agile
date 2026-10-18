@@ -6,7 +6,10 @@ import java.time.OffsetDateTime;
 
 import pe.castillo.beneficiario.BeneficiarioFila;
 
-/** HU-06: todo lo que muestra el detalle de un pago. */
+/**
+ * HU-06: todo lo que muestra el detalle de un pago.
+ * HU-10: si está en espera, la nota del gerente, quién la puso y cuándo; y si fue liberado, quién y cuándo.
+ */
 public record ObligacionDetalle(
         Long id,
         String concepto,
@@ -19,5 +22,11 @@ public record ObligacionDetalle(
         long diasParaVencer,
         String registradoPor,
         OffsetDateTime registradoEn,
-        BeneficiarioFila beneficiario) {
+        BeneficiarioFila beneficiario,
+        boolean enEspera,
+        String notaEspera,
+        String esperaPor,
+        OffsetDateTime esperaEn,
+        String liberadoPor,
+        OffsetDateTime liberadoEn) {
 }

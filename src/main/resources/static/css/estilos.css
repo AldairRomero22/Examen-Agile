@@ -224,3 +224,23 @@ a.boton-primario { color: #fff; }
   .alerta { grid-template-columns: 1fr auto; }
   .alerta-dias { grid-column: 1 / -1; text-align: left; min-width: 0; }
 }
+
+/* ---------- HU-10: en espera ---------- */
+.caja-espera {
+  margin: 12px 0; padding: 14px 16px; border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--estado-en-espera) 35%, white);
+  border-left: 5px solid var(--estado-en-espera);
+  background: color-mix(in srgb, var(--estado-en-espera) 8%, white);
+  color: var(--texto);
+}
+.caja-espera strong { color: var(--estado-en-espera); }
+.nota-espera { margin: 6px 0 4px; white-space: pre-wrap; overflow-wrap: break-word; }
+.acciones-pago { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; margin: 12px 0; }
+.acciones-pago > div { display: flex; gap: 12px; flex-wrap: wrap; }
+.accion-con-ayuda { flex-direction: column; gap: 6px !important; }
+.ayuda-bloqueo { color: var(--estado-en-espera); font-weight: 600; font-size: .88rem; }
+.boton-espera { background: var(--estado-en-espera); color: #fff; }
+.boton-espera:hover { background: color-mix(in srgb, var(--estado-en-espera) 85%, black); }
+.form-espera { margin: 0 0 16px; }
+.fila-en-espera td { background: color-mix(in srgb, var(--estado-en-espera) 6%, white); }
+.fila-en-espera td:first-child { box-shadow: inset 4px 0 0 var(--estado-en-espera); }

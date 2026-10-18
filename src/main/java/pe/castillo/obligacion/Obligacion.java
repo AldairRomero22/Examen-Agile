@@ -47,8 +47,24 @@ public class Obligacion {
     @Column(name = "estado_pago", nullable = false)
     private String estadoPago = "PENDIENTE";
 
+    // HU-10 · En espera (lo pone y lo quita el gerente)
     @Column(name = "en_espera", nullable = false)
     private boolean enEspera = false;
+
+    @Column(name = "nota_espera")
+    private String notaEspera;
+
+    @Column(name = "espera_por")
+    private Long esperaPor;
+
+    @Column(name = "espera_en")
+    private OffsetDateTime esperaEn;
+
+    @Column(name = "liberado_por")
+    private Long liberadoPor;
+
+    @Column(name = "liberado_en")
+    private OffsetDateTime liberadoEn;
 
     @Column(nullable = false)
     private boolean activo = true;
@@ -81,7 +97,32 @@ public class Obligacion {
     public String getObservacion() { return observacion; }
     public String getEstadoPago() { return estadoPago; }
     public boolean isEnEspera() { return enEspera; }
+    public String getNotaEspera() { return notaEspera; }
+    public Long getEsperaPor() { return esperaPor; }
+    public OffsetDateTime getEsperaEn() { return esperaEn; }
+    public Long getLiberadoPor() { return liberadoPor; }
+    public OffsetDateTime getLiberadoEn() { return liberadoEn; }
     public boolean isActivo() { return activo; }
     public Long getRegistradoPor() { return registradoPor; }
     public OffsetDateTime getRegistradoEn() { return registradoEn; }
+
+    /** HU-10 criterio 2: pasa a "En espera" y guarda la nota, el usuario y la fecha. */
+    public void ponerEnEspera(String nota, Long usuarioId, OffsetDateTime ahora) {
+        this.enEspera = true;
+        this.notaEspera = nota;
+        this.esperaPor = usuarioId;
+        this.esperaEn = ahora;
+        this.liberadoPor = null;
+        this.liberadoEn = null;
+    }
+
+    /**
+     * HU-10 criterio 4: "Liberar pago". Al quitar la marca, el estado vuelve a calcularse
+     * por la fecha (Por pagar, Por vencer o Vencido). La última nota queda guardada como historial.
+     */
+    public void liberar(Long usuarioId, OffsetDateTime ahora) {
+        this.enEspera = false;
+        this.liberadoPor = usuarioId;
+        this.liberadoEn = ahora;
+    }
 }

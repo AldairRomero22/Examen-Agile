@@ -33,6 +33,9 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login.html", "/css/**", "/js/**", "/favicon.ico", "/error").permitAll()
+                // HU-10: la única acción del gerente es poner un pago en espera o liberarlo.
+                // (Va antes de la regla del asistente: gana la primera regla que coincide.)
+                .requestMatchers(HttpMethod.POST, "/api/obligaciones/*/espera", "/api/obligaciones/*/liberar").hasRole("GERENTE")
                 // HU-01 criterio 3: solo el asistente crea o modifica; el gerente solo consulta.
                 .requestMatchers(HttpMethod.POST, "/api/beneficiarios/**", "/api/obligaciones/**").hasRole("ASISTENTE")
                 .requestMatchers("/beneficiario-nuevo.html", "/obligacion-nueva.html").hasRole("ASISTENTE")

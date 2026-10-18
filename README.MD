@@ -12,12 +12,12 @@ src/main/java/pe/castillo/
 ├─ usuario/                     HU-01: usuarios, roles, cuentas iniciales, /api/me
 ├─ categoria/                   las 4 categorías fijas
 ├─ beneficiario/                HU-02
-└─ obligacion/                  HU-03 (+ estado calculado por fecha, HU-05)
+└─ obligacion/                  HU-03 a HU-06 y HU-10 (en espera)
 src/main/resources/
 ├─ application.properties
 ├─ db/migration/                tablas (Flyway las crea solo al arrancar)
 └─ static/                      pantallas: login, panel, beneficiarios, beneficiario,
-                                beneficiario-nuevo, obligacion-nueva, css/, js/
+                                beneficiario-nuevo, obligacion-nueva, pago, css/, js/
 ```
 
 Avance por HU:
@@ -27,11 +27,11 @@ Avance por HU:
 | HU-01 Iniciar sesión según mi rol | hecha |
 | HU-02 Gestionar beneficiarios | hecha |
 | HU-03 Registrar obligación | hecha |
-| HU-04 Panel y pagos del mes | lista provisional (falta resumen, filtros, colores) |
-| HU-05 Alertas de vencimiento | el estado ya se calcula por fecha; falta el bloque de alertas |
-| HU-06 Detalle del pago | pendiente |
+| HU-04 Panel y pagos del mes | hecha |
+| HU-05 Alertas de vencimiento | hecha |
+| HU-06 Detalle del pago | hecha (`pago.html`) |
 | HU-07 / HU-08 / HU-09 Voucher | pendiente (`lector/` y `comprobante/`) |
-| HU-10 Poner en espera | pendiente |
+| HU-10 Poner en espera | hecha (botones en `pago.html`) |
 
 ## Ejecutar en tu PC (VS Code)
 

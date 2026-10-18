@@ -1,34 +1,23 @@
 // HU-06: ver el detalle del pago
+// HU-10: poner en espera y liberar (gerente); aviso y bloqueo de subida (asistente)
 (async () => {
-  await iniciarPagina('panel');
+  const yo = await iniciarPagina('panel');
   const el = id => document.getElementById(id);
+  const esGerente = yo.rol === 'GERENTE';
 
   const id = new URLSearchParams(window.location.search).get('id');
   const r = await api('/api/obligaciones/' + encodeURIComponent(id || ''));
   if (!r.ok) {
-    // Criterio 4
+    // HU-06 criterio 4
     el('no-existe').hidden = false;
     return;
   }
-  const p = await r.json();
+  let p = await r.json();
   const b = p.beneficiario;
 
-  // Criterio 1
-  el('concepto').textContent = p.concepto;
-  el('estado').innerHTML = insigniaEstado(p.estado, p.estadoEtiqueta);
-  el('monto').textContent = formatearMonto(p.monto);
-  const pendiente = ['POR_PAGAR', 'POR_VENCER', 'VENCIDO'].includes(p.estado);
-  el('vencimiento').textContent = formatearFecha(p.fechaVencimiento) + (pendiente ? ' · ' + textoDias(p.diasParaVencer) : '');
-  el('categoria').textContent = p.categoria;
-  el('registrado-por').textContent = p.registradoPor;
-  el('registrado-en').textContent = formatearFechaHora(p.registradoEn);
-  if (p.observacion) {
-    el('observacion').textContent = p.observacion;
-    el('caja-observacion').hidden = false;
-  }
-  el('volver').href = '/panel.html?mes=' + p.fechaVencimiento.slice(0, 7);
+  pintar();
 
-  // Criterio 2
+  // HU-06 criterio 2
   el('beneficiario').textContent = b.nombre;
   el('beneficiario').href = '/beneficiario.html?id=' + b.id;
   el('etiqueta-documento').textContent = b.tipoDocumento;
@@ -36,7 +25,7 @@
   el('banco').textContent = b.banco;
   el('cuenta').textContent = b.cuenta;
 
-  // Criterio 3: copiar al portapapeles y avisar "Datos copiados"
+  // HU-06 criterio 3: copiar al portapapeles y avisar "Datos copiados"
   el('copiar').addEventListener('click', async () => {
     const texto =
       'Beneficiario: ' + b.nombre + '\n' +
@@ -49,7 +38,128 @@
     if (ok) setTimeout(() => mostrarAviso(''), 3000);
   });
 
+  // ---------- HU-10: acciones del gerente ----------
+  if (esGerente) {
+    el('poner-espera').addEventListener('click', () => {
+      mostrarAviso('');
+      el('form-espera').hidden = false;
+      el('poner-espera').hidden = true;
+      el('nota').focus();
+    });
+    el('cancelar-espera').addEventListener('click', cerrarFormulario);
+    el('nota').addEventListener('input', () => {
+      el('contador-nota').textContent = el('nota').value.length;
+      marcarError('nota', '');
+    });
+
+    // Criterios 1 y 2: nota obligatoria de hasta 200 caracteres
+    el('form-espera').addEventListener('submit', async e => {
+      e.preventDefault();
+      const nota = el('nota').value.trim();
+      if (!nota) {
+        marcarError('nota', 'Escribe una nota para el asistente');
+        return;
+      }
+      if (nota.length > 200) {
+        marcarError('nota', 'Máximo 200 caracteres');
+        return;
+      }
+      await enviar('/espera', { nota }, 'El pago quedó en espera');
+    });
+
+    // Criterio 4: vuelve al estado que le toca por su fecha
+    el('liberar').addEventListener('click', () => enviar('/liberar', null, 'Pago liberado'));
+  }
+
+  // ---------- HU-10 criterio 3: el asistente no puede subir comprobante si está en espera ----------
+  if (!esGerente) {
+    el('subir').addEventListener('click', () => {
+      if (p.enEspera) return;
+      window.location.href = '/comprobante-subir.html?id=' + p.id;
+    });
+  }
+
   el('contenido').hidden = false;
+
+  async function enviar(ruta, cuerpo, mensajeOk) {
+    const botones = ['confirmar-espera', 'liberar'].map(el);
+    botones.forEach(x => { x.disabled = true; });
+    try {
+      const resp = await api('/api/obligaciones/' + p.id + ruta, {
+        method: 'POST',
+        body: cuerpo ? JSON.stringify(cuerpo) : undefined
+      });
+      const datos = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        if (datos.errores && datos.errores.nota) {
+          marcarError('nota', datos.errores.nota);
+        } else {
+          mostrarAviso(datos.mensaje || 'No se pudo guardar', 'error');
+        }
+        return;
+      }
+      p = datos;
+      cerrarFormulario();
+      pintar();
+      mostrarAviso(mensajeOk, 'ok');
+      setTimeout(() => mostrarAviso(''), 3000);
+    } catch (err) {
+      mostrarAviso('No se pudo conectar con el servidor', 'error');
+    } finally {
+      botones.forEach(x => { x.disabled = false; });
+    }
+  }
+
+  function cerrarFormulario() {
+    if (!esGerente) return;
+    el('form-espera').hidden = true;
+    el('nota').value = '';
+    el('contador-nota').textContent = '0';
+    marcarError('nota', '');
+    pintar();
+  }
+
+  // Pinta todo lo que depende del estado (se repite después de poner en espera o liberar)
+  function pintar() {
+    // HU-06 criterio 1
+    el('concepto').textContent = p.concepto;
+    el('estado').innerHTML = insigniaEstado(p.estado, p.estadoEtiqueta);
+    el('monto').textContent = formatearMonto(p.monto);
+    const pendiente = ['POR_PAGAR', 'POR_VENCER', 'VENCIDO'].includes(p.estado);
+    el('vencimiento').textContent = formatearFecha(p.fechaVencimiento) + (pendiente ? ' · ' + textoDias(p.diasParaVencer) : '');
+    el('categoria').textContent = p.categoria;
+    el('registrado-por').textContent = p.registradoPor;
+    el('registrado-en').textContent = formatearFechaHora(p.registradoEn);
+    if (p.observacion) {
+      el('observacion').textContent = p.observacion;
+      el('caja-observacion').hidden = false;
+    }
+    el('volver').href = '/panel.html?mes=' + p.fechaVencimiento.slice(0, 7);
+
+    // HU-10 criterios 2 y 3: nota del gerente visible para los dos roles
+    el('caja-espera').hidden = !p.enEspera;
+    if (p.enEspera) {
+      el('nota-espera').textContent = p.notaEspera;
+      el('espera-info').textContent = 'Por ' + p.esperaPor + ' · ' + formatearFechaHora(p.esperaEn);
+    }
+    el('liberado-info').hidden = !(!p.enEspera && p.liberadoEn);
+    if (!p.enEspera && p.liberadoEn) {
+      el('liberado-info').textContent = 'Liberado por ' + p.liberadoPor + ' el ' + formatearFechaHora(p.liberadoEn);
+    }
+    document.querySelector('main').classList.toggle('pago-en-espera', p.enEspera);
+
+    const pagado = p.estado === 'PAGADO';
+    if (esGerente) {
+      // Criterio 1: "Poner en espera" solo si no está Pagado; criterio 4: "Liberar pago" si está en espera
+      el('poner-espera').hidden = pagado || p.enEspera || !el('form-espera').hidden;
+      el('liberar').hidden = !p.enEspera;
+    } else {
+      // Criterio 3: botón deshabilitado con el mensaje del gerente
+      el('subir').hidden = pagado || p.estado === 'EN_VERIFICACION';
+      el('subir').disabled = p.enEspera;
+      el('subir-bloqueado').hidden = !p.enEspera;
+    }
+  }
 
   async function copiar(texto) {
     try {

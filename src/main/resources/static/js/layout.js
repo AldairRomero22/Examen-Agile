@@ -28,6 +28,9 @@ async function iniciarPagina(activa) {
   // (crear, editar, subir comprobante) se quita para él. El servidor además rechaza esas acciones.
   if (yo.rol === 'GERENTE') {
     document.querySelectorAll('.solo-asistente').forEach(el => el.remove());
+  } else {
+    // HU-10: poner en espera y liberar son solo del gerente
+    document.querySelectorAll('.solo-gerente').forEach(el => el.remove());
   }
   return yo;
 }
