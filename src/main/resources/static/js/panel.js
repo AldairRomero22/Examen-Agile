@@ -1,13 +1,41 @@
 (async () => {
-  const yo = await usuarioActual();
-  document.getElementById('usuario-nombre').textContent = yo.correo;
-  const rol = document.getElementById('usuario-rol');
-  rol.textContent = yo.rol === 'GERENTE' ? 'Gerente' : 'Asistente';
-  document.getElementById('saludo').textContent = 'Hola, ' + yo.nombre + '.';
+  await iniciarPagina('panel');
 
-  // HU-01 criterio 3: el gerente solo consulta. Todo elemento con la clase
-  // "solo-asistente" (botones de crear, editar, subir comprobante) se oculta para él.
-  if (yo.rol === 'GERENTE') {
-    document.querySelectorAll('.solo-asistente').forEach(el => el.remove());
+  const params = new URLSearchParams(window.location.search);
+  const campoMes = document.getElementById('mes');
+  campoMes.value = params.get('mes') || hoyIso().slice(0, 7);
+
+  if (params.has('registrado')) {
+    mostrarAviso('Obligación registrada correctamente', 'ok');
+  }
+
+  campoMes.addEventListener('change', cargar);
+  await cargar();
+
+  async function cargar() {
+    const filas = document.getElementById('filas');
+    const vacio = document.getElementById('vacio');
+    const envoltorio = document.getElementById('envoltorio');
+    if (!campoMes.value) return;
+
+    const r = await api('/api/obligaciones?mes=' + encodeURIComponent(campoMes.value));
+    if (!r.ok) {
+      mostrarAviso('No se pudo cargar la lista', 'error');
+      return;
+    }
+    const lista = await r.json();
+
+    filas.innerHTML = lista.map(o =>
+      '<tr>' +
+        '<td>' + esc(o.concepto) + '</td>' +
+        '<td>' + esc(o.categoria) + '</td>' +
+        '<td><a href="/beneficiario.html?id=' + o.beneficiarioId + '">' + esc(o.beneficiario) + '</a></td>' +
+        '<td>' + formatearFecha(o.fechaVencimiento) + '</td>' +
+        '<td class="num">' + formatearMonto(o.monto) + '</td>' +
+        '<td>' + insigniaEstado(o.estado, o.estadoEtiqueta) + '</td>' +
+      '</tr>').join('');
+
+    vacio.hidden = lista.length > 0;
+    envoltorio.hidden = lista.length === 0;
   }
 })();

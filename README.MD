@@ -8,25 +8,30 @@ base de datos **PostgreSQL en Neon** y despliegue en **Render** con Docker.
 ```
 src/main/java/pe/castillo/
 ├─ CastilloApplication.java     arranque (zona horaria America/Lima)
-├─ config/                      seguridad, CSRF, redirección de "/"
-└─ usuario/                     HU-01: usuarios, roles, cuentas iniciales, /api/me
+├─ config/                      seguridad, CSRF, errores en JSON, fecha de "hoy" en Lima
+├─ usuario/                     HU-01: usuarios, roles, cuentas iniciales, /api/me
+├─ categoria/                   las 4 categorías fijas
+├─ beneficiario/                HU-02
+└─ obligacion/                  HU-03 (+ estado calculado por fecha, HU-05)
 src/main/resources/
 ├─ application.properties
 ├─ db/migration/                tablas (Flyway las crea solo al arrancar)
-│  ├─ V1__tablas.sql            usuario, categoria, beneficiario, obligacion, comprobante, verificacion
-│  └─ V2__categorias.sql        las 4 categorías fijas
-└─ static/                      pantallas: login.html, panel.html, css/, js/
+└─ static/                      pantallas: login, panel, beneficiarios, beneficiario,
+                                beneficiario-nuevo, obligacion-nueva, css/, js/
 ```
 
-Paquetes que faltan crear, uno por grupo de HU:
+Avance por HU:
 
-| Paquete | HU |
+| HU | Estado |
 |---|---|
-| `beneficiario/` | HU-02 |
-| `obligacion/` | HU-03, HU-05, HU-06, HU-10 |
-| `panel/` | HU-04 |
-| `lector/` | HU-07 (lector intercambiable: IA de visión o Tesseract) |
-| `comprobante/` | HU-07, HU-08, HU-09 |
+| HU-01 Iniciar sesión según mi rol | hecha |
+| HU-02 Gestionar beneficiarios | hecha |
+| HU-03 Registrar obligación | hecha |
+| HU-04 Panel y pagos del mes | lista provisional (falta resumen, filtros, colores) |
+| HU-05 Alertas de vencimiento | el estado ya se calcula por fecha; falta el bloque de alertas |
+| HU-06 Detalle del pago | pendiente |
+| HU-07 / HU-08 / HU-09 Voucher | pendiente (`lector/` y `comprobante/`) |
+| HU-10 Poner en espera | pendiente |
 
 ## Ejecutar en tu PC (VS Code)
 

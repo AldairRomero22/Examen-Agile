@@ -7,26 +7,35 @@
   <link rel="stylesheet" href="/css/estilos.css">
 </head>
 <body>
-  <header class="barra">
-    <span class="marca">Castillo</span>
-    <nav class="menu">
-      <a href="/panel.html" class="activo">Panel</a>
-      <!-- HU-02 / HU-03: Beneficiarios y Nueva obligación se agregan aquí -->
-    </nav>
-    <div class="usuario">
-      <span id="usuario-nombre"></span>
-      <span id="usuario-rol" class="insignia"></span>
-      <button type="button" class="boton boton-secundario" onclick="cerrarSesion()">Cerrar sesión</button>
-    </div>
-  </header>
+  <header id="barra"></header>
 
   <main class="contenido">
-    <h1>Panel</h1>
-    <p id="saludo"></p>
-    <p class="nota">Aquí irán el resumen del mes (HU-04) y las alertas de pago (HU-05).</p>
+    <div class="encabezado-pagina">
+      <h1>Pagos del mes</h1>
+      <label class="selector-mes">Mes
+        <input type="month" id="mes">
+      </label>
+    </div>
+
+    <div id="aviso" class="aviso" hidden></div>
+    <p class="nota">Lista provisional. El resumen con totales, filtros y alertas llega con las HU-04 y HU-05.</p>
+
+    <div id="vacio" class="vacio" hidden>Aún no hay pagos registrados este mes</div>
+    <div class="tabla-envoltorio" id="envoltorio" hidden>
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Concepto</th><th>Categoría</th><th>Beneficiario</th>
+            <th>Vence</th><th class="num">Monto</th><th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="filas"></tbody>
+      </table>
+    </div>
   </main>
 
   <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
   <script src="/js/panel.js"></script>
 </body>
 </html>

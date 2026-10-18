@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castillo · Beneficiario</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <header id="barra"></header>
+
+  <main class="contenido">
+    <p><a href="/beneficiarios.html">← Volver a Beneficiarios</a></p>
+
+    <div id="no-existe" class="vacio" hidden>
+      Beneficiario no encontrado. <a href="/beneficiarios.html">Volver a Beneficiarios</a>
+    </div>
+
+    <section id="contenido" hidden>
+      <h1 id="nombre"></h1>
+      <dl class="datos">
+        <div><dt id="etiqueta-documento">Documento</dt><dd id="documento"></dd></div>
+        <div><dt>Banco</dt><dd id="banco"></dd></div>
+        <div><dt>Cuenta o CCI</dt><dd id="cuenta"></dd></div>
+        <div><dt>Estado</dt><dd id="estado"></dd></div>
+      </dl>
+
+      <h2>Gastos de este beneficiario</h2>
+      <div id="vacio" class="vacio" hidden>Este beneficiario aún no tiene gastos registrados</div>
+      <div class="tabla-envoltorio" id="envoltorio" hidden>
+        <table class="tabla">
+          <thead>
+            <tr><th>Concepto</th><th>Categoría</th><th>Vence</th><th class="num">Monto</th><th>Estado</th></tr>
+          </thead>
+          <tbody id="filas"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/beneficiario.js"></script>
+</body>
+</html>

@@ -2,6 +2,7 @@ package pe.castillo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,6 +33,9 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login.html", "/css/**", "/js/**", "/favicon.ico", "/error").permitAll()
+                // HU-01 criterio 3: solo el asistente crea o modifica; el gerente solo consulta.
+                .requestMatchers(HttpMethod.POST, "/api/beneficiarios/**", "/api/obligaciones/**").hasRole("ASISTENTE")
+                .requestMatchers("/beneficiario-nuevo.html", "/obligacion-nueva.html").hasRole("ASISTENTE")
                 .anyRequest().authenticated())
             .formLogin(form -> form
                 .loginPage("/login.html")
@@ -46,7 +50,16 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/login.html?salir")
                 .permitAll())
             .exceptionHandling(ex -> ex
-                .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), esApi))
+                .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), esApi)
+                .accessDeniedHandler((request, response, e) -> {
+                    if (request.getRequestURI().startsWith("/api/")) {
+                        response.setStatus(HttpStatus.FORBIDDEN.value());
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().write("{\"mensaje\":\"No tienes permiso para esta acción\"}");
+                    } else {
+                        response.sendRedirect("/acceso-denegado.html");
+                    }
+                }))
             // CSRF con cookie XSRF-TOKEN legible por JS: las páginas son HTML estático
             .csrf(csrf -> csrf
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castillo · Nuevo beneficiario</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <header id="barra"></header>
+
+  <main class="contenido contenido-estrecho">
+    <p><a id="enlace-volver" href="/beneficiarios.html">← Volver a Beneficiarios</a></p>
+    <h1>Nuevo beneficiario</h1>
+    <p class="nota">Registra a quién se le paga una sola vez; luego lo eliges en cada obligación sin volver a escribir sus datos.</p>
+
+    <div id="aviso" class="aviso" hidden></div>
+
+    <form id="formulario" class="formulario" novalidate>
+      <label for="nombre">Nombre o razón social</label>
+      <input id="nombre" type="text" maxlength="150" autocomplete="off">
+      <small class="error-campo" id="error-nombre" hidden></small>
+
+      <label for="documento">RUC (11 dígitos) o DNI (8 dígitos)</label>
+      <input id="documento" type="text" inputmode="numeric" maxlength="11" autocomplete="off">
+      <small class="error-campo" id="error-documento" hidden></small>
+
+      <label for="banco">Banco</label>
+      <input id="banco" type="text" maxlength="60" autocomplete="off">
+      <small class="error-campo" id="error-banco" hidden></small>
+
+      <label for="cuenta">Cuenta o CCI</label>
+      <input id="cuenta" type="text" maxlength="30" autocomplete="off">
+      <small class="error-campo" id="error-cuenta" hidden></small>
+
+      <div class="acciones">
+        <button type="submit" class="boton boton-primario" id="guardar">Guardar</button>
+        <a href="/beneficiarios.html" class="boton boton-secundario" id="cancelar">Cancelar</a>
+      </div>
+    </form>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/beneficiario-nuevo.js"></script>
+</body>
+</html>

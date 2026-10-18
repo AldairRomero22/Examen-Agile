@@ -79,3 +79,78 @@ body {
 }
 .contenido { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
 .nota { color: var(--texto-suave); }
+
+/* ---------- Páginas internas ---------- */
+.contenido-estrecho { max-width: 560px; }
+.contenido h1 { margin: 0 0 8px; font-size: 1.6rem; }
+.contenido h2 { margin: 28px 0 12px; font-size: 1.15rem; }
+a { color: var(--primario); }
+a.boton { text-decoration: none; display: inline-block; text-align: center; }
+a.boton-primario { color: #fff; }
+
+.encabezado-pagina {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.selector-mes { display: flex; align-items: center; gap: 8px; font-size: .9rem; font-weight: 600; }
+.selector-mes input { padding: 8px 10px; border: 1px solid var(--borde); border-radius: 8px; font-size: .95rem; }
+
+/* ---------- Tablas ---------- */
+.tabla-envoltorio { overflow-x: auto; background: var(--superficie); border: 1px solid var(--borde); border-radius: 10px; }
+.tabla { width: 100%; border-collapse: collapse; font-size: .93rem; }
+.tabla th, .tabla td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+.tabla th { background: var(--fondo); font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: var(--texto-suave); }
+.tabla tr:last-child td { border-bottom: none; }
+.tabla .num { text-align: right; }
+.fila-click { cursor: pointer; }
+.fila-click:hover { background: var(--fondo); }
+.vacio {
+  padding: 32px 16px; text-align: center; color: var(--texto-suave);
+  background: var(--superficie); border: 1px dashed var(--borde); border-radius: 10px;
+}
+
+/* ---------- Insignias de estado (HU-04 criterio 5) ---------- */
+.estado { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+.estado-pagado        { color: var(--estado-pagado);        background: color-mix(in srgb, var(--estado-pagado) 12%, white); }
+.estado-por-pagar     { color: var(--estado-por-pagar);     background: color-mix(in srgb, var(--estado-por-pagar) 12%, white); }
+.estado-por-vencer    { color: var(--estado-por-vencer);    background: color-mix(in srgb, var(--estado-por-vencer) 14%, white); }
+.estado-vencido       { color: var(--estado-vencido);       background: color-mix(in srgb, var(--estado-vencido) 12%, white); }
+.estado-en-espera     { color: var(--estado-en-espera);     background: color-mix(in srgb, var(--estado-en-espera) 12%, white); }
+.estado-en-verificacion { color: var(--estado-verificacion); background: color-mix(in srgb, var(--estado-verificacion) 12%, white); }
+.estado-observado     { color: var(--estado-observado);     background: color-mix(in srgb, var(--estado-observado) 14%, white); }
+.estado-activo        { color: var(--estado-pagado);        background: color-mix(in srgb, var(--estado-pagado) 12%, white); }
+
+/* ---------- Formularios ---------- */
+.formulario {
+  display: flex; flex-direction: column; background: var(--superficie);
+  border: 1px solid var(--borde); border-radius: 12px; padding: 24px;
+}
+.formulario label { font-size: .9rem; font-weight: 600; margin: 16px 0 6px; }
+.formulario label:first-child { margin-top: 0; }
+.formulario input, .formulario select, .formulario textarea {
+  padding: 10px 12px; font-size: 1rem; font-family: inherit;
+  border: 1px solid var(--borde); border-radius: 8px; background: #fff; color: var(--texto);
+}
+.formulario input:focus, .formulario select:focus, .formulario textarea:focus {
+  outline: 2px solid var(--primario); outline-offset: 1px;
+}
+.formulario textarea { resize: vertical; }
+.ayuda { color: var(--texto-suave); margin-top: 4px; }
+.enlace-chico { font-size: .85rem; margin-top: 8px; }
+.acciones { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+.caja-datos {
+  margin-top: 8px; padding: 10px 12px; background: var(--info-fondo);
+  border-radius: 8px; font-size: .9rem; line-height: 1.6;
+}
+.aviso-ok { background: #e6f4ea; color: var(--estado-pagado); }
+
+/* ---------- Detalle ---------- */
+.datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0; }
+.datos div { background: var(--superficie); border: 1px solid var(--borde); border-radius: 10px; padding: 12px 14px; }
+.datos dt { font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; color: var(--texto-suave); }
+.datos dd { margin: 4px 0 0; font-weight: 600; word-break: break-all; }
+
+@media (max-width: 640px) {
+  .barra { gap: 12px; padding: 10px 16px; }
+  .contenido { padding: 16px 12px; }
+}

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castillo · Beneficiarios</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <header id="barra"></header>
+
+  <main class="contenido">
+    <div class="encabezado-pagina">
+      <h1>Beneficiarios</h1>
+      <a href="/beneficiario-nuevo.html" class="boton boton-primario solo-asistente">Nuevo beneficiario</a>
+    </div>
+
+    <div id="aviso" class="aviso" hidden></div>
+    <div id="vacio" class="vacio" hidden>Aún no hay beneficiarios registrados</div>
+    <div class="tabla-envoltorio" id="envoltorio" hidden>
+      <table class="tabla">
+        <thead>
+          <tr><th>Nombre o razón social</th><th>Documento</th><th>Banco</th><th>Estado</th></tr>
+        </thead>
+        <tbody id="filas"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/beneficiarios.js"></script>
+</body>
+</html>

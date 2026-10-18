@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castillo · Nueva obligación</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <header id="barra"></header>
+
+  <main class="contenido contenido-estrecho">
+    <h1>Nueva obligación</h1>
+
+    <div id="aviso" class="aviso" hidden></div>
+
+    <form id="formulario" class="formulario" novalidate>
+      <label for="concepto">Concepto</label>
+      <input id="concepto" type="text" maxlength="150" autocomplete="off">
+      <small class="error-campo" id="error-concepto" hidden></small>
+
+      <label for="categoriaId">Categoría</label>
+      <select id="categoriaId"><option value="">Elige una categoría</option></select>
+      <small class="error-campo" id="error-categoriaId" hidden></small>
+
+      <label for="beneficiarioId">Beneficiario</label>
+      <select id="beneficiarioId"><option value="">Elige un beneficiario</option></select>
+      <small class="error-campo" id="error-beneficiarioId" hidden></small>
+      <div id="datos-beneficiario" class="caja-datos" hidden></div>
+      <a href="/beneficiario-nuevo.html?volver=obligacion" class="enlace-chico">Registrar un beneficiario nuevo</a>
+
+      <label for="monto">Monto (S/)</label>
+      <input id="monto" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off">
+      <small class="error-campo" id="error-monto" hidden></small>
+
+      <label for="fechaVencimiento">Fecha de vencimiento</label>
+      <input id="fechaVencimiento" type="date">
+      <small class="error-campo" id="error-fechaVencimiento" hidden></small>
+      <small class="ayuda" id="ayuda-vencida" hidden>Esta fecha ya pasó: la obligación se registrará como Vencido.</small>
+
+      <label for="observacion">Observación (opcional)</label>
+      <textarea id="observacion" rows="3" maxlength="200"></textarea>
+      <small class="ayuda"><span id="contador">0</span>/200</small>
+      <small class="error-campo" id="error-observacion" hidden></small>
+
+      <div class="acciones">
+        <button type="button" class="boton boton-primario" id="guardar">Guardar</button>
+        <button type="button" class="boton boton-secundario" id="guardar-otra">Guardar y registrar otra</button>
+      </div>
+    </form>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/obligacion-nueva.js"></script>
+</body>
+</html>
