@@ -12,12 +12,15 @@ src/main/java/pe/castillo/
 ├─ usuario/                     HU-01: usuarios, roles, cuentas iniciales, /api/me
 ├─ categoria/                   las 4 categorías fijas
 ├─ beneficiario/                HU-02
-└─ obligacion/                  HU-03 a HU-06 y HU-10 (en espera)
+├─ obligacion/                  HU-03 a HU-06 y HU-10 (en espera)
+├─ lector/                      HU-07: lee el voucher (Tesseract; la IA se agrega después)
+└─ comprobante/                 HU-07/08/09: subir, verificar con 4 reglas, ver
 src/main/resources/
 ├─ application.properties
 ├─ db/migration/                tablas (Flyway las crea solo al arrancar)
 └─ static/                      pantallas: login, panel, beneficiarios, beneficiario,
-                                beneficiario-nuevo, obligacion-nueva, pago, css/, js/
+                                beneficiario-nuevo, obligacion-nueva, pago, comprobante-subir,
+                                comprobante-ver, css/, js/
 ```
 
 Avance por HU:
@@ -30,7 +33,9 @@ Avance por HU:
 | HU-04 Panel y pagos del mes | hecha |
 | HU-05 Alertas de vencimiento | hecha |
 | HU-06 Detalle del pago | hecha (`pago.html`) |
-| HU-07 / HU-08 / HU-09 Voucher | pendiente (`lector/` y `comprobante/`) |
+| HU-07 Subir voucher y leerlo | hecha con Tesseract (`comprobante-subir.html`) |
+| HU-08 Verificar con 4 reglas | hecha (Pagado u Observado) |
+| HU-09 Ver comprobante | hecha (`comprobante-ver.html`) |
 | HU-10 Poner en espera | hecha (botones en `pago.html`) |
 
 ## Ejecutar en tu PC (VS Code)
@@ -43,6 +48,21 @@ Avance por HU:
 4. Abre http://localhost:8080 e ingresa con `asistente@castillo.pe` o `gerente@castillo.pe`.
 
 `.vscode/` está en `.gitignore`: las claves **no** se suben a GitHub.
+
+## Lector de vouchers (Tesseract)
+
+El voucher se lee con **Tesseract** (OCR gratuito, sin IA). Los PDF de bancos se leen directo del texto del PDF.
+
+- **Render**: el `Dockerfile` ya instala Tesseract con español. No hay que hacer nada.
+- **Tu PC (Windows)**: instala Tesseract (instalador de UB Mannheim, marca **Spanish** en idiomas).
+  Si `tesseract --version` no funciona en la terminal, define la variable `TESSERACT_CMD` con la ruta
+  del programa, por ejemplo `C:\Program Files\Tesseract-OCR\tesseract.exe` (sin comillas).
+- Si falta el idioma español, usa solo inglés (los números y fechas se leen igual).
+- En Render gratis la lectura es lenta (0.1 CPU): puede tardar decenas de segundos. Se puede bajar la
+  memoria con `JAVA_OPTS=-Xmx256m`.
+- El lector es intercambiable (`LECTOR_VOUCHER`, hoy solo `tesseract`): después se agrega el de IA.
+
+Opcionales: `TESSERACT_CMD`, `TESSERACT_IDIOMAS` (por defecto `spa+eng`), `TESSERACT_LIMITE_SEGUNDOS` (90).
 
 ## Variables de entorno (Render → Environment)
 

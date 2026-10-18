@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castillo · Subir comprobante</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <header id="barra"></header>
+
+  <main class="contenido contenido-medio">
+    <p><a href="/panel.html" id="volver">← Volver al detalle del pago</a></p>
+
+    <div id="no-existe" class="vacio" hidden>
+      Pago no encontrado. <a href="/panel.html">Volver a Pagos del mes</a>
+    </div>
+
+    <!-- HU-07 criterio 1: un pago Pagado o En espera no admite subida -->
+    <div id="bloqueado" class="vacio" hidden></div>
+
+    <section id="contenido" hidden>
+      <div class="pago-cabecera">
+        <div>
+          <span class="etiqueta-seccion"><span class="cuadro">C</span> Comprobante de pago</span>
+          <h1 id="concepto"></h1>
+          <div class="pago-monto" id="monto"></div>
+        </div>
+        <div class="pago-lateral">
+          <span id="estado"></span>
+          <span class="etiqueta-seccion">Vencimiento</span>
+          <strong id="vencimiento"></strong>
+        </div>
+      </div>
+
+      <div id="aviso" class="aviso" hidden></div>
+      <div id="observado-previo" class="aviso aviso-error" hidden></div>
+
+      <!-- Paso 1 y 2: subir el archivo y ver lo que leyó el sistema -->
+      <div id="paso-subir" class="pago-grid">
+        <div class="expediente">
+          <div class="expediente-cabecera"><span>1 · Sube el voucher</span></div>
+          <div class="expediente-cuerpo">
+            <label class="zona-subida" id="zona" for="archivo">
+              <span class="zona-icono" id="zona-icono"></span>
+              <strong>Elige o arrastra el archivo del voucher</strong>
+              <span class="nota">JPG, PNG o PDF · hasta 5 MB</span>
+              <input type="file" id="archivo" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf">
+            </label>
+            <small class="error-campo" id="error-archivo" hidden></small>
+
+            <div id="elegido" class="archivo-elegido" hidden>
+              <img id="vista-previa" alt="Vista previa del voucher" hidden>
+              <div>
+                <strong id="nombre-archivo"></strong>
+                <small id="tamano-archivo" class="nota"></small>
+              </div>
+            </div>
+
+            <div class="acciones" style="margin-top:0">
+              <button type="button" class="boton boton-primario" id="leer" disabled>Subir y leer voucher</button>
+            </div>
+            <p id="leyendo" class="leyendo" hidden role="status">
+              <span class="girando" aria-hidden="true"></span>
+              Leyendo el voucher… puede tardar unos segundos.
+            </p>
+          </div>
+        </div>
+
+        <div class="expediente" id="panel-leido">
+          <div class="expediente-cabecera"><span>2 · Datos leídos del voucher</span></div>
+          <div class="expediente-cuerpo">
+            <p id="espera-lectura" class="nota">Aquí aparecerán la fecha de pago, el número de operación y el monto que lea el sistema.</p>
+
+            <form id="form-leido" class="formulario formulario-plano" hidden novalidate>
+              <div class="aviso aviso-info" style="margin:0">
+                <strong>Datos leídos del voucher.</strong> No se pueden modificar. Si falta alguno, sube otra imagen más clara
+                o escribe solo ese campo: quedará marcado «escrito a mano».
+              </div>
+
+              <div class="referencia">
+                <span class="etiqueta-seccion">Monto de la obligación</span>
+                <strong id="monto-obligacion"></strong>
+              </div>
+
+              <label for="monto-leido">Monto</label>
+              <input type="text" id="monto-leido" inputmode="decimal" autocomplete="off">
+              <small class="marca-campo" id="marca-monto"></small>
+              <small class="error-campo" id="error-monto-leido" hidden></small>
+              <small class="ayuda-monto" id="alerta-monto" hidden></small>
+
+              <label for="fecha-leida">Fecha de pago</label>
+              <input type="date" id="fecha-leida">
+              <small class="marca-campo" id="marca-fecha"></small>
+              <small class="error-campo" id="error-fecha-leida" hidden></small>
+              <small class="ayuda-monto" id="alerta-fecha" hidden></small>
+
+              <label for="nro-leido">Número de operación</label>
+              <input type="text" id="nro-leido" autocomplete="off" maxlength="40">
+              <small class="marca-campo" id="marca-nro"></small>
+              <small class="error-campo" id="error-nro-leido" hidden></small>
+
+              <div class="acciones">
+                <button type="submit" class="boton boton-turquesa" id="enviar" disabled>Enviar comprobante</button>
+                <button type="button" class="boton boton-secundario" id="otra-imagen">Subir otra imagen</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 3: resultado de la verificación (HU-08) -->
+      <div id="paso-resultado" hidden></div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/comprobante-comun.js"></script>
+  <script src="/js/comprobante-subir.js"></script>
+</body>
+</html>

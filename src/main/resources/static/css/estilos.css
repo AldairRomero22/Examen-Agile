@@ -441,3 +441,65 @@ button.tarjeta-total .tarjeta-cantidad { color: var(--carbon); margin-top: 6px; 
 @media (max-width: 520px) {
   .resumen { grid-template-columns: 1fr; }
 }
+
+
+/* ---------- HU-07/08/09: comprobante ---------- */
+.zona-subida {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+  padding: 28px 16px; border: 2px dashed var(--carbon); border-radius: 10px; background: var(--blanco);
+  cursor: pointer; transition: background .15s;
+}
+.zona-subida:hover, .zona-subida.arrastrando { background: var(--turquesa-claro); }
+.zona-subida input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.zona-subida:focus-within { outline: 3px solid var(--turquesa); outline-offset: 2px; }
+.zona-icono svg { width: 40px; height: 40px; }
+.archivo-elegido { display: flex; align-items: center; gap: 14px; margin-top: 12px; padding: 10px; border: 1px solid var(--linea); border-radius: 8px; background: var(--blanco); }
+.archivo-elegido div { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
+#vista-previa { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1px solid var(--linea); }
+.leyendo { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-weight: 600; }
+.girando { width: 20px; height: 20px; border: 3px solid var(--linea); border-top-color: var(--carbon); border-radius: 50%; animation: giro .8s linear infinite; }
+@keyframes giro { to { transform: rotate(360deg); } }
+.formulario-plano { border: none; box-shadow: none; padding: 0; background: transparent; }
+.referencia { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; margin-bottom: 8px; background: var(--amarillo); border: 1px solid var(--carbon); border-radius: 8px; }
+.marca-campo { display: block; margin: 4px 0; font-size: .85rem; }
+.marca-leido, .marca-mano { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.marca-leido svg, .marca-mano svg { width: 14px; height: 14px; }
+.marca-mano { color: #8a5a00; }
+.campo-leido { background: var(--marfil) !important; font-weight: 600; cursor: not-allowed; }
+.ayuda-monto { color: var(--error); font-weight: 600; margin-top: 4px; }
+.lista-fallas { margin: 8px 0 0; padding-left: 20px; color: var(--error); font-weight: 500; }
+
+.insignia-verif { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid var(--carbon); border-radius: 999px; font-weight: 600; font-size: .85rem; color: var(--carbon); }
+.insignia-verif svg { width: 16px; height: 16px; }
+.insignia-verif-auto { background: var(--turquesa); }
+.insignia-verif-manual { background: var(--lila); }
+
+.caja-verificacion { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; border: 1px solid var(--carbon); border-radius: 10px; background: var(--blanco); box-shadow: var(--sombra); }
+
+.resultado { margin-top: 16px; padding: 18px; border: 1px solid var(--carbon); border-radius: 12px; background: var(--blanco); box-shadow: var(--sombra-grande); }
+.resultado-ok { border-left: 8px solid var(--turquesa); }
+.resultado-obs { border-left: 8px solid var(--coral); }
+.resultado-cabecera { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.resultado-cabecera > div { flex: 1; min-width: 200px; }
+.resultado-cabecera h2 { margin: 2px 0; }
+.resultado-icono svg { width: 36px; height: 36px; }
+.resultado-ok .resultado-icono { color: #1d7d77; }
+.resultado-obs .resultado-icono { color: var(--error); }
+.matriz { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.matriz-fila { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: start; padding: 10px; border: 1px solid var(--linea); border-radius: 8px; }
+.matriz-fila.cumple { background: #eefaf9; }
+.matriz-fila.falla { background: var(--coral-claro); border-color: var(--coral); }
+.matriz-icono svg { width: 22px; height: 22px; }
+.matriz-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.matriz-titulo { font-weight: 600; }
+.matriz-mensaje { color: var(--error); }
+.matriz-sello { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+
+.visor { margin-bottom: 12px; border: 1px solid var(--linea); border-radius: 8px; background: var(--marfil); overflow: hidden; }
+.visor img { display: block; width: 100%; max-height: 640px; object-fit: contain; }
+.visor iframe { display: block; width: 100%; height: 640px; border: 0; }
+@media (max-width: 600px) {
+  .matriz-fila { grid-template-columns: 24px 1fr; }
+  .matriz-sello { grid-column: 2; }
+  .visor iframe { height: 460px; }
+}

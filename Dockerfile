@@ -9,6 +9,11 @@ RUN mvn -B -DskipTests package
 # Etapa 2: ejecutar solo con el JRE
 FROM eclipse-temurin:21-jre
 WORKDIR /app
+# HU-07: Tesseract (OCR) con español para leer los vouchers.
+# fontconfig y fuentes: Java las necesita para dibujar las páginas de un PDF escaneado.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa fontconfig fonts-dejavu-core \
+ && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app/target/castillo.jar app.jar
 ENV JAVA_OPTS="-Xmx300m"
 EXPOSE 8080

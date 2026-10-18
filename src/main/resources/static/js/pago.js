@@ -16,6 +16,7 @@
   const b = p.beneficiario;
 
   pintar();
+  pintarVerificacion();
 
   // HU-06 criterio 2
   el('beneficiario').textContent = b.nombre;
@@ -101,6 +102,7 @@
       p = datos;
       cerrarFormulario();
       pintar();
+      pintarVerificacion();
       mostrarAviso(mensajeOk, 'ok');
       setTimeout(() => mostrarAviso(''), 3000);
     } catch (err) {
@@ -156,8 +158,28 @@
     } else {
       // Criterio 3: botón deshabilitado con el mensaje del gerente
       el('subir').hidden = pagado || p.estado === 'EN_VERIFICACION';
+      el('subir').textContent = p.estado === 'OBSERVADO' ? 'Subir otro comprobante' : 'Subir comprobante';
       el('subir').disabled = p.enEspera;
       el('subir-bloqueado').hidden = !p.enEspera;
+    }
+  }
+
+  // HU-09: en pagos Pagado u Observado se muestra la verificación y el enlace "Ver comprobante"
+  async function pintarVerificacion() {
+    const tiene = p.estado === 'PAGADO' || p.estado === 'OBSERVADO';
+    el('caja-verificacion').hidden = !tiene;
+    if (!tiene) return;
+    el('ver-comprobante').href = '/comprobante-ver.html?id=' + p.id;
+    try {
+      const resp = await api('/api/obligaciones/' + p.id + '/comprobante');
+      if (!resp.ok) return;
+      const c = await resp.json();
+      el('verif-insignia').innerHTML = c.insignia ? insigniaVerificacion(c.insignia, c.insigniaEtiqueta) : '';
+      const fallas = (c.reglas || []).filter(x => !x.cumple).map(x => x.mensaje);
+      el('verif-fallas').innerHTML = fallas.map(f => '<li>' + esc(f) + '</li>').join('');
+      el('verif-fallas').hidden = fallas.length === 0;
+    } catch (err) {
+      // el enlace "Ver comprobante" sigue disponible aunque no se pueda traer el resumen
     }
   }
 

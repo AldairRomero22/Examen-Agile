@@ -47,6 +47,13 @@ public class Obligacion {
     @Column(name = "estado_pago", nullable = false)
     private String estadoPago = "PENDIENTE";
 
+    /** HU-08 criterio 2: AUTOMATICA o MANUAL (si el asistente escribió algún dato a mano). Solo cuando está Pagado. */
+    @Column(name = "tipo_verificacion")
+    private String tipoVerificacion;
+
+    @Column(name = "pagado_en")
+    private OffsetDateTime pagadoEn;
+
     // HU-10 · En espera (lo pone y lo quita el gerente)
     @Column(name = "en_espera", nullable = false)
     private boolean enEspera = false;
@@ -96,6 +103,8 @@ public class Obligacion {
     public LocalDate getFechaVencimiento() { return fechaVencimiento; }
     public String getObservacion() { return observacion; }
     public String getEstadoPago() { return estadoPago; }
+    public String getTipoVerificacion() { return tipoVerificacion; }
+    public OffsetDateTime getPagadoEn() { return pagadoEn; }
     public boolean isEnEspera() { return enEspera; }
     public String getNotaEspera() { return notaEspera; }
     public Long getEsperaPor() { return esperaPor; }
@@ -105,6 +114,20 @@ public class Obligacion {
     public boolean isActivo() { return activo; }
     public Long getRegistradoPor() { return registradoPor; }
     public OffsetDateTime getRegistradoEn() { return registradoEn; }
+
+    /** HU-08 criterio 2: las cuatro reglas se cumplieron. */
+    public void marcarPagado(String tipoVerificacion, OffsetDateTime ahora) {
+        this.estadoPago = "PAGADO";
+        this.tipoVerificacion = tipoVerificacion;
+        this.pagadoEn = ahora;
+    }
+
+    /** HU-08 criterio 3: alguna regla falló; el asistente puede subir otro comprobante. */
+    public void marcarObservado() {
+        this.estadoPago = "OBSERVADO";
+        this.tipoVerificacion = null;
+        this.pagadoEn = null;
+    }
 
     /** HU-10 criterio 2: pasa a "En espera" y guarda la nota, el usuario y la fecha. */
     public void ponerEnEspera(String nota, Long usuarioId, OffsetDateTime ahora) {

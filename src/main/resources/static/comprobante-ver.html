@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castillo · Ver comprobante</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <header id="barra"></header>
+
+  <main class="contenido contenido-medio">
+    <p><a href="/panel.html" id="volver">← Volver al detalle del pago</a></p>
+
+    <div id="no-existe" class="vacio" hidden></div>
+
+    <section id="contenido" hidden>
+      <div class="pago-cabecera">
+        <div>
+          <span class="etiqueta-seccion"><span class="cuadro">C</span> Comprobante del pago</span>
+          <h1 id="concepto"></h1>
+          <div class="pago-monto" id="monto"></div>
+        </div>
+        <div class="pago-lateral">
+          <span id="estado"></span>
+          <span id="insignia"></span>
+        </div>
+      </div>
+
+      <div class="pago-grid">
+        <!-- HU-09 criterio 2: el comprobante se abre en pantalla y se puede descargar -->
+        <div class="expediente">
+          <div class="expediente-cabecera"><span>Comprobante</span><span id="archivo-info"></span></div>
+          <div class="expediente-cuerpo">
+            <div class="visor" id="visor"></div>
+            <div class="acciones" style="margin-top:0">
+              <a class="boton boton-secundario" id="abrir" target="_blank" rel="noopener">Abrir en otra pestaña</a>
+              <a class="boton boton-turquesa" id="descargar">Descargar</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- HU-09 criterios 3 y 4: datos leídos, quién lo registró, campos escritos a mano e insignia -->
+        <div class="pago-derecha">
+          <div class="expediente">
+            <div class="expediente-cabecera"><span>Datos del comprobante</span><span>Solo lectura</span></div>
+            <div class="expediente-cuerpo">
+              <dl>
+                <div><dt>Monto</dt><dd id="d-monto"></dd></div>
+                <div><dt>Fecha de pago</dt><dd id="d-fecha"></dd></div>
+                <div><dt>Número de operación</dt><dd id="d-nro"></dd></div>
+                <div><dt>Registrado por</dt><dd id="d-subido-por"></dd></div>
+                <div><dt>Registrado el</dt><dd id="d-subido-en"></dd></div>
+                <div><dt>Lector</dt><dd id="d-lector"></dd></div>
+              </dl>
+              <p class="nota" id="nota-manual" hidden>Los campos marcados «escrito a mano» no los leyó el sistema: los escribió el asistente.</p>
+            </div>
+          </div>
+          <div id="resultado"></div>
+          <div class="acciones solo-asistente" id="acciones-observado" hidden style="margin-top:0">
+            <a class="boton boton-primario" id="subir-otro">Subir otro comprobante</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/comprobante-comun.js"></script>
+  <script src="/js/comprobante-ver.js"></script>
+</body>
+</html>

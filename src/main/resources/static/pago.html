@@ -76,6 +76,13 @@
           </div>
           <p id="liberado-info" class="nota" hidden></p>
 
+          <!-- HU-09: resumen de la verificación y acceso al comprobante (PAGADO / OBSERVADO, ambos roles) -->
+          <div id="caja-verificacion" class="caja-verificacion" hidden>
+            <div id="verif-insignia"></div>
+            <ul id="verif-fallas" class="lista-fallas" hidden></ul>
+            <a class="boton boton-turquesa" id="ver-comprobante" href="#">Ver comprobante</a>
+          </div>
+
           <div class="acciones-pago">
             <!-- Asistente: subir comprobante (HU-07); bloqueado mientras esté en espera -->
             <div class="solo-asistente accion-con-ayuda">
@@ -106,6 +113,7 @@
 
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
+  <script src="/js/comprobante-comun.js"></script>
   <script src="/js/pago.js"></script>
 </body>
 </html>

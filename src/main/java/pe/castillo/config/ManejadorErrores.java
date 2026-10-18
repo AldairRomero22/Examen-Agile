@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 /** Convierte los errores en respuestas JSON que las pantallas saben mostrar. */
 @RestControllerAdvice
@@ -41,6 +42,13 @@ public class ManejadorErrores {
         cuerpo.put("mensaje", "Revisa los campos marcados");
         cuerpo.put("errores", errores);
         return ResponseEntity.badRequest().body(cuerpo);
+    }
+
+    /** HU-07 criterio 2: un archivo de más de 5 MB se rechaza antes de llegar a la pantalla de lectura. */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> archivoMuyGrande(MaxUploadSizeExceededException e) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(Map.of("mensaje", "Formato o tamaño no permitido", "campo", "archivo"));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

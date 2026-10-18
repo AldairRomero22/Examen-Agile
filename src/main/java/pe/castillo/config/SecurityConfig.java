@@ -37,8 +37,8 @@ public class SecurityConfig {
                 // (Va antes de la regla del asistente: gana la primera regla que coincide.)
                 .requestMatchers(HttpMethod.POST, "/api/obligaciones/*/espera", "/api/obligaciones/*/liberar").hasRole("GERENTE")
                 // HU-01 criterio 3: solo el asistente crea o modifica; el gerente solo consulta.
-                .requestMatchers(HttpMethod.POST, "/api/beneficiarios/**", "/api/obligaciones/**").hasRole("ASISTENTE")
-                .requestMatchers("/beneficiario-nuevo.html", "/obligacion-nueva.html").hasRole("ASISTENTE")
+                .requestMatchers(HttpMethod.POST, "/api/beneficiarios/**", "/api/obligaciones/**", "/api/comprobantes/**").hasRole("ASISTENTE")
+                .requestMatchers("/beneficiario-nuevo.html", "/obligacion-nueva.html", "/comprobante-subir.html").hasRole("ASISTENTE")
                 .anyRequest().authenticated())
             .formLogin(form -> form
                 .loginPage("/login.html")
@@ -63,6 +63,8 @@ public class SecurityConfig {
                         response.sendRedirect("/acceso-denegado.html");
                     }
                 }))
+            // HU-09: el comprobante (PDF) se muestra dentro de nuestra propia pantalla; solo se permite desde el mismo sitio
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
             // CSRF con cookie XSRF-TOKEN legible por JS: las páginas son HTML estático
             .csrf(csrf -> csrf
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
