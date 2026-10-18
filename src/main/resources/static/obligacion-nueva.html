@@ -4,36 +4,44 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Castillo · Nueva obligación</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/estilos.css">
 </head>
 <body>
   <header id="barra"></header>
 
   <main class="contenido contenido-estrecho">
-    <h1>Nueva obligación</h1>
-
     <div id="aviso" class="aviso" hidden></div>
 
     <form id="formulario" class="formulario" novalidate>
-      <label for="concepto">Concepto</label>
+      <div class="modulo-cabecera">
+        <div>
+          <span class="etiqueta-seccion">Módulo de registro</span>
+          <h2>Nueva obligación</h2>
+        </div>
+        <span class="paso">Paso 1/1</span>
+      </div>
+      <label for="concepto">Concepto *</label>
       <input id="concepto" type="text" maxlength="150" autocomplete="off">
       <small class="error-campo" id="error-concepto" hidden></small>
 
-      <label for="categoriaId">Categoría</label>
+      <label for="categoriaId">Categoría *</label>
       <select id="categoriaId"><option value="">Elige una categoría</option></select>
       <small class="error-campo" id="error-categoriaId" hidden></small>
 
-      <label for="beneficiarioId">Beneficiario</label>
+      <label for="beneficiarioId">Beneficiario *</label>
       <select id="beneficiarioId"><option value="">Elige un beneficiario</option></select>
       <small class="error-campo" id="error-beneficiarioId" hidden></small>
       <div id="datos-beneficiario" class="caja-datos" hidden></div>
       <a href="/beneficiario-nuevo.html?volver=obligacion" class="enlace-chico">Registrar un beneficiario nuevo</a>
 
-      <label for="monto">Monto (S/)</label>
+      <label for="monto">Monto (S/) *</label>
       <input id="monto" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off">
       <small class="error-campo" id="error-monto" hidden></small>
 
-      <label for="fechaVencimiento">Fecha de vencimiento</label>
+      <label for="fechaVencimiento">Fecha de vencimiento *</label>
       <input id="fechaVencimiento" type="date">
       <small class="error-campo" id="error-fechaVencimiento" hidden></small>
       <small class="ayuda" id="ayuda-vencida" hidden>Esta fecha ya pasó: la obligación se registrará como Vencido.</small>

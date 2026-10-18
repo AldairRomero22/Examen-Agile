@@ -1,24 +1,39 @@
-// Barra superior común a todas las pantallas internas.
+// Menú lateral común a todas las pantallas internas (diseño Fortress Neo-Editorial).
 // Uso en cada página: <header id="barra"></header> ... const yo = await iniciarPagina('panel');
 async function iniciarPagina(activa) {
   const yo = await usuarioActual();
 
+  const icono = (trazos) =>
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + trazos + '</svg>';
+  const iconos = {
+    panel: icono('<rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>'),
+    beneficiarios: icono('<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="15" r="1.2"/>'),
+    obligacion: icono('<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>')
+  };
+
   const barra = document.getElementById('barra');
   barra.className = 'barra';
   barra.innerHTML =
-    '<span class="marca">Castillo</span>' +
+    '<div class="marca-bloque">' +
+      '<span class="logo-c">C</span>' +
+      '<div><span class="marca">Castillo</span><span class="marca-sub">Control de pagos</span></div>' +
+    '</div>' +
+    '<div class="menu-titulo">Menú principal</div>' +
     '<nav class="menu">' +
-      '<a href="/panel.html" data-pagina="panel">Panel</a>' +
-      '<a href="/beneficiarios.html" data-pagina="beneficiarios">Beneficiarios</a>' +
-      '<a href="/obligacion-nueva.html" data-pagina="obligacion" class="solo-asistente">Nueva obligación</a>' +
+      '<a href="/panel.html" data-pagina="panel">' + iconos.panel + '<span>Panel</span></a>' +
+      '<a href="/beneficiarios.html" data-pagina="beneficiarios">' + iconos.beneficiarios + '<span>Beneficiarios</span></a>' +
+      '<a href="/obligacion-nueva.html" data-pagina="obligacion" class="solo-asistente">' + iconos.obligacion + '<span>Nueva obligación</span></a>' +
     '</nav>' +
     '<div class="usuario">' +
-      '<span id="usuario-correo"></span>' +
-      '<span id="usuario-rol" class="insignia"></span>' +
+      '<div class="usuario-fila">' +
+        '<span class="avatar" id="usuario-inicial"></span>' +
+        '<div class="usuario-datos"><span id="usuario-correo"></span><span id="usuario-rol" class="insignia"></span></div>' +
+      '</div>' +
       '<button type="button" class="boton boton-secundario" id="boton-salir">Cerrar sesión</button>' +
     '</div>';
 
   document.getElementById('usuario-correo').textContent = yo.correo;
+  document.getElementById('usuario-inicial').textContent = (yo.correo || '?').charAt(0).toUpperCase();
   document.getElementById('usuario-rol').textContent = yo.rol === 'GERENTE' ? 'Gerente' : 'Asistente';
   document.getElementById('boton-salir').addEventListener('click', cerrarSesion);
   const enlace = barra.querySelector('[data-pagina="' + activa + '"]');

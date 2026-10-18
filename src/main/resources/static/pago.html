@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Castillo · Detalle del pago</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/estilos.css">
 </head>
 <body>
@@ -17,65 +20,87 @@
     </div>
 
     <section id="contenido" hidden>
-      <div class="encabezado-pagina">
-        <h1 id="concepto"></h1>
-        <span id="estado"></span>
+      <div class="pago-cabecera">
+        <div>
+          <span class="etiqueta-seccion"><span class="cuadro">C</span> Detalle del pago</span>
+          <h1 id="concepto"></h1>
+          <div class="pago-monto" id="monto"></div>
+        </div>
+        <div class="pago-lateral">
+          <span id="estado"></span>
+          <span class="etiqueta-seccion">Vencimiento</span>
+          <strong id="vencimiento"></strong>
+        </div>
       </div>
+
       <div id="aviso" class="aviso" hidden></div>
 
-      <!-- HU-10 criterios 2 y 3: el pago en espera se distingue y muestra la nota del gerente -->
-      <div id="caja-espera" class="caja-espera" hidden>
-        <strong>El gerente puso este pago en espera</strong>
-        <p id="nota-espera" class="nota-espera"></p>
-        <small id="espera-info" class="nota"></small>
+      <div class="pago-grid">
+        <!-- Columna izquierda: expediente con los datos para pagar (HU-06) -->
+        <div class="expediente">
+          <div class="expediente-cabecera"><span>Expediente del pago</span></div>
+          <div class="expediente-cuerpo">
+            <div>
+              <span class="etiqueta-seccion">Beneficiario</span>
+              <h2 style="margin:4px 0 0"><a id="beneficiario" href="#"></a></h2>
+            </div>
+
+            <div class="bloque datos-pago">
+              <h3>Datos de pago</h3>
+              <dl>
+                <div><dt id="etiqueta-documento">Documento</dt><dd id="documento"></dd></div>
+                <div><dt>Banco</dt><dd id="banco"></dd></div>
+                <div><dt>Cuenta o CCI</dt><dd id="cuenta"></dd></div>
+              </dl>
+              <div class="acciones" style="margin-top:16px">
+                <button type="button" class="boton boton-turquesa" id="copiar">Copiar datos de pago</button>
+              </div>
+            </div>
+
+            <dl>
+              <div><dt>Categoría</dt><dd id="categoria"></dd></div>
+              <div id="caja-observacion" hidden><dt>Observación</dt><dd id="observacion"></dd></div>
+              <div><dt>Registrado por</dt><dd id="registrado-por"></dd></div>
+              <div><dt>Registrado el</dt><dd id="registrado-en"></dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Columna derecha: acciones según el rol (HU-10) -->
+        <div class="pago-derecha">
+          <!-- HU-10 criterios 2 y 3: el pago en espera se distingue y muestra la nota del gerente -->
+          <div id="caja-espera" class="caja-espera" hidden>
+            <strong>El gerente puso este pago en espera</strong>
+            <p id="nota-espera" class="nota-espera"></p>
+            <small id="espera-info" class="nota"></small>
+          </div>
+          <p id="liberado-info" class="nota" hidden></p>
+
+          <div class="acciones-pago">
+            <!-- Asistente: subir comprobante (HU-07); bloqueado mientras esté en espera -->
+            <div class="solo-asistente accion-con-ayuda">
+              <button type="button" class="boton boton-primario" id="subir">Subir comprobante</button>
+              <small id="subir-bloqueado" class="ayuda-bloqueo" hidden>El gerente puso este pago en espera</small>
+            </div>
+            <!-- Gerente: su única acción (HU-01 criterio 3) -->
+            <div class="solo-gerente">
+              <button type="button" class="boton boton-espera" id="poner-espera" hidden>Poner en espera</button>
+              <button type="button" class="boton boton-primario" id="liberar" hidden>Liberar pago</button>
+            </div>
+          </div>
+
+          <form id="form-espera" class="formulario solo-gerente form-espera" hidden novalidate>
+            <label for="nota">Nota para el asistente</label>
+            <textarea id="nota" rows="3" maxlength="200" placeholder="Ejemplo: Espera hasta que confirme el monto con el proveedor"></textarea>
+            <small class="ayuda"><span id="contador-nota">0</span>/200</small>
+            <small class="error-campo" id="error-nota" hidden></small>
+            <div class="acciones">
+              <button type="submit" class="boton boton-espera" id="confirmar-espera">Confirmar</button>
+              <button type="button" class="boton boton-secundario" id="cancelar-espera">Cancelar</button>
+            </div>
+          </form>
+        </div>
       </div>
-      <p id="liberado-info" class="nota" hidden></p>
-
-      <div class="acciones-pago">
-        <!-- Asistente: subir comprobante (HU-07); bloqueado mientras esté en espera -->
-        <div class="solo-asistente accion-con-ayuda">
-          <button type="button" class="boton boton-primario" id="subir">Subir comprobante</button>
-          <small id="subir-bloqueado" class="ayuda-bloqueo" hidden>El gerente puso este pago en espera</small>
-        </div>
-        <!-- Gerente: su única acción (HU-01 criterio 3) -->
-        <div class="solo-gerente">
-          <button type="button" class="boton boton-espera" id="poner-espera" hidden>Poner en espera</button>
-          <button type="button" class="boton boton-primario" id="liberar" hidden>Liberar pago</button>
-        </div>
-      </div>
-
-      <form id="form-espera" class="formulario solo-gerente form-espera" hidden novalidate>
-        <label for="nota">Nota para el asistente</label>
-        <textarea id="nota" rows="3" maxlength="200" placeholder="Ejemplo: Espera hasta que confirme el monto con el proveedor"></textarea>
-        <small class="ayuda"><span id="contador-nota">0</span>/200</small>
-        <small class="error-campo" id="error-nota" hidden></small>
-        <div class="acciones">
-          <button type="submit" class="boton boton-espera" id="confirmar-espera">Confirmar</button>
-          <button type="button" class="boton boton-secundario" id="cancelar-espera">Cancelar</button>
-        </div>
-      </form>
-
-      <dl class="datos">
-        <div><dt>Monto</dt><dd id="monto"></dd></div>
-        <div><dt>Vencimiento</dt><dd id="vencimiento"></dd></div>
-        <div><dt>Categoría</dt><dd id="categoria"></dd></div>
-        <div><dt>Registrado por</dt><dd id="registrado-por"></dd></div>
-        <div><dt>Registrado el</dt><dd id="registrado-en"></dd></div>
-        <div id="caja-observacion" hidden><dt>Observación</dt><dd id="observacion"></dd></div>
-      </dl>
-
-      <section class="datos-pago">
-        <div class="encabezado-pagina">
-          <h2>Datos de pago</h2>
-          <button type="button" class="boton boton-primario" id="copiar">Copiar datos de pago</button>
-        </div>
-        <dl class="datos">
-          <div><dt>Beneficiario</dt><dd><a id="beneficiario" href="#"></a></dd></div>
-          <div><dt id="etiqueta-documento">Documento</dt><dd id="documento"></dd></div>
-          <div><dt>Banco</dt><dd id="banco"></dd></div>
-          <div><dt>Cuenta o CCI</dt><dd id="cuenta"></dd></div>
-        </dl>
-      </section>
     </section>
   </main>
 

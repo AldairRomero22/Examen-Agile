@@ -4,29 +4,63 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Castillo · Iniciar sesión</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/estilos.css">
 </head>
 <body class="pagina-login">
-  <main class="tarjeta-login">
-    <h1 class="marca">Castillo</h1>
-    <p class="subtitulo">Control de pagos</p>
+  <section class="login-izquierda" aria-hidden="true">
+    <div class="login-marca">
+      <span class="logo-c">C</span>
+      <div><span class="marca">Castillo</span><span class="marca-sub">Control de pagos</span></div>
+    </div>
 
-    <div id="aviso" class="aviso" hidden></div>
+    <div class="login-composicion">
+      <div class="bloques-color"><span class="b1">VENCIDO</span><span class="b2">POR VENCER</span><span class="b3">PAGADO</span></div>
+      <div class="login-modulo">
+        <small>Del registro al comprobante</small>
+        <h3>Registra, paga y verifica</h3>
+        <div class="login-pasos">
+          <div><b>1 · Registra</b><span>La obligación y su vencimiento</span></div>
+          <div><b>2 · Paga</b><span>En el banco o en caja</span></div>
+          <div><b>3 · Verifica</b><span>Sube el comprobante</span></div>
+        </div>
+      </div>
+    </div>
 
-    <form id="form-login" method="post" action="/login" novalidate>
-      <input type="hidden" name="_csrf" id="csrf">
+    <div class="login-mensaje">
+      <h2>Cada obligación programada, <em>bajo control total</em> y sin sorpresas.</h2>
+      <p>Controla los pagos de tu empresa: alertas antes de cada vencimiento, datos de pago a un clic y comprobantes verificados.</p>
+    </div>
+  </section>
 
-      <label for="correo">Correo</label>
-      <input id="correo" name="correo" type="email" autocomplete="username">
-      <small class="error-campo" id="error-correo" hidden>Ingresa tu correo</small>
+  <section class="login-derecha">
+    <main class="tarjeta-login">
+      <div class="cuadritos"><i></i><i></i><i></i> Acceso al sistema</div>
+      <h1>Iniciar sesión</h1>
+      <p class="subtitulo">Ingresa con tu correo y contraseña para acceder al control de pagos.</p>
 
-      <label for="clave">Contraseña</label>
-      <input id="clave" name="clave" type="password" autocomplete="current-password">
-      <small class="error-campo" id="error-clave" hidden>Ingresa tu contraseña</small>
+      <div id="aviso" class="aviso" hidden></div>
 
-      <button type="submit" class="boton boton-primario">Ingresar</button>
-    </form>
-  </main>
+      <form id="form-login" method="post" action="/login" novalidate>
+        <input type="hidden" name="_csrf" id="csrf">
+
+        <label for="correo">Correo</label>
+        <input id="correo" name="correo" type="email" autocomplete="username">
+        <small class="error-campo" id="error-correo" hidden>Ingresa tu correo</small>
+
+        <label for="clave">Contraseña</label>
+        <input id="clave" name="clave" type="password" autocomplete="current-password">
+        <small class="error-campo" id="error-clave" hidden>Ingresa tu contraseña</small>
+
+        <button type="submit" class="boton boton-primario">Ingresar →</button>
+      </form>
+
+      <div class="login-nota">El acceso define automáticamente tus permisos: <strong>Asistente</strong> o <strong>Gerente</strong>.</div>
+      <p class="login-pie">Castillo · Control de pagos</p>
+    </main>
+  </section>
 
   <script src="/js/api.js"></script>
   <script src="/js/login.js"></script>
