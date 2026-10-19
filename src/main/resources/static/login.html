@@ -4,63 +4,69 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Castillo · Iniciar sesión</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/estilos.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/login.css">
 </head>
-<body class="pagina-login">
-  <section class="login-izquierda" aria-hidden="true">
-    <div class="login-marca">
-      <span class="logo-c">C</span>
-      <div><span class="marca">Castillo</span><span class="marca-sub">Control de pagos</span></div>
-    </div>
-
-    <div class="login-composicion">
-      <div class="bloques-color"><span class="b1">VENCIDO</span><span class="b2">POR VENCER</span><span class="b3">PAGADO</span></div>
-      <div class="login-modulo">
-        <small>Del registro al comprobante</small>
-        <h3>Registra, paga y verifica</h3>
-        <div class="login-pasos">
-          <div><b>1 · Registra</b><span>La obligación y su vencimiento</span></div>
-          <div><b>2 · Paga</b><span>En el banco o en caja</span></div>
-          <div><b>3 · Verifica</b><span>Sube el comprobante</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="login-mensaje">
-      <h2>Cada obligación programada, <em>bajo control total</em> y sin sorpresas.</h2>
-      <p>Controla los pagos de tu empresa: alertas antes de cada vencimiento, datos de pago a un clic y comprobantes verificados.</p>
-    </div>
-  </section>
-
-  <section class="login-derecha">
-    <main class="tarjeta-login">
-      <div class="cuadritos"><i></i><i></i><i></i> Acceso al sistema</div>
-      <h1>Iniciar sesión</h1>
-      <p class="subtitulo">Ingresa con tu correo y contraseña para acceder al control de pagos.</p>
+<body class="login-nuevo">
+  <section class="login-lado">
+    <main class="login-contenido">
+      <div class="login-logo-movil logo-castillo" role="img" aria-label="Castillo SAC"></div>
+      <h1>Bienvenido<br>de nuevo<span>.</span></h1>
+      <p class="login-sub">Ingresa con tu correo y contraseña para acceder al control de pagos.</p>
 
       <div id="aviso" class="aviso" hidden></div>
 
       <form id="form-login" method="post" action="/login" novalidate>
         <input type="hidden" name="_csrf" id="csrf">
 
-        <label for="correo">Correo</label>
-        <input id="correo" name="correo" type="email" maxlength="150" autocomplete="username">
-        <small class="error-campo" id="error-correo" hidden>Ingresa tu correo</small>
+        <div class="grupo">
+          <label for="correo">Correo electrónico</label>
+          <div class="campo">
+            <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>
+            <input id="correo" name="correo" type="email" maxlength="150" autocomplete="username" placeholder="nombre@empresa.com">
+          </div>
+          <small class="error-campo" id="error-correo" hidden>Ingresa tu correo</small>
+        </div>
 
-        <label for="clave">Contraseña</label>
-        <input id="clave" name="clave" type="password" maxlength="100" autocomplete="current-password">
-        <small class="error-campo" id="error-clave" hidden>Ingresa tu contraseña</small>
+        <div class="grupo">
+          <label for="clave">Contraseña</label>
+          <div class="campo con-boton">
+            <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+            <input id="clave" name="clave" type="password" maxlength="100" autocomplete="current-password" placeholder="Tu contraseña">
+            <button type="button" class="ver-clave" id="ver-clave" aria-label="Mostrar contraseña" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <small class="error-campo" id="error-clave" hidden>Ingresa tu contraseña</small>
+        </div>
 
-        <button type="submit" class="boton boton-primario">Ingresar →</button>
+        <div class="fila-opciones">
+          <input type="checkbox" id="recordar">
+          <label for="recordar">Recordar mi correo</label>
+        </div>
+
+        <button type="submit" class="boton-entrar">
+          <span>Ingresar</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
       </form>
 
       <div class="login-nota">El acceso define automáticamente tus permisos: <strong>Asistente</strong> o <strong>Gerente</strong>.</div>
-      <p class="login-pie">Castillo · Control de pagos</p>
     </main>
+    <footer class="login-pie"><span>© 2026 Castillo SAC</span><span>Control de pagos</span></footer>
   </section>
+
+  <aside class="login-foto" aria-hidden="true">
+    <div class="login-foto-img"></div>
+    <div class="login-foto-velo"></div>
+    <div class="login-foto-logo logo-castillo"></div>
+  </aside>
 
   <script src="/js/api.js"></script>
   <script src="/js/reglas.js"></script>

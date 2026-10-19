@@ -9,7 +9,28 @@ if (params.has('error')) {
   mostrarAviso('Cerraste sesión', 'aviso-info');
 }
 
+// Mostrar u ocultar la contraseña
+const botonVer = document.getElementById('ver-clave');
+botonVer.addEventListener('click', () => {
+  const campo = document.getElementById('clave');
+  const mostrar = campo.type === 'password';
+  campo.type = mostrar ? 'text' : 'password';
+  botonVer.setAttribute('aria-pressed', String(mostrar));
+  botonVer.setAttribute('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña');
+});
+
+// Recordar mi correo: solo el correo, nunca la contraseña; se guarda en este navegador
+const CLAVE_CORREO = 'castillo_correo';
+try {
+  const guardado = localStorage.getItem(CLAVE_CORREO);
+  if (guardado) {
+    document.getElementById('correo').value = guardado;
+    document.getElementById('recordar').checked = true;
+  }
+} catch (e) { /* sin almacenamiento: no pasa nada */ }
+
 form.addEventListener('submit', evento => {
+  aviso.hidden = true;   // el aviso anterior (credenciales / cerraste sesión) ya no aplica
   document.getElementById('correo').value = document.getElementById('correo').value.trim();
   const faltaCorreo = marcarSiVacio('correo');
   const faltaClave = marcarSiVacio('clave');
@@ -20,6 +41,10 @@ form.addEventListener('submit', evento => {
     evento.preventDefault();
     return;
   }
+  try {
+    if (document.getElementById('recordar').checked) localStorage.setItem(CLAVE_CORREO, document.getElementById('correo').value);
+    else localStorage.removeItem(CLAVE_CORREO);
+  } catch (e) { /* sin almacenamiento */ }
   document.getElementById('csrf').value = tokenCsrf();
 });
 
