@@ -112,7 +112,7 @@ public final class ExtractorDatosVoucher {
         return mejor;
     }
 
-    private static LocalDate primeraFechaDe(String linea) {
+    static LocalDate primeraFechaDe(String linea) {
         Matcher m = FECHA_NUMERICA.matcher(linea);
         while (m.find()) {
             boolean anioCorto = m.group(4).length() == 2;

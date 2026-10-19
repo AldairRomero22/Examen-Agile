@@ -90,7 +90,7 @@ public class LectorTesseract implements LectorVoucher {
      * Decodifica la imagen cuidando la memoria: una foto de 48 megapíxeles ocuparía casi 200 MB,
      * así que si es muy grande se lee reducida (se salta cada N-ésimo píxel).
      */
-    private static BufferedImage decodificar(byte[] archivo) {
+    static BufferedImage decodificar(byte[] archivo) {
         try (ImageInputStream entrada = ImageIO.createImageInputStream(new ByteArrayInputStream(archivo))) {
             Iterator<ImageReader> lectores = ImageIO.getImageReaders(entrada);
             if (!lectores.hasNext()) {

@@ -1,7 +1,9 @@
 package pe.castillo.beneficiario;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.validation.Valid;
 
@@ -15,8 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import pe.castillo.categoria.Categoria;
+import pe.castillo.categoria.CategoriaRepository;
 import pe.castillo.config.Fechas;
 import pe.castillo.config.NegocioException;
+import pe.castillo.config.Reglas;
+import pe.castillo.config.ValidacionException;
 import pe.castillo.obligacion.ObligacionRepository;
 import pe.castillo.obligacion.ObligacionResumen;
 import pe.castillo.usuario.UsuarioRepository;
@@ -32,10 +38,13 @@ public class BeneficiarioController {
     private final BeneficiarioRepository beneficiarios;
     private final ObligacionRepository obligaciones;
     private final UsuarioRepository usuarios;
+    private final CategoriaRepository categorias;
 
     public BeneficiarioController(BeneficiarioRepository beneficiarios,
                                   ObligacionRepository obligaciones,
-                                  UsuarioRepository usuarios) {
+                                  UsuarioRepository usuarios,
+                                  CategoriaRepository categorias) {
+        this.categorias = categorias;
         this.beneficiarios = beneficiarios;
         this.obligaciones = obligaciones;
         this.usuarios = usuarios;
@@ -67,13 +76,24 @@ public class BeneficiarioController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BeneficiarioFila crear(@Valid @RequestBody BeneficiarioForm form, Authentication auth) {
+        // Reglas de formato (iguales a las de la pantalla): nombre con letras, DNI/RUC válido, banco, cuenta solo dígitos
+        Map<String, String> errores = new LinkedHashMap<>();
+        ValidacionException.agregar(errores, "nombre", Reglas.nombre(form.nombre()));
+        ValidacionException.agregar(errores, "documento", Reglas.documento(form.documento()));
+        ValidacionException.agregar(errores, "banco", Reglas.banco(form.banco()));
+        ValidacionException.agregar(errores, "cuenta", Reglas.cuenta(form.cuenta()));
+        ValidacionException.lanzarSiHay(errores);
+        Categoria categoria = categorias.findById(form.categoriaId())
+                .filter(Categoria::isActivo)
+                .orElseThrow(() -> new NegocioException(HttpStatus.BAD_REQUEST, "Elige una categoría válida", "categoriaId"));
+
         String documento = form.documento().trim();
         if (beneficiarios.existsByDocumento(documento)) {
             throw new NegocioException(HttpStatus.CONFLICT, "Este documento ya está registrado", "documento");
         }
         Long usuarioId = usuarios.findByCorreoIgnoreCase(auth.getName()).orElseThrow().getId();
         Beneficiario nuevo = beneficiarios.save(new Beneficiario(
-                form.nombre().trim(), documento, form.banco().trim(), form.cuenta().trim(), usuarioId));
+                form.nombre().trim().replaceAll("\\s+", " "), documento, form.banco().trim(), form.cuenta().trim(), categoria, usuarioId));
         return BeneficiarioFila.de(nuevo);
     }
 

@@ -10,18 +10,30 @@ if (params.has('error')) {
 }
 
 form.addEventListener('submit', evento => {
+  document.getElementById('correo').value = document.getElementById('correo').value.trim();
   const faltaCorreo = marcarSiVacio('correo');
   const faltaClave = marcarSiVacio('clave');
-  if (faltaCorreo || faltaClave) {
+  // Correo con formato válido (nombre@empresa.com) antes de enviar
+  const malCorreo = !faltaCorreo && Reglas.correo(document.getElementById('correo').value);
+  if (malCorreo) mostrarErrorCorreo(malCorreo);
+  if (faltaCorreo || faltaClave || malCorreo) {
     evento.preventDefault();
     return;
   }
   document.getElementById('csrf').value = tokenCsrf();
 });
 
+function mostrarErrorCorreo(mensaje) {
+  const error = document.getElementById('error-correo');
+  error.textContent = mensaje;
+  error.hidden = false;
+  document.getElementById('correo').classList.add('campo-error');
+}
+
 function marcarSiVacio(id) {
   const campo = document.getElementById(id);
   const vacio = campo.value.trim() === '';
+  if (id === 'correo') document.getElementById('error-correo').textContent = 'Ingresa tu correo';
   document.getElementById('error-' + id).hidden = !vacio;
   campo.classList.toggle('campo-error', vacio);
   return vacio;

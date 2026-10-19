@@ -7,7 +7,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
+import pe.castillo.categoria.Categoria;
 
 @Entity
 @Table(name = "beneficiario")
@@ -29,6 +33,11 @@ public class Beneficiario {
     @Column(nullable = false)
     private String cuenta;
 
+    /** Rubro del beneficiario; vacío solo en beneficiarios antiguos sin obligaciones. */
+    @ManyToOne
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
+
     @Column(nullable = false)
     private boolean activo = true;
 
@@ -40,11 +49,12 @@ public class Beneficiario {
 
     protected Beneficiario() { }
 
-    public Beneficiario(String nombre, String documento, String banco, String cuenta, Long creadoPor) {
+    public Beneficiario(String nombre, String documento, String banco, String cuenta, Categoria categoria, Long creadoPor) {
         this.nombre = nombre;
         this.documento = documento;
         this.banco = banco;
         this.cuenta = cuenta;
+        this.categoria = categoria;
         this.creadoPor = creadoPor;
     }
 
@@ -53,6 +63,7 @@ public class Beneficiario {
     public String getDocumento() { return documento; }
     public String getBanco() { return banco; }
     public String getCuenta() { return cuenta; }
+    public Categoria getCategoria() { return categoria; }
     public boolean isActivo() { return activo; }
     public Long getCreadoPor() { return creadoPor; }
     public OffsetDateTime getCreadoEn() { return creadoEn; }

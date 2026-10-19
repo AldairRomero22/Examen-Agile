@@ -44,6 +44,15 @@ public class ManejadorErrores {
         return ResponseEntity.badRequest().body(cuerpo);
     }
 
+    /** Reglas propias (nombre, RUC, cuenta, fechas...): mismo formato que la validación de formularios. */
+    @ExceptionHandler(ValidacionException.class)
+    public ResponseEntity<Map<String, Object>> reglas(ValidacionException e) {
+        Map<String, Object> cuerpo = new LinkedHashMap<>();
+        cuerpo.put("mensaje", e.getMessage());
+        cuerpo.put("errores", e.getErrores());
+        return ResponseEntity.badRequest().body(cuerpo);
+    }
+
     /** HU-07 criterio 2: un archivo de más de 5 MB se rechaza antes de llegar a la pantalla de lectura. */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, Object>> archivoMuyGrande(MaxUploadSizeExceededException e) {

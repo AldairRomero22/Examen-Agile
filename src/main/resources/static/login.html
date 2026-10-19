@@ -47,11 +47,11 @@
         <input type="hidden" name="_csrf" id="csrf">
 
         <label for="correo">Correo</label>
-        <input id="correo" name="correo" type="email" autocomplete="username">
+        <input id="correo" name="correo" type="email" maxlength="150" autocomplete="username">
         <small class="error-campo" id="error-correo" hidden>Ingresa tu correo</small>
 
         <label for="clave">Contraseña</label>
-        <input id="clave" name="clave" type="password" autocomplete="current-password">
+        <input id="clave" name="clave" type="password" maxlength="100" autocomplete="current-password">
         <small class="error-campo" id="error-clave" hidden>Ingresa tu contraseña</small>
 
         <button type="submit" class="boton boton-primario">Ingresar →</button>
@@ -63,6 +63,7 @@
   </section>
 
   <script src="/js/api.js"></script>
+  <script src="/js/reglas.js"></script>
   <script src="/js/login.js"></script>
 </body>
 </html>

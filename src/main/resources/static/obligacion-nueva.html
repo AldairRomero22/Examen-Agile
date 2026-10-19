@@ -15,7 +15,54 @@
   <main class="contenido contenido-estrecho">
     <div id="aviso" class="aviso" hidden></div>
 
-    <form id="formulario" class="formulario" novalidate>
+    <section id="eleccion" class="formulario" hidden>
+      <div class="modulo-cabecera">
+        <div>
+          <span class="etiqueta-seccion">Módulo de registro</span>
+          <h2>Nueva obligación</h2>
+        </div>
+      </div>
+      <p class="nota">¿Cómo quieres registrarla?</p>
+      <div class="opciones-registro">
+        <button type="button" class="opcion-registro" id="elegir-mano">
+          <strong>Escribir a mano</strong>
+          <span>Llenas el formulario tú mismo.</span>
+        </button>
+        <button type="button" class="opcion-registro" id="elegir-documento">
+          <strong>Leer desde un documento</strong>
+          <span>Subes el recibo, la factura o la cuota (JPG, PNG o PDF) y el sistema rellena el formulario. Tú lo revisas.</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="lectura" class="formulario" hidden>
+      <div class="modulo-cabecera">
+        <div>
+          <span class="etiqueta-seccion">Leer desde un documento</span>
+          <h2>Sube el documento</h2>
+        </div>
+      </div>
+      <label class="zona-subida" id="zona" for="archivo">
+        <strong>Elige o arrastra el recibo, factura o cuota</strong>
+        <span class="nota">JPG, PNG o PDF · hasta 5 MB</span>
+        <input type="file" id="archivo" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf">
+      </label>
+      <small class="error-campo" id="error-archivo" hidden></small>
+      <div id="leyendo" class="archivo-elegido" hidden>
+        <span class="girando"></span>
+        <div><strong>Leyendo el documento…</strong><small class="nota">Puede tardar unos segundos.</small></div>
+      </div>
+      <div id="fallo-lectura" class="aviso aviso-error" hidden></div>
+      <div class="acciones">
+        <button type="button" class="boton boton-secundario" id="lectura-mano">Escribir a mano</button>
+        <button type="button" class="boton boton-secundario" id="lectura-volver">Volver</button>
+      </div>
+    </section>
+
+    <form id="formulario" class="formulario" novalidate hidden>
+      <div id="aviso-leido" class="aviso aviso-info" hidden>
+        <strong>Revisa los datos leídos.</strong> Lo marcado como “Leído del documento” puedes corregirlo. Lo que no se pudo leer quedó vacío.
+      </div>
       <div class="modulo-cabecera">
         <div>
           <span class="etiqueta-seccion">Módulo de registro</span>
@@ -23,6 +70,7 @@
         </div>
         <span class="paso">Paso 1/1</span>
       </div>
+      <button type="button" class="enlace-chico enlace-boton" id="cambiar-modo">← Cambiar la forma de registrar</button>
       <label for="concepto">Concepto *</label>
       <input id="concepto" type="text" maxlength="150" autocomplete="off">
       <small class="error-campo" id="error-concepto" hidden></small>
@@ -34,7 +82,12 @@
       <label for="beneficiarioId">Beneficiario *</label>
       <select id="beneficiarioId"><option value="">Elige un beneficiario</option></select>
       <small class="error-campo" id="error-beneficiarioId" hidden></small>
+      <small class="ayuda" id="ayuda-rubro" hidden>Registra uno con el enlace de abajo.</small>
       <div id="datos-beneficiario" class="caja-datos" hidden></div>
+      <div id="beneficiario-nuevo" class="caja-datos caja-aviso" hidden>
+        <div id="beneficiario-nuevo-texto"></div>
+        <button type="button" class="boton boton-secundario" id="registrar-emisor">Registrar este beneficiario</button>
+      </div>
       <a href="/beneficiario-nuevo.html?volver=obligacion" class="enlace-chico">Registrar un beneficiario nuevo</a>
 
       <label for="monto">Monto (S/) *</label>
@@ -60,6 +113,7 @@
 
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
+  <script src="/js/reglas.js"></script>
   <script src="/js/obligacion-nueva.js"></script>
 </body>
 </html>

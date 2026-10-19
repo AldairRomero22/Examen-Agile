@@ -533,3 +533,27 @@ button.tarjeta-total > span:last-child { flex: 1 1 320px; max-width: 520px; }
 @keyframes aparecer { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .contenido { animation: aparecer .22s ease-out both; }
 @media (prefers-reduced-motion: reduce) { .contenido { animation: none; } }
+
+
+/* ---------- Nueva obligación: escribir a mano o leer desde un documento ---------- */
+.opciones-registro { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+.opcion-registro {
+  display: flex; flex-direction: column; gap: 6px; text-align: left; padding: 18px; cursor: pointer;
+  border: 2px solid var(--carbon); border-radius: 10px; background: var(--blanco); box-shadow: var(--sombra);
+  font: inherit; color: var(--texto); transition: background .15s;
+}
+.opcion-registro:hover, .opcion-registro:focus-visible { background: var(--turquesa-claro); outline: none; }
+.opcion-registro strong { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; }
+.opcion-registro span { font-size: .88rem; color: var(--texto-suave); }
+.enlace-boton { background: none; border: none; padding: 0; cursor: pointer; font: inherit; text-align: left; margin-bottom: 6px; }
+.etiqueta-leido {
+  display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; font-size: .72rem; font-weight: 600;
+  background: var(--turquesa-claro); border: 1px solid var(--carbon); color: var(--carbon);
+}
+.aviso-info { background: var(--turquesa-claro); border: 1px solid var(--carbon); color: var(--carbon); margin-bottom: 14px; }
+@media (max-width: 620px) { .opciones-registro { grid-template-columns: 1fr; } }
+
+.caja-aviso { background: var(--amarillo-claro, #fbf0c8); border: 1px solid var(--carbon); display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+
+/* Banco «Otro…»: el campo de texto aparece debajo de la lista */
+#banco-otro { margin-top: 8px; }

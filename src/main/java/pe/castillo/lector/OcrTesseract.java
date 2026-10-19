@@ -30,7 +30,7 @@ public final class OcrTesseract {
     private final String comando;
     private final long limiteSegundos;
     private volatile String idiomas;
-    private final Semaphore turno = new Semaphore(1, true);
+    private static final Semaphore turno = new Semaphore(1, true);   // compartido: una sola lectura a la vez en todo el sistema
 
     public OcrTesseract(String comando, String idiomas, long limiteSegundos) {
         this.comando = comando;

@@ -23,7 +23,7 @@ public record ObligacionForm(
 
         @NotNull(message = "Obligatorio")
         @DecimalMin(value = "0", inclusive = false, message = "El monto debe ser mayor que 0")
-        @Digits(integer = 10, fraction = 2, message = "Máximo 2 decimales")
+        @Digits(integer = 8, fraction = 2, message = "Máximo S/ 99,999,999.99 y 2 decimales")
         BigDecimal monto,
 
         @NotNull(message = "Obligatorio")

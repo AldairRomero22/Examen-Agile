@@ -13,6 +13,7 @@
   document.getElementById('nombre').textContent = b.nombre;
   document.getElementById('etiqueta-documento').textContent = b.tipoDocumento;
   document.getElementById('documento').textContent = b.documento;
+  document.getElementById('categoria-benef').textContent = b.categoria || 'Sin categoría';
   document.getElementById('banco').textContent = b.banco;
   document.getElementById('cuenta').textContent = b.cuenta;
   document.getElementById('estado').textContent = b.estado;

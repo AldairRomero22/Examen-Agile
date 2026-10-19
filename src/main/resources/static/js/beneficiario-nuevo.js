@@ -9,8 +9,33 @@
     document.getElementById('cancelar').href = '/obligacion-nueva.html';
   }
 
-  const campos = ['nombre', 'documento', 'banco', 'cuenta'];
+  // Datos leídos de un documento (nombre y RUC del emisor): se prellenan y el asistente los revisa
+  const consulta = new URLSearchParams(window.location.search);
+  if (consulta.get('nombre')) document.getElementById('nombre').value = consulta.get('nombre').slice(0, 150);
+  if (consulta.get('documento')) document.getElementById('documento').value = consulta.get('documento').replace(/\D/g, '').slice(0, 11);
+
+  const campos = ['nombre', 'documento', 'categoriaId', 'banco', 'cuenta'];
+
+  // Categoría (rubro) del beneficiario: en Nueva obligación, al elegir una categoría salen solo los de ese rubro
+  const rCat = await api('/api/categorias');
+  const listaCategorias = rCat.ok ? await rCat.json() : [];
+  document.getElementById('categoriaId').innerHTML = '<option value="">Elige una categoría</option>' +
+    listaCategorias.map(c => '<option value="' + c.id + '">' + esc(c.nombre) + '</option>').join('');
+  const categoriaPrevia = consulta.get('categoriaId');
+  if (categoriaPrevia && listaCategorias.some(c => String(c.id) === categoriaPrevia)) {
+    document.getElementById('categoriaId').value = categoriaPrevia;
+  }
   const valor = id => document.getElementById(id).value.trim();
+  // El banco se elige de una lista; con «Otro…» se escribe
+  const bancoOtro = document.getElementById('banco-otro');
+  const banco = () => document.getElementById('banco').value === '__otro' ? bancoOtro.value.trim() : valor('banco');
+  document.getElementById('banco').addEventListener('change', () => {
+    bancoOtro.hidden = document.getElementById('banco').value !== '__otro';
+    if (!bancoOtro.hidden) bancoOtro.focus();
+  });
+  // Cuenta o CCI: solo se escriben números (se quitan guiones, espacios y letras al pegar)
+  const cuenta = document.getElementById('cuenta');
+  cuenta.addEventListener('input', () => { cuenta.value = cuenta.value.replace(/\D/g, '').slice(0, 20); });
 
   // Criterio 2: el documento acepta solo números
   const documento = document.getElementById('documento');
@@ -25,17 +50,25 @@
 
     // Criterios 1 y 2: validación antes de enviar
     let hayErrores = false;
-    campos.forEach(id => {
-      if (valor(id) === '') {
-        marcarError(id, 'Obligatorio');
-        hayErrores = true;
-      }
-    });
     const doc = valor('documento');
-    if (doc !== '' && doc.length !== 8 && doc.length !== 11) {
-      marcarError('documento', 'Debe tener 8 dígitos (DNI) u 11 (RUC), solo números');
+    const comprobar = (id, texto, regla) => {
+      const mensaje = texto === '' ? 'Obligatorio' : regla(texto);
+      if (mensaje) { marcarError(id, mensaje); hayErrores = true; }
+    };
+    comprobar('nombre', valor('nombre'), Reglas.nombre);
+    comprobar('documento', doc, Reglas.documento);
+    if (valor('categoriaId') === '') {
+      marcarError('categoriaId', 'Obligatorio');
       hayErrores = true;
     }
+    if (valor('banco') === '') {
+      marcarError('banco', 'Obligatorio');
+      hayErrores = true;
+    } else if (Reglas.banco(banco())) {
+      marcarError('banco', Reglas.banco(banco()) === 'Elige el banco' ? 'Escribe el nombre del banco' : Reglas.banco(banco()));
+      hayErrores = true;
+    }
+    comprobar('cuenta', valor('cuenta'), Reglas.cuenta);
     if (hayErrores) return;
 
     const boton = document.getElementById('guardar');
@@ -44,7 +77,7 @@
       const r = await api('/api/beneficiarios', {
         method: 'POST',
         body: JSON.stringify({
-          nombre: valor('nombre'), documento: doc, banco: valor('banco'), cuenta: valor('cuenta')
+          nombre: valor('nombre'), documento: doc, categoriaId: Number(valor('categoriaId')), banco: banco(), cuenta: valor('cuenta')
         })
       });
       const datos = await r.json().catch(() => ({}));

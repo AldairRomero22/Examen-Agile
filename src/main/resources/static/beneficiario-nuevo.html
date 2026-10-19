@@ -28,12 +28,25 @@
       <input id="documento" type="text" inputmode="numeric" maxlength="11" autocomplete="off">
       <small class="error-campo" id="error-documento" hidden></small>
 
+      <label for="categoriaId">Categoría (rubro)</label>
+      <select id="categoriaId"><option value="">Elige una categoría</option></select>
+      <small class="error-campo" id="error-categoriaId" hidden></small>
+
       <label for="banco">Banco</label>
-      <input id="banco" type="text" maxlength="60" autocomplete="off">
+      <select id="banco">
+        <option value="">Elige un banco</option>
+        <option>BCP</option><option>BBVA</option><option>Interbank</option><option>Scotiabank</option>
+        <option>Banco de la Nación</option><option>BanBif</option><option>Pichincha</option><option>Mibanco</option>
+        <option>Banco GNB</option><option>Banco Falabella</option><option>Banco Ripley</option><option>Citibank</option>
+        <option>Caja Trujillo</option><option>Caja Arequipa</option><option>Caja Piura</option>
+        <option>Caja Huancayo</option><option>Caja Cusco</option><option>Caja Sullana</option>
+        <option value="__otro">Otro…</option>
+      </select>
+      <input id="banco-otro" type="text" maxlength="60" placeholder="Escribe el nombre del banco" autocomplete="off" hidden>
       <small class="error-campo" id="error-banco" hidden></small>
 
-      <label for="cuenta">Cuenta o CCI</label>
-      <input id="cuenta" type="text" maxlength="30" autocomplete="off">
+      <label for="cuenta">Cuenta o CCI (solo números, de 10 a 20 dígitos)</label>
+      <input id="cuenta" type="text" inputmode="numeric" maxlength="20" autocomplete="off">
       <small class="error-campo" id="error-cuenta" hidden></small>
 
       <div class="acciones">
@@ -45,6 +58,7 @@
 
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
+  <script src="/js/reglas.js"></script>
   <script src="/js/beneficiario-nuevo.js"></script>
 </body>
 </html>

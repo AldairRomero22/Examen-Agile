@@ -1,10 +1,11 @@
 package pe.castillo.beneficiario;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-/** HU-02 criterios 1 y 2: los cuatro campos son obligatorios; documento de 8 (DNI) u 11 (RUC) dígitos. */
+/** HU-02: los cuatro campos son obligatorios; el formato (DNI/RUC, cuenta solo dígitos...) lo valida Reglas. */
 public record BeneficiarioForm(
         @NotBlank(message = "Obligatorio")
         @Size(max = 150, message = "Máximo 150 caracteres")
@@ -19,6 +20,9 @@ public record BeneficiarioForm(
         String banco,
 
         @NotBlank(message = "Obligatorio")
-        @Size(max = 30, message = "Máximo 30 caracteres")
-        String cuenta) {
+        @Size(max = 20, message = "Solo números, de 10 a 20 dígitos (sin guiones ni espacios)")
+        String cuenta,
+
+        @NotNull(message = "Obligatorio")
+        Long categoriaId) {
 }

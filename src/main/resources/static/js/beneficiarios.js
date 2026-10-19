@@ -12,6 +12,7 @@
     '<tr class="fila-click" data-id="' + b.id + '">' +
       '<td><a href="/beneficiario.html?id=' + b.id + '">' + esc(b.nombre) + '</a></td>' +
       '<td>' + esc(b.tipoDocumento) + ' ' + esc(b.documento) + '</td>' +
+      '<td>' + esc(b.categoria || 'Sin categoría') + '</td>' +
       '<td>' + esc(b.banco) + '</td>' +
       '<td><span class="estado estado-activo">' + esc(b.estado) + '</span></td>' +
     '</tr>').join('');
