@@ -51,6 +51,7 @@
     if (!campoMes.value) return;
     const r = await api('/api/obligaciones?mes=' + encodeURIComponent(campoMes.value));
     if (!r.ok) {
+      document.getElementById('cargando').hidden = true;
       mostrarAviso('No se pudo cargar la lista', 'error');
       return;
     }
@@ -60,6 +61,7 @@
 
 
   function pintar() {
+    document.getElementById('cargando').hidden = true;
     const categoria = filtroCategoria.value;
     const texto = normal(buscador.value.trim());
     const base = lista.filter(o =>
@@ -81,12 +83,12 @@
 
     document.getElementById('filas').innerHTML = visibles.map(o =>
       '<tr class="fila-click' + (o.estado === 'EN_ESPERA' ? ' fila-en-espera' : '') + '" data-id="' + o.id + '" tabindex="0">' +
-        '<td><a href="/pago.html?id=' + o.id + '">' + esc(o.concepto) + '</a></td>' +
-        '<td>' + esc(o.categoria) + '</td>' +
-        '<td>' + esc(o.beneficiario) + '</td>' +
-        '<td>' + formatearFecha(o.fechaVencimiento) + '</td>' +
-        '<td class="num">' + formatearMonto(o.monto) + '</td>' +
-        '<td>' + insigniaEstado(o.estado, o.estadoEtiqueta) + '</td>' +
+        '<td data-label="Concepto"><a href="/pago.html?id=' + o.id + '">' + esc(o.concepto) + '</a></td>' +
+        '<td data-label="Categoría">' + esc(o.categoria) + '</td>' +
+        '<td data-label="Beneficiario">' + esc(o.beneficiario) + '</td>' +
+        '<td data-label="Vence">' + formatearFecha(o.fechaVencimiento) + '</td>' +
+        '<td data-label="Monto" class="num">' + formatearMonto(o.monto) + '</td>' +
+        '<td data-label="Estado">' + insigniaEstado(o.estado, o.estadoEtiqueta) + '</td>' +
       '</tr>').join('');
     document.querySelectorAll('#filas .fila-click').forEach(fila => {
       const abrir = () => { window.location.href = '/pago.html?id=' + fila.dataset.id; };

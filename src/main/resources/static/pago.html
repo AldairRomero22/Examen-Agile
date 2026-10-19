@@ -17,7 +17,7 @@
   <header id="barra"></header>
 
   <main class="contenido contenido-medio">
-    <p><a href="/pagos.html" id="volver">← Volver a Pagos del mes</a></p>
+    <p class="volver"><a href="/pagos.html" id="volver">← Volver a Pagos del mes</a></p>
 
     <div id="no-existe" class="vacio" hidden>
       Pago no encontrado. <a href="/pagos.html">Volver a Pagos del mes</a>
@@ -52,9 +52,9 @@
             <div class="bloque datos-pago">
               <h3>Datos de pago</h3>
               <dl>
-                <div><dt id="etiqueta-documento">Documento</dt><dd id="documento"></dd></div>
+                <div><dt id="etiqueta-documento">Documento</dt><dd class="dd-copiable"><span id="documento"></span><button type="button" class="copiar-campo" data-copiar="documento" aria-label="Copiar documento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>Copiar</button></dd></div>
                 <div><dt>Banco</dt><dd id="banco"></dd></div>
-                <div><dt>Cuenta o CCI</dt><dd id="cuenta"></dd></div>
+                <div><dt>Cuenta o CCI</dt><dd class="dd-copiable"><span id="cuenta"></span><button type="button" class="copiar-campo" data-copiar="cuenta" aria-label="Copiar cuenta o CCI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>Copiar</button></dd></div>
               </dl>
               <div class="acciones" style="margin-top:16px">
                 <button type="button" class="boton boton-turquesa" id="copiar">Copiar datos de pago</button>
@@ -100,6 +100,8 @@
             </div>
           </div>
 
+          <p class="nota" id="sin-acciones" hidden>No hay acciones pendientes para este pago.</p>
+
           <form id="form-espera" class="formulario solo-gerente form-espera" hidden novalidate>
             <label for="nota">Nota para el asistente</label>
             <textarea id="nota" rows="3" maxlength="200" placeholder="Ejemplo: Espera hasta que confirme el monto con el proveedor"></textarea>
@@ -115,6 +117,10 @@
     </section>
   </main>
 
+  <script src="/js/vendor/gsap.min.js"></script>
+  <script src="/js/vendor/ScrollTrigger.min.js"></script>
+  <script src="/js/vendor/lenis.min.js"></script>
+  <script src="/js/animaciones.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
   <script src="/js/comprobante-comun.js"></script>

@@ -21,11 +21,11 @@
   // Criterio 4: los gastos asociados, cada uno con su estado
   document.getElementById('filas').innerHTML = datos.gastos.map(o =>
     '<tr class="fila-click" data-id="' + o.id + '">' +
-      '<td><a href="/pago.html?id=' + o.id + '">' + esc(o.concepto) + '</a></td>' +
-      '<td>' + esc(o.categoria) + '</td>' +
-      '<td>' + formatearFecha(o.fechaVencimiento) + '</td>' +
-      '<td class="num">' + formatearMonto(o.monto) + '</td>' +
-      '<td>' + insigniaEstado(o.estado, o.estadoEtiqueta) + '</td>' +
+      '<td data-label="Concepto"><a href="/pago.html?id=' + o.id + '">' + esc(o.concepto) + '</a></td>' +
+      '<td data-label="Categoría">' + esc(o.categoria) + '</td>' +
+      '<td data-label="Vence">' + formatearFecha(o.fechaVencimiento) + '</td>' +
+      '<td data-label="Monto" class="num">' + formatearMonto(o.monto) + '</td>' +
+      '<td data-label="Estado">' + insigniaEstado(o.estado, o.estadoEtiqueta) + '</td>' +
     '</tr>').join('');
 
   document.querySelectorAll('#filas .fila-click').forEach(fila =>

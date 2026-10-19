@@ -46,6 +46,16 @@ form.addEventListener('submit', evento => {
     else localStorage.removeItem(CLAVE_CORREO);
   } catch (e) { /* sin almacenamiento */ }
   document.getElementById('csrf').value = tokenCsrf();
+  // Mientras Spring Security valida, el botón muestra que está ingresando y no se envía dos veces
+  const boton = form.querySelector('.boton-entrar');
+  boton.disabled = true;
+  document.getElementById('texto-entrar').textContent = 'Ingresando…';
+});
+
+// Si el navegador vuelve a esta página desde el historial, el botón queda listo otra vez
+window.addEventListener('pageshow', () => {
+  form.querySelector('.boton-entrar').disabled = false;
+  document.getElementById('texto-entrar').textContent = 'Ingresar';
 });
 
 function mostrarErrorCorreo(mensaje) {

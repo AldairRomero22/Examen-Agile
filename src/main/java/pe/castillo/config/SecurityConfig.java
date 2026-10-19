@@ -32,7 +32,7 @@ public class SecurityConfig {
 
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login.html", "/css/**", "/js/**", "/favicon.ico", "/error").permitAll()
+                .requestMatchers("/login.html", "/css/**", "/js/**", "/img/**", "/favicon.ico", "/error").permitAll()
                 // HU-10: la única acción del gerente es poner un pago en espera o liberarlo.
                 // (Va antes de la regla del asistente: gana la primera regla que coincide.)
                 .requestMatchers(HttpMethod.POST, "/api/obligaciones/*/espera", "/api/obligaciones/*/liberar").hasRole("GERENTE")

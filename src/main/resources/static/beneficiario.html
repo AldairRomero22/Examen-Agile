@@ -17,7 +17,7 @@
   <header id="barra"></header>
 
   <main class="contenido">
-    <p><a href="/beneficiarios.html">← Volver a Beneficiarios</a></p>
+    <p class="volver"><a href="/beneficiarios.html">← Volver a Beneficiarios</a></p>
 
     <div id="no-existe" class="vacio" hidden>
       Beneficiario no encontrado. <a href="/beneficiarios.html">Volver a Beneficiarios</a>
@@ -36,7 +36,7 @@
       <h2>Gastos de este beneficiario</h2>
       <div id="vacio" class="vacio" hidden>Este beneficiario aún no tiene gastos registrados</div>
       <div class="tabla-envoltorio" id="envoltorio" hidden>
-        <table class="tabla">
+        <table class="tabla tabla-movil">
           <thead>
             <tr><th>Concepto</th><th>Categoría</th><th>Vence</th><th class="num">Monto</th><th>Estado</th></tr>
           </thead>
@@ -46,6 +46,10 @@
     </section>
   </main>
 
+  <script src="/js/vendor/gsap.min.js"></script>
+  <script src="/js/vendor/ScrollTrigger.min.js"></script>
+  <script src="/js/vendor/lenis.min.js"></script>
+  <script src="/js/animaciones.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
   <script src="/js/beneficiario.js"></script>

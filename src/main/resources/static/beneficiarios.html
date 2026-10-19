@@ -23,9 +23,10 @@
     </div>
 
     <div id="aviso" class="aviso" hidden></div>
+    <div id="cargando" class="cargando" role="status"><span class="girando" aria-hidden="true"></span>Cargando beneficiarios…</div>
     <div id="vacio" class="vacio" hidden>Aún no hay beneficiarios registrados</div>
     <div class="tabla-envoltorio" id="envoltorio" hidden>
-      <table class="tabla">
+      <table class="tabla tabla-movil">
         <thead>
           <tr><th>Nombre o razón social</th><th>Documento</th><th>Categoría</th><th>Banco</th><th>Estado</th></tr>
         </thead>
@@ -34,6 +35,10 @@
     </div>
   </main>
 
+  <script src="/js/vendor/gsap.min.js"></script>
+  <script src="/js/vendor/ScrollTrigger.min.js"></script>
+  <script src="/js/vendor/lenis.min.js"></script>
+  <script src="/js/animaciones.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
   <script src="/js/beneficiarios.js"></script>

@@ -39,6 +39,21 @@
     if (ok) setTimeout(() => mostrarAviso(''), 3000);
   });
 
+  // Copiar un solo dato (documento o cuenta) con su propio botón
+  document.querySelectorAll('.copiar-campo').forEach(boton => {
+    boton.addEventListener('click', async () => {
+      const ok = await copiar(el(boton.dataset.copiar).textContent);
+      if (!ok) {
+        mostrarAviso('No se pudo copiar. Selecciona el dato y cópialo a mano.', 'error');
+        return;
+      }
+      const original = boton.innerHTML;
+      boton.classList.add('copiado');
+      boton.lastChild.textContent = 'Copiado';
+      setTimeout(() => { boton.classList.remove('copiado'); boton.innerHTML = original; }, 1800);
+    });
+  });
+
   // ---------- HU-10: acciones del gerente ----------
   if (esGerente) {
     el('poner-espera').addEventListener('click', () => {
@@ -162,6 +177,10 @@
       el('subir').disabled = p.enEspera;
       el('subir-bloqueado').hidden = !p.enEspera;
     }
+    // Si el rol no tiene nada que hacer con este pago, se dice en lugar de dejar la tarjeta vacía
+    const hayBoton = [...document.querySelectorAll('.acciones-pago .boton')].some(x => !x.hidden);
+    const formulario = el('form-espera');
+    el('sin-acciones').hidden = hayBoton || !!(formulario && !formulario.hidden);
   }
 
   // HU-09: en pagos Pagado u Observado se muestra la verificación y el enlace "Ver comprobante"

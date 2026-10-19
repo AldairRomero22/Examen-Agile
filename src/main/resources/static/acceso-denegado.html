@@ -16,9 +16,20 @@
 <body>
   <header id="barra"></header>
   <main class="contenido contenido-estrecho">
-    <h1>No tienes permiso para esta pantalla</h1>
-    <p>Tu rol solo permite consultar. <a href="/panel.html">Volver al panel</a></p>
+    <section class="caja-denegado">
+      <span class="etiqueta-seccion"><span class="cuadro">C</span> Acceso restringido</span>
+      <h1>No tienes permiso para esta pantalla</h1>
+      <p>Tu rol solo permite consultar. Registrar, modificar y subir comprobantes lo hace el asistente.</p>
+      <div class="acciones">
+        <a href="/panel.html" class="boton boton-primario">Volver al panel</a>
+        <a href="/pagos.html" class="boton boton-secundario">Ver pagos</a>
+      </div>
+    </section>
   </main>
+  <script src="/js/vendor/gsap.min.js"></script>
+  <script src="/js/vendor/ScrollTrigger.min.js"></script>
+  <script src="/js/vendor/lenis.min.js"></script>
+  <script src="/js/animaciones.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
   <script>iniciarPagina('');</script>
