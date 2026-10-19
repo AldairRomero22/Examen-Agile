@@ -102,8 +102,9 @@ public class DocumentoController {
                 concepto = ultima.get().getConcepto();
             }
         }
-        // si no hay historial, se usa lo que la IA sugiere del documento (solo si el lector con IA está activo)
-        if (concepto == null) {
+        // el concepto que la IA lee del documento (con su periodo, p. ej. "setiembre 2026") manda sobre el de la última
+        // obligación; esa solo se usa cuando el documento no da concepto (lector sin IA)
+        if (lectura.concepto() != null && !lectura.concepto().isBlank()) {
             concepto = lectura.concepto();
         }
         if (categoriaId == null && lectura.categoria() != null) {
