@@ -6,10 +6,15 @@ import java.time.LocalDate;
 /**
  * HU-07 criterio 3: lo que un lector logró extraer del voucher.
  * Un dato que el lector no pudo leer es null (no se inventa).
+ * "lector" dice quién lo leyó: "IA" o "TESSERACT" (null si no se sabe; se usa el nombre del lector).
  */
-public record LecturaVoucher(LocalDate fecha, String nroOperacion, BigDecimal monto) {
+public record LecturaVoucher(LocalDate fecha, String nroOperacion, BigDecimal monto, String lector) {
 
-    public static final LecturaVoucher VACIA = new LecturaVoucher(null, null, null);
+    public static final LecturaVoucher VACIA = new LecturaVoucher(null, null, null, null);
+
+    public LecturaVoucher(LocalDate fecha, String nroOperacion, BigDecimal monto) {
+        this(fecha, nroOperacion, monto, null);
+    }
 
     /** HU-07 criterio 4: no se leyó ningún dato. */
     public boolean estaVacia() {
@@ -25,6 +30,12 @@ public record LecturaVoucher(LocalDate fecha, String nroOperacion, BigDecimal mo
         return new LecturaVoucher(
                 fecha != null ? fecha : otra.fecha,
                 nroOperacion != null ? nroOperacion : otra.nroOperacion,
-                monto != null ? monto : otra.monto);
+                monto != null ? monto : otra.monto,
+                lector != null ? lector : otra.lector);
+    }
+
+    /** La misma lectura, indicando quién la hizo. */
+    public LecturaVoucher leidaPor(String quien) {
+        return new LecturaVoucher(fecha, nroOperacion, monto, quien);
     }
 }

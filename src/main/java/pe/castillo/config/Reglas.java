@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 /**
- * Reglas de validación compartidas por beneficiarios y obligaciones.
+ * Reglas de validación de las obligaciones (y del nombre de a quién se paga).
  * Cada método devuelve el mensaje de error, o null si el valor es válido.
  * Las mismas reglas están en /js/reglas.js para avisar en pantalla antes de enviar.
  */

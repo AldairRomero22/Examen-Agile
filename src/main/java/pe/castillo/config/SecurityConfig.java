@@ -37,8 +37,8 @@ public class SecurityConfig {
                 // (Va antes de la regla del asistente: gana la primera regla que coincide.)
                 .requestMatchers(HttpMethod.POST, "/api/obligaciones/*/espera", "/api/obligaciones/*/liberar").hasRole("GERENTE")
                 // HU-01 criterio 3: solo el asistente crea o modifica; el gerente solo consulta.
-                .requestMatchers(HttpMethod.POST, "/api/beneficiarios/**", "/api/obligaciones/**", "/api/comprobantes/**", "/api/documentos/**").hasRole("ASISTENTE")
-                .requestMatchers("/beneficiario-nuevo.html", "/obligacion-nueva.html", "/comprobante-subir.html").hasRole("ASISTENTE")
+                .requestMatchers(HttpMethod.POST, "/api/obligaciones/**", "/api/comprobantes/**", "/api/documentos/**").hasRole("ASISTENTE")
+                .requestMatchers("/obligacion-nueva.html", "/comprobante-subir.html").hasRole("ASISTENTE")
                 .anyRequest().authenticated())
             .formLogin(form -> form
                 .loginPage("/login.html")

@@ -23,9 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import pe.castillo.beneficiario.Beneficiario;
-import pe.castillo.beneficiario.BeneficiarioFila;
-import pe.castillo.beneficiario.BeneficiarioRepository;
 import pe.castillo.categoria.Categoria;
 import pe.castillo.categoria.CategoriaRepository;
 import pe.castillo.config.Fechas;
@@ -48,16 +45,13 @@ public class ObligacionController {
 
     private final ObligacionRepository obligaciones;
     private final CategoriaRepository categorias;
-    private final BeneficiarioRepository beneficiarios;
     private final UsuarioRepository usuarios;
 
     public ObligacionController(ObligacionRepository obligaciones,
                                 CategoriaRepository categorias,
-                                BeneficiarioRepository beneficiarios,
                                 UsuarioRepository usuarios) {
         this.obligaciones = obligaciones;
         this.categorias = categorias;
-        this.beneficiarios = beneficiarios;
         this.usuarios = usuarios;
     }
 
@@ -88,7 +82,13 @@ public class ObligacionController {
                 .toList();
     }
 
-    /** HU-06: detalle del pago con los datos para pagar. Si no existe: "Pago no encontrado". */
+    /** A quiénes ya se les registró algún pago: el formulario los sugiere mientras se escribe. */
+    @GetMapping("/destinatarios")
+    public List<String> destinatarios() {
+        return obligaciones.nombresBeneficiarios();
+    }
+
+    /** HU-06: detalle del pago. Si no existe: "Pago no encontrado". */
     @GetMapping("/{id}")
     public ObligacionDetalle detalle(@PathVariable Long id) {
         return detalleDe(buscar(id));
@@ -157,7 +157,7 @@ public class ObligacionController {
                 ChronoUnit.DAYS.between(hoy, o.getFechaVencimiento()),
                 nombreUsuario(o.getRegistradoPor()),
                 o.getRegistradoEn(),
-                BeneficiarioFila.de(o.getBeneficiario()),
+                o.getBeneficiarioNombre(),
                 o.isEnEspera(),
                 o.isEnEspera() ? o.getNotaEspera() : null,
                 o.isEnEspera() ? nombreUsuario(o.getEsperaPor()) : null,
@@ -175,18 +175,17 @@ public class ObligacionController {
     public ObligacionResumen crear(@Valid @RequestBody ObligacionForm form, Authentication auth) {
         Map<String, String> errores = new LinkedHashMap<>();
         ValidacionException.agregar(errores, "concepto", Reglas.concepto(form.concepto()));
+        ValidacionException.agregar(errores, "beneficiario", Reglas.nombre(form.beneficiario()));
         ValidacionException.agregar(errores, "fechaVencimiento", Reglas.vencimiento(form.fechaVencimiento(), Fechas.hoy()));
         ValidacionException.lanzarSiHay(errores);
 
         Categoria categoria = categorias.findById(form.categoriaId())
                 .filter(Categoria::isActivo)
                 .orElseThrow(() -> new NegocioException(HttpStatus.BAD_REQUEST, "Elige una categoría válida", "categoriaId"));
-        Beneficiario beneficiario = beneficiarios.findById(form.beneficiarioId())
-                .filter(Beneficiario::isActivo)
-                .orElseThrow(() -> new NegocioException(HttpStatus.BAD_REQUEST, "Elige un beneficiario válido", "beneficiarioId"));
+        String aQuien = form.beneficiario().trim().replaceAll("\\s+", " ");
 
         // No se permite registrar dos veces lo mismo (ver avisoDuplicada)
-        avisoDuplicada(obligaciones, beneficiario.getId(), form.concepto(), form.monto(), form.fechaVencimiento())
+        avisoDuplicada(obligaciones, aQuien, form.concepto(), form.monto(), form.fechaVencimiento())
                 .ifPresent(mensaje -> {
                     throw new NegocioException(HttpStatus.CONFLICT, mensaje);
                 });
@@ -196,20 +195,26 @@ public class ObligacionController {
         Long usuarioId = usuarioId(auth);
 
         Obligacion guardada = obligaciones.save(new Obligacion(
-                form.concepto().trim().replaceAll("\\s+", " "), categoria, beneficiario, form.monto(),
+                form.concepto().trim().replaceAll("\\s+", " "), categoria, aQuien, form.monto(),
                 form.fechaVencimiento(), observacion, usuarioId));
         return ObligacionResumen.de(guardada, Fechas.hoy());
     }
 
     /**
-     * Mensaje si la obligación ya está registrada, o vacío si se puede guardar. Es duplicada si hay una activa del
-     * mismo beneficiario con (a) el mismo monto y vencimiento, o (b) el mismo concepto en el mismo mes de vencimiento,
-     * aunque el monto cambie. "concepto" puede ser null (se revisa solo la regla a).
+     * Mensaje si la obligación ya está registrada, o vacío si se puede guardar. Es duplicada si hay una activa para
+     * la misma persona o empresa (a quién se paga, sin importar mayúsculas, tildes ni espacios) con (a) el mismo monto
+     * y vencimiento, o (b) el mismo concepto en el mismo mes de vencimiento, aunque el monto cambie.
+     * "concepto" puede ser null (se revisa solo la regla a).
      */
-    public static java.util.Optional<String> avisoDuplicada(ObligacionRepository repo, Long beneficiarioId,
+    public static java.util.Optional<String> avisoDuplicada(ObligacionRepository repo, String aQuien,
                                                             String concepto, BigDecimal monto, LocalDate vencimiento) {
-        java.util.Optional<Obligacion> exacta = repo.findFirstByBeneficiarioIdAndMontoAndFechaVencimientoAndActivoTrue(
-                beneficiarioId, monto, vencimiento);
+        if (aQuien == null || aQuien.isBlank() || monto == null || vencimiento == null) {
+            return java.util.Optional.empty();
+        }
+        String quien = Reglas.clave(aQuien);
+        java.util.Optional<Obligacion> exacta = repo.findByMontoAndFechaVencimientoAndActivoTrue(monto, vencimiento).stream()
+                .filter(o -> Reglas.clave(o.getBeneficiarioNombre()).equals(quien))
+                .findFirst();
         if (exacta.isPresent()) {
             return exacta.map(ObligacionController::mensajeDuplicada);
         }
@@ -218,8 +223,9 @@ public class ObligacionController {
         }
         String clave = Reglas.clave(concepto);
         YearMonth mes = YearMonth.from(vencimiento);
-        return repo.findByBeneficiarioIdAndActivoTrueAndFechaVencimientoBetweenOrderByFechaVencimientoAscIdAsc(
-                        beneficiarioId, mes.atDay(1), mes.atEndOfMonth()).stream()
+        return repo.findByActivoTrueAndFechaVencimientoBetweenOrderByFechaVencimientoAscIdAsc(
+                        mes.atDay(1), mes.atEndOfMonth()).stream()
+                .filter(o -> Reglas.clave(o.getBeneficiarioNombre()).equals(quien))
                 .filter(o -> Reglas.clave(o.getConcepto()).equals(clave))
                 .findFirst()
                 .map(ObligacionController::mensajeMismoMes);
@@ -227,15 +233,16 @@ public class ObligacionController {
 
     /** Texto del aviso cuando ya existe la misma obligación. */
     public static String mensajeDuplicada(Obligacion existente) {
-        return "Esta obligación ya está registrada: «" + existente.getConcepto() + "» (mismo beneficiario, S/ "
-                + soles(existente) + " y vencimiento " + dia(existente) + "). Si es otro pago, revisa el monto o la fecha.";
+        return "Esta obligación ya está registrada: «" + existente.getConcepto() + "» para "
+                + existente.getBeneficiarioNombre() + " (S/ " + soles(existente) + " y vencimiento " + dia(existente)
+                + "). Si es otro pago, revisa el monto o la fecha.";
     }
 
     /** Aviso cuando hay lo mismo en el mismo mes pero con otro monto. */
     public static String mensajeMismoMes(Obligacion existente) {
-        return "Ya hay una obligación «" + existente.getConcepto() + "» de este beneficiario para ese mes (S/ "
-                + soles(existente) + ", vence " + dia(existente) + "). Si es un pago distinto, cambia el concepto"
-                + " para diferenciarlo; si es el mismo, no lo registres otra vez.";
+        return "Ya hay una obligación «" + existente.getConcepto() + "» para " + existente.getBeneficiarioNombre()
+                + " en ese mes (S/ " + soles(existente) + ", vence " + dia(existente) + "). Si es un pago distinto,"
+                + " cambia el concepto para diferenciarlo; si es el mismo, no lo registres otra vez.";
     }
 
     private static String soles(Obligacion o) {

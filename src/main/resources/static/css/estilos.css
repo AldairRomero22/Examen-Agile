@@ -565,19 +565,7 @@ main:has(> #contenido[hidden]):not(:has(> #no-existe:not([hidden]))):not(:has(#b
 .volver a { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: .9rem; text-decoration: none; }
 .volver a:hover { text-decoration: underline; }
 
-/* ---------- Detalle del pago: copiar cada dato ---------- */
-.dd-copiable { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.dd-copiable > span { overflow-wrap: anywhere; min-width: 0; }
-.copiar-campo {
-  flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px;
-  border: 1px solid var(--carbon); background: var(--blanco); color: var(--carbon); box-shadow: 1px 1px 0 var(--carbon);
-  font: inherit; font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; cursor: pointer;
-  transition: transform .08s, box-shadow .08s, background .15s;
-}
-.copiar-campo svg { width: 14px; height: 14px; }
-.copiar-campo:hover { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--carbon); }
-.copiar-campo:active { transform: translate(1px, 1px); box-shadow: 0 0 0 var(--carbon); }
-.copiar-campo.copiado { background: var(--turquesa); }
+/* ---------- Detalle del pago ---------- */
 #sin-acciones { margin: 0; padding: 12px 14px; border: 1px dashed var(--carbon); border-radius: 8px; background: var(--blanco); }
 
 /* ---------- Acceso denegado ---------- */

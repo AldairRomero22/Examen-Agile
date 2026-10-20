@@ -1,45 +1,17 @@
 (async () => {
   await iniciarPagina('obligacion');
 
-  const campos = ['concepto', 'categoriaId', 'beneficiarioId', 'monto', 'fechaVencimiento', 'observacion'];
+  const campos = ['concepto', 'categoriaId', 'beneficiario', 'monto', 'fechaVencimiento', 'observacion'];
   const el = id => document.getElementById(id);
-  let beneficiarios = [];
 
-  // ----- Criterio 2: categorías fijas; criterio 3: beneficiarios registrados -----
-  const [rCat, rBen] = await Promise.all([api('/api/categorias'), api('/api/beneficiarios')]);
+  // ----- Criterio 2: categorías fijas. "A quién se paga" se escribe; se sugieren los nombres a los que ya se pagó -----
+  const [rCat, rDest] = await Promise.all([api('/api/categorias'), api('/api/obligaciones/destinatarios')]);
   const categorias = rCat.ok ? await rCat.json() : [];
-  beneficiarios = rBen.ok ? await rBen.json() : [];
+  const destinatarios = rDest.ok ? await rDest.json() : [];
 
   el('categoriaId').innerHTML = '<option value="">Elige una categoría</option>' +
     categorias.map(c => '<option value="' + c.id + '">' + esc(c.nombre) + '</option>').join('');
-
-  // Beneficiarios según la categoría elegida: sin categoría salen todos; con categoría, solo los de ese rubro;
-  // si el rubro tiene uno solo, queda elegido.
-  function pintarBeneficiarios() {
-    const cat = el('categoriaId').value;
-    const actual = el('beneficiarioId').value;
-    const lista = cat ? beneficiarios.filter(b => String(b.categoriaId) === cat) : beneficiarios;
-    el('beneficiarioId').innerHTML =
-      (cat && lista.length === 0
-        ? '<option value="">No hay beneficiarios en esta categoría</option>'
-        : '<option value="">Elige un beneficiario</option>') +
-      lista.map(b => '<option value="' + b.id + '">' + esc(b.nombre) + '</option>').join('');
-    if (lista.some(b => String(b.id) === actual)) {
-      el('beneficiarioId').value = actual;
-    } else if (cat && lista.length === 1) {
-      el('beneficiarioId').value = String(lista[0].id);
-      marcarError('beneficiarioId', '');
-    }
-    el('ayuda-rubro').hidden = !(cat && lista.length === 0);
-    mostrarDatosBeneficiario();
-  }
-  // Si el beneficiario ya elegido tiene categoría, esa es la categoría de la obligación
-  function alinearCategoria() {
-    const b = beneficiarios.find(x => String(x.id) === el('beneficiarioId').value);
-    if (b && b.categoriaId != null) el('categoriaId').value = String(b.categoriaId);
-  }
-  el('categoriaId').addEventListener('change', pintarBeneficiarios);
-  pintarBeneficiarios();
+  el('lista-destinatarios').innerHTML = destinatarios.map(n => '<option value="' + esc(n) + '"></option>').join('');
 
   // ----- Elegir cómo registrar: a mano o leyendo un documento -----
   const MAXIMO = 5 * 1024 * 1024;
@@ -51,44 +23,6 @@
   el('lectura-volver').addEventListener('click', () => ver('eleccion'));
   el('lectura-mano').addEventListener('click', () => ver('formulario'));
   el('cambiar-modo').addEventListener('click', () => ver('eleccion'));
-
-  // Al registrar al emisor de un documento leído se sale de esta pantalla: lo leído se guarda en esta pestaña
-  // (no en el servidor) y se recupera al volver.
-  const CLAVE_BORRADOR = 'castillo_borrador_lectura';
-  const CAMPOS_BORRADOR = ['concepto', 'categoriaId', 'monto', 'fechaVencimiento', 'observacion'];
-  function guardarBorrador() {
-    const datos = { campos: {}, leidos: [] };
-    CAMPOS_BORRADOR.forEach(id => { datos.campos[id] = el(id).value; });
-    document.querySelectorAll('.etiqueta-leido').forEach(m => {
-      const f = m.parentElement && m.parentElement.getAttribute('for');
-      if (f) datos.leidos.push(f);
-    });
-    try { sessionStorage.setItem(CLAVE_BORRADOR, JSON.stringify(datos)); } catch (e) { /* sin almacenamiento */ }
-  }
-  function restaurarBorrador() {
-    let datos = null;
-    try {
-      datos = JSON.parse(sessionStorage.getItem(CLAVE_BORRADOR) || 'null');
-      sessionStorage.removeItem(CLAVE_BORRADOR);
-    } catch (e) { datos = null; }
-    if (!datos) return;
-    CAMPOS_BORRADOR.forEach(id => { if (datos.campos[id] != null) el(id).value = datos.campos[id]; });
-    el('contador').textContent = el('observacion').value.length;
-    const f = el('fechaVencimiento').value;
-    el('ayuda-vencida').hidden = !(f && f < hoyIso());
-    (datos.leidos || []).forEach(id => { if (el(id)) marcarLeido(id); });
-    el('aviso-leido').hidden = false;
-  }
-
-  let emisorPendiente = null;
-  el('registrar-emisor').addEventListener('click', () => {
-    if (!emisorPendiente) return;
-    guardarBorrador();
-    const q = new URLSearchParams({ volver: 'obligacion', nombre: emisorPendiente.nombre, documento: emisorPendiente.documento });
-    if (el('categoriaId').value) q.set('categoriaId', el('categoriaId').value);
-    window.location.href = '/beneficiario-nuevo.html?' + q.toString();
-  });
-  el('beneficiarioId').addEventListener('change', () => { if (el('beneficiarioId').value) el('beneficiario-nuevo').hidden = true; });
 
   function limpiarLectura() {
     marcarError('archivo', '');
@@ -113,7 +47,6 @@
   function quitarMarcasLeido() {
     document.querySelectorAll('.etiqueta-leido').forEach(m => m.remove());
     el('aviso-leido').hidden = true;
-    el('beneficiario-nuevo').hidden = true;
   }
 
   const zona = el('zona');
@@ -146,7 +79,7 @@
         }
         return;
       }
-      if (cuerpo.monto == null && !cuerpo.fechaVencimiento && cuerpo.beneficiarioId == null) {
+      if (cuerpo.monto == null && !cuerpo.fechaVencimiento && !cuerpo.beneficiario) {
         fallo('No pudimos leer el documento. Prueba con una foto más clara o escribe los datos a mano.');
         return;
       }
@@ -170,7 +103,6 @@
   function rellenar(d) {
     el('formulario').reset();
     quitarMarcasLeido();
-    el('datos-beneficiario').hidden = true;
     el('contador').textContent = '0';
     const poner = (id, valor) => { el(id).value = valor; marcarLeido(id); };
     if (d.monto != null) poner('monto', Number(d.monto).toFixed(2));
@@ -178,47 +110,12 @@
       poner('fechaVencimiento', d.fechaVencimiento);
       el('ayuda-vencida').hidden = !(d.fechaVencimiento < hoyIso());
     }
-    if (d.beneficiarioId != null && beneficiarios.some(b => b.id === d.beneficiarioId)) {
-      poner('beneficiarioId', String(d.beneficiarioId));
-      mostrarDatosBeneficiario();
-    }
-    // categoría: la del beneficiario (su rubro) o, si no tiene, la de su última obligación / la que sugiere el documento
-    const benLeido = beneficiarios.find(b => b.id === d.beneficiarioId);
-    const catId = benLeido && benLeido.categoriaId != null ? benLeido.categoriaId : d.categoriaId;
-    if (catId != null && categorias.some(c => c.id === catId)) poner('categoriaId', String(catId));
-    pintarBeneficiarios();
+    if (d.beneficiario) poner('beneficiario', d.beneficiario);
+    if (d.categoriaId != null && categorias.some(c => c.id === d.categoriaId)) poner('categoriaId', String(d.categoriaId));
     if (d.concepto) poner('concepto', d.concepto);
-    // Emisor leído que no está registrado: se ofrece registrarlo con su nombre y RUC ya puestos
-    if (d.beneficiarioId == null && (d.emisorNombre || d.emisorDocumento)) {
-      emisorPendiente = { nombre: d.emisorNombre || '', documento: d.emisorDocumento || '' };
-      el('beneficiario-nuevo-texto').innerHTML =
-        '<strong>Beneficiario no registrado:</strong> ' + esc(emisorPendiente.nombre || 'sin nombre') +
-        (emisorPendiente.documento ? ' (' + (emisorPendiente.documento.length === 11 ? 'RUC' : 'DNI') + ' ' + esc(emisorPendiente.documento) + ')' : '') +
-        '<br><small class="nota">Regístralo una vez (te faltará su banco y cuenta) y vuelves aquí con todo lo leído.</small>';
-      el('beneficiario-nuevo').hidden = false;
-    }
     el('aviso-leido').hidden = false;
     // el documento ya está registrado: se avisa de entrada (el servidor igual lo rechazaría al guardar)
     if (d.avisoDuplicada) mostrarAviso(d.avisoDuplicada, 'error');
-  }
-
-  // Criterio 3: al elegir un beneficiario se muestran su documento, banco y cuenta o CCI
-  el('beneficiarioId').addEventListener('change', () => {
-    if (el('beneficiarioId').value && !el('categoriaId').value) alinearCategoria();
-    mostrarDatosBeneficiario();
-  });
-  function mostrarDatosBeneficiario() {
-    const caja = el('datos-beneficiario');
-    const b = beneficiarios.find(x => String(x.id) === el('beneficiarioId').value);
-    if (!b) {
-      caja.hidden = true;
-      return;
-    }
-    caja.innerHTML =
-      '<div><strong>' + esc(b.tipoDocumento) + ':</strong> ' + esc(b.documento) + '</div>' +
-      '<div><strong>Banco:</strong> ' + esc(b.banco) + '</div>' +
-      '<div><strong>Cuenta o CCI:</strong> ' + esc(b.cuenta) + '</div>';
-    caja.hidden = false;
   }
 
   // El calendario solo permite fechas razonables (hasta 2 años atrás y 5 adelante)
@@ -240,20 +137,7 @@
     el('contador').textContent = el('observacion').value.length;
   });
 
-  // Si se vuelve de registrar un beneficiario nuevo, queda elegido y se va directo al formulario
-  const preseleccion = new URLSearchParams(window.location.search).get('beneficiario');
-  if (preseleccion) {
-    restaurarBorrador();
-    // el beneficiario recién registrado manda: su categoría es la de la obligación
-    const nuevo = beneficiarios.find(b => String(b.id) === preseleccion);
-    if (nuevo && nuevo.categoriaId != null) el('categoriaId').value = String(nuevo.categoriaId);
-    pintarBeneficiarios();
-    el('beneficiarioId').value = preseleccion;
-    mostrarDatosBeneficiario();
-    ver('formulario');
-  } else {
-    ver('eleccion');
-  }
+  ver('eleccion');
 
   el('guardar').addEventListener('click', () => guardar(false));
   el('guardar-otra').addEventListener('click', () => guardar(true));
@@ -270,9 +154,11 @@
         hayErrores = true;
       }
     };
-    ['concepto', 'categoriaId', 'beneficiarioId', 'monto', 'fechaVencimiento'].forEach(pedir);
+    ['concepto', 'categoriaId', 'beneficiario', 'monto', 'fechaVencimiento'].forEach(pedir);
     const conceptoMal = el('concepto').value.trim() !== '' && Reglas.concepto(el('concepto').value);
     if (conceptoMal) { marcarError('concepto', conceptoMal); hayErrores = true; }
+    const aQuienMal = el('beneficiario').value.trim() !== '' && Reglas.nombre(el('beneficiario').value);
+    if (aQuienMal) { marcarError('beneficiario', aQuienMal); hayErrores = true; }
     const fechaMal = el('fechaVencimiento').value !== '' && Reglas.vencimiento(el('fechaVencimiento').value, hoyIso());
     if (fechaMal) { marcarError('fechaVencimiento', fechaMal); hayErrores = true; }
 
@@ -299,7 +185,7 @@
         body: JSON.stringify({
           concepto: el('concepto').value.trim(),
           categoriaId: Number(el('categoriaId').value),
-          beneficiarioId: Number(el('beneficiarioId').value),
+          beneficiario: el('beneficiario').value.trim().replace(/\s+/g, ' '),
           monto: monto,
           fechaVencimiento: el('fechaVencimiento').value,
           observacion: el('observacion').value.trim() || null
@@ -308,12 +194,16 @@
       const datos = await r.json().catch(() => ({}));
 
       if (r.status === 201) {
+        // el nombre nuevo queda sugerido para el siguiente registro
+        if (datos.beneficiario && !destinatarios.includes(datos.beneficiario)) {
+          destinatarios.push(datos.beneficiario);
+          el('lista-destinatarios').insertAdjacentHTML('beforeend', '<option value="' + esc(datos.beneficiario) + '"></option>');
+        }
         if (registrarOtra) {
           // Criterio 6: formulario vacío y listo para el siguiente gasto
           el('formulario').reset();
           quitarMarcasLeido();
           ver('eleccion');
-          el('datos-beneficiario').hidden = true;
           el('ayuda-vencida').hidden = true;
           el('contador').textContent = '0';
           mostrarAviso('Obligación registrada: ' + datos.concepto + ' (' + datos.estadoEtiqueta + ')', 'ok');

@@ -13,7 +13,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import pe.castillo.beneficiario.Beneficiario;
 import pe.castillo.categoria.Categoria;
 
 @Entity
@@ -31,9 +30,9 @@ public class Obligacion {
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "beneficiario_id", nullable = false)
-    private Beneficiario beneficiario;
+    /** A quién se paga (texto): lo escribe el asistente o se lee del documento. */
+    @Column(name = "beneficiario_nombre", nullable = false, length = 150)
+    private String beneficiarioNombre;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal monto;
@@ -84,11 +83,11 @@ public class Obligacion {
 
     protected Obligacion() { }
 
-    public Obligacion(String concepto, Categoria categoria, Beneficiario beneficiario, BigDecimal monto,
+    public Obligacion(String concepto, Categoria categoria, String beneficiarioNombre, BigDecimal monto,
                       LocalDate fechaVencimiento, String observacion, Long registradoPor) {
         this.concepto = concepto;
         this.categoria = categoria;
-        this.beneficiario = beneficiario;
+        this.beneficiarioNombre = beneficiarioNombre;
         this.monto = monto;
         this.fechaVencimiento = fechaVencimiento;
         this.observacion = observacion;
@@ -98,7 +97,7 @@ public class Obligacion {
     public Long getId() { return id; }
     public String getConcepto() { return concepto; }
     public Categoria getCategoria() { return categoria; }
-    public Beneficiario getBeneficiario() { return beneficiario; }
+    public String getBeneficiarioNombre() { return beneficiarioNombre; }
     public BigDecimal getMonto() { return monto; }
     public LocalDate getFechaVencimiento() { return fechaVencimiento; }
     public String getObservacion() { return observacion; }

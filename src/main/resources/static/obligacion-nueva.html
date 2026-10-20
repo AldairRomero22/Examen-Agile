@@ -34,7 +34,7 @@
         </button>
         <button type="button" class="opcion-registro" id="elegir-documento">
           <strong>Leer desde un documento</strong>
-          <span>Subes el recibo, la factura o la cuota (JPG, PNG o PDF) y el sistema rellena el formulario. Tú lo revisas.</span>
+          <span>Subes el recibo, la boleta, la factura, la cuota o el voucher (JPG, PNG o PDF) y el sistema rellena el formulario, incluido a quién se paga. Tú lo revisas.</span>
         </button>
       </div>
     </section>
@@ -47,7 +47,7 @@
         </div>
       </div>
       <label class="zona-subida" id="zona" for="archivo">
-        <strong>Elige o arrastra el recibo, factura o cuota</strong>
+        <strong>Elige o arrastra el recibo, boleta, factura, cuota o voucher</strong>
         <span class="nota">JPG, PNG o PDF · hasta 5 MB</span>
         <input type="file" id="archivo" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf">
       </label>
@@ -83,16 +83,12 @@
       <select id="categoriaId"><option value="">Elige una categoría</option></select>
       <small class="error-campo" id="error-categoriaId" hidden></small>
 
-      <label for="beneficiarioId">Beneficiario *</label>
-      <select id="beneficiarioId"><option value="">Elige un beneficiario</option></select>
-      <small class="error-campo" id="error-beneficiarioId" hidden></small>
-      <small class="ayuda" id="ayuda-rubro" hidden>Registra uno con el enlace de abajo.</small>
-      <div id="datos-beneficiario" class="caja-datos" hidden></div>
-      <div id="beneficiario-nuevo" class="caja-datos caja-aviso" hidden>
-        <div id="beneficiario-nuevo-texto"></div>
-        <button type="button" class="boton boton-secundario" id="registrar-emisor">Registrar este beneficiario</button>
-      </div>
-      <a href="/beneficiario-nuevo.html?volver=obligacion" class="enlace-chico">Registrar un beneficiario nuevo</a>
+      <label for="beneficiario">A quién se paga *</label>
+      <input id="beneficiario" type="text" maxlength="150" list="lista-destinatarios" autocomplete="off"
+             placeholder="Persona o empresa que cobra, por ejemplo Hidrandina S.A.">
+      <datalist id="lista-destinatarios"></datalist>
+      <small class="error-campo" id="error-beneficiario" hidden></small>
+      <small class="ayuda">Si lees un documento, se rellena solo. Mientras escribes se sugieren los nombres a los que ya se pagó.</small>
 
       <label for="monto">Monto (S/) *</label>
       <input id="monto" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off">

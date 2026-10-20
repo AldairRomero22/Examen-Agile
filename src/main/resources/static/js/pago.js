@@ -13,46 +13,12 @@
     return;
   }
   let p = await r.json();
-  const b = p.beneficiario;
 
   pintar();
   pintarVerificacion();
 
-  // HU-06 criterio 2
-  el('beneficiario').textContent = b.nombre;
-  el('beneficiario').href = '/beneficiario.html?id=' + b.id;
-  el('etiqueta-documento').textContent = b.tipoDocumento;
-  el('documento').textContent = b.documento;
-  el('banco').textContent = b.banco;
-  el('cuenta').textContent = b.cuenta;
-
-  // HU-06 criterio 3: copiar al portapapeles y avisar "Datos copiados"
-  el('copiar').addEventListener('click', async () => {
-    const texto =
-      'Beneficiario: ' + b.nombre + '\n' +
-      b.tipoDocumento + ': ' + b.documento + '\n' +
-      'Banco: ' + b.banco + '\n' +
-      'Cuenta o CCI: ' + b.cuenta + '\n' +
-      'Monto: ' + formatearMonto(p.monto);
-    const ok = await copiar(texto);
-    mostrarAviso(ok ? 'Datos copiados' : 'No se pudo copiar. Selecciona los datos y cópialos a mano.', ok ? 'ok' : 'error');
-    if (ok) setTimeout(() => mostrarAviso(''), 3000);
-  });
-
-  // Copiar un solo dato (documento o cuenta) con su propio botón
-  document.querySelectorAll('.copiar-campo').forEach(boton => {
-    boton.addEventListener('click', async () => {
-      const ok = await copiar(el(boton.dataset.copiar).textContent);
-      if (!ok) {
-        mostrarAviso('No se pudo copiar. Selecciona el dato y cópialo a mano.', 'error');
-        return;
-      }
-      const original = boton.innerHTML;
-      boton.classList.add('copiado');
-      boton.lastChild.textContent = 'Copiado';
-      setTimeout(() => { boton.classList.remove('copiado'); boton.innerHTML = original; }, 1800);
-    });
-  });
+  // HU-06 criterio 2: a quién se paga
+  el('beneficiario').textContent = p.beneficiario;
 
   // ---------- HU-10: acciones del gerente ----------
   if (esGerente) {
@@ -202,22 +168,4 @@
     }
   }
 
-  async function copiar(texto) {
-    try {
-      await navigator.clipboard.writeText(texto);
-      return true;
-    } catch (e) {
-      // Respaldo para navegadores sin acceso al portapapeles
-      const area = document.createElement('textarea');
-      area.value = texto;
-      area.style.position = 'fixed';
-      area.style.opacity = '0';
-      document.body.appendChild(area);
-      area.select();
-      let ok = false;
-      try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
-      area.remove();
-      return ok;
-    }
-  }
 })();

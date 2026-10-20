@@ -5,14 +5,13 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 /**
- * Una obligación tal como la ven las pantallas (lista del mes, alertas, detalle del beneficiario).
+ * Una obligación tal como la ven las pantallas (lista del mes y alertas). beneficiario = a quién se paga.
  * diasParaVencer: días que faltan para el vencimiento (0 = vence hoy, negativo = días de atraso).
  */
 public record ObligacionResumen(
         Long id,
         String concepto,
         String categoria,
-        Long beneficiarioId,
         String beneficiario,
         LocalDate fechaVencimiento,
         BigDecimal monto,
@@ -26,8 +25,7 @@ public record ObligacionResumen(
                 o.getId(),
                 o.getConcepto(),
                 o.getCategoria().getNombre(),
-                o.getBeneficiario().getId(),
-                o.getBeneficiario().getNombre(),
+                o.getBeneficiarioNombre(),
                 o.getFechaVencimiento(),
                 o.getMonto(),
                 estado.name(),

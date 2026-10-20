@@ -1,9 +1,8 @@
 package pe.castillo.lector;
 
 /**
- * HU-07 criterio 3: el lector es intercambiable por configuración, sin tocar el resto del flujo.
- * Se elige con la variable de entorno LECTOR_VOUCHER (propiedad castillo.lector):
- *   tesseract (por ahora, OCR local)  ·  ia (visión por IA, se agrega después)
+ * HU-07 criterio 3: el lector es intercambiable sin tocar el resto del flujo.
+ * El que usa el sistema es LectorVoucherAutomatico: IA si hay clave (ANTHROPIC_API_KEY) y Tesseract como respaldo.
  */
 public interface LectorVoucher {
 

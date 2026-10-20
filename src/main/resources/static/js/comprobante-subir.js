@@ -148,6 +148,12 @@
 
   // ---------- Datos leídos (solo lectura) y campos que quedaron vacíos ----------
   function mostrarLectura() {
+    // El servidor solo acepta vouchers leídos completos; si faltara algo, se pide otra imagen (nada se escribe a mano)
+    if (comprobante.monto == null || !comprobante.fecha || !comprobante.nroOperacion) {
+      comprobante = null;
+      marcarError('archivo', 'No se pudieron leer todos los datos del voucher. Sube una imagen más clara.');
+      return;
+    }
     el('espera-lectura').hidden = true;
     el('form-leido').hidden = false;
 
@@ -156,10 +162,6 @@
     configurarCampo('fecha-leida', 'marca-fecha', comprobante.fecha != null, comprobante.fecha || '', '');
     configurarCampo('nro-leido', 'marca-nro', comprobante.nroOperacion != null, comprobante.nroOperacion || '', 'Ejemplo: 12345678');
 
-    const vacios = !comprobante.monto || !comprobante.fecha || !comprobante.nroOperacion;
-    if (vacios) {
-      mostrarAviso('No se pudieron leer todos los datos. Sube otra imagen más clara o escribe solo los campos vacíos.', 'info');
-    }
     validar();
     el('form-leido').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }

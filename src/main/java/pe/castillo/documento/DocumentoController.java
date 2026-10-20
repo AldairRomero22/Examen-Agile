@@ -1,6 +1,7 @@
 package pe.castillo.documento;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,12 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import pe.castillo.beneficiario.Beneficiario;
-import pe.castillo.beneficiario.BeneficiarioRepository;
 import pe.castillo.categoria.Categoria;
 import pe.castillo.categoria.CategoriaRepository;
 import pe.castillo.comprobante.ArchivoVoucher;
 import pe.castillo.config.NegocioException;
+import pe.castillo.config.Reglas;
 import pe.castillo.lector.CoincidenciaBeneficiario;
 import pe.castillo.lector.LectorDocumento;
 import pe.castillo.lector.LectorNoDisponibleException;
@@ -28,7 +28,7 @@ import pe.castillo.obligacion.ObligacionController;
 import pe.castillo.obligacion.ObligacionRepository;
 
 /**
- * Nueva obligación, opción "Leer desde un documento": recibe un recibo, factura o cuota (JPG, PNG o PDF, máx. 5 MB),
+ * Nueva obligación, opción "Leer desde un documento": recibe un recibo, boleta, factura, cuota o voucher (JPG, PNG o PDF, máx. 5 MB),
  * lo lee y devuelve los datos para rellenar el formulario. El archivo NO se guarda y no se crea nada:
  * el asistente revisa los datos y guarda la obligación como siempre. Solo asistente (lo exige SecurityConfig).
  */
@@ -40,14 +40,11 @@ public class DocumentoController {
     private static final String FORMATO_NO_PERMITIDO = "Formato o tamaño no permitido. Usa JPG, PNG o PDF de hasta 5 MB";
 
     private final LectorDocumento lector;
-    private final BeneficiarioRepository beneficiarios;
     private final ObligacionRepository obligaciones;
     private final CategoriaRepository categorias;
 
-    public DocumentoController(LectorDocumento lector, BeneficiarioRepository beneficiarios,
-                               ObligacionRepository obligaciones, CategoriaRepository categorias) {
+    public DocumentoController(LectorDocumento lector, ObligacionRepository obligaciones, CategoriaRepository categorias) {
         this.lector = lector;
-        this.beneficiarios = beneficiarios;
         this.obligaciones = obligaciones;
         this.categorias = categorias;
     }
@@ -80,30 +77,42 @@ public class DocumentoController {
                     "No se pudo leer el documento. Intenta de nuevo o escribe los datos a mano");
         }
 
-        // beneficiario: por RUC/DNI que aparezca en el texto; si no, por nombre completo único
-        List<Beneficiario> activos = beneficiarios.findByActivoTrueOrderByNombreAsc();
-        Long beneficiarioId = CoincidenciaBeneficiario.buscar(lectura.texto(), activos.stream()
-                .map(b -> new CoincidenciaBeneficiario.Candidato(b.getId(), b.getNombre(), b.getDocumento()))
-                .toList());
-        String beneficiarioNombre = null;
-        Long categoriaId = null;
-        String concepto = null;
-        if (beneficiarioId != null) {
-            for (Beneficiario b : activos) {
-                if (b.getId().equals(beneficiarioId)) {
-                    beneficiarioNombre = b.getNombre();
+        // A quién se paga: si el nombre leído (o el texto del documento) coincide con alguien a quien ya se le pagó,
+        // se usa ese mismo nombre para que quede escrito igual; si no, el nombre que leyó la IA.
+        List<String> conocidos = obligaciones.nombresBeneficiarios();
+        List<CoincidenciaBeneficiario.Candidato> candidatos = new ArrayList<>();
+        for (int i = 0; i < conocidos.size(); i++) {
+            candidatos.add(new CoincidenciaBeneficiario.Candidato((long) i, conocidos.get(i), null));
+        }
+        String aQuien = null;
+        Long encontrado = CoincidenciaBeneficiario.buscar(lectura.texto(), candidatos);
+        if (encontrado == null && lectura.emisorNombre() != null) {
+            String leido = Reglas.clave(lectura.emisorNombre());
+            for (int i = 0; i < conocidos.size() && encontrado == null; i++) {
+                if (Reglas.clave(conocidos.get(i)).equals(leido)) {
+                    encontrado = (long) i;
                 }
             }
-            // concepto y categoría sugeridos: los de su última obligación
+        }
+        if (encontrado != null) {
+            aQuien = conocidos.get(encontrado.intValue());
+        } else if (lectura.emisorNombre() != null && Reglas.nombre(lectura.emisorNombre()) == null) {
+            aQuien = lectura.emisorNombre().trim().replaceAll("\\s+", " ");
+        }
+
+        // concepto y categoría sugeridos: los de su último pago registrado
+        Long categoriaId = null;
+        String concepto = null;
+        if (aQuien != null) {
             Optional<Obligacion> ultima = obligaciones
-                    .findFirstByBeneficiarioIdAndActivoTrueOrderByFechaVencimientoDescIdDesc(beneficiarioId);
+                    .findFirstByBeneficiarioNombreIgnoreCaseAndActivoTrueOrderByFechaVencimientoDescIdDesc(aQuien);
             if (ultima.isPresent()) {
                 categoriaId = ultima.get().getCategoria().getId();
                 concepto = ultima.get().getConcepto();
             }
         }
-        // el concepto que la IA lee del documento (con su periodo, p. ej. "setiembre 2026") manda sobre el de la última
-        // obligación; esa solo se usa cuando el documento no da concepto (lector sin IA)
+        // el concepto que la IA lee del documento (con su periodo, p. ej. "setiembre 2026") manda sobre el del último
+        // pago; ese solo se usa cuando el documento no da concepto (lector sin IA)
         if (lectura.concepto() != null && !lectura.concepto().isBlank()) {
             concepto = lectura.concepto();
         }
@@ -114,16 +123,9 @@ public class DocumentoController {
                 }
             }
         }
-        // emisor no registrado: se ofrece registrarlo con el nombre y el RUC leídos
-        String emisorNombre = beneficiarioId == null ? lectura.emisorNombre() : null;
-        String emisorDocumento = beneficiarioId == null ? lectura.emisorDocumento() : null;
         // ¿ya está registrada? se avisa desde ahora; igual el servidor la rechazaría al guardar
-        String avisoDuplicada = null;
-        if (beneficiarioId != null && lectura.monto() != null && lectura.fechaVencimiento() != null) {
-            avisoDuplicada = ObligacionController.avisoDuplicada(obligaciones, beneficiarioId, concepto,
-                    lectura.monto(), lectura.fechaVencimiento()).orElse(null);
-        }
-        return new DocumentoLeido(lectura.monto(), lectura.fechaVencimiento(),
-                beneficiarioId, beneficiarioNombre, categoriaId, concepto, emisorNombre, emisorDocumento, avisoDuplicada);
+        String avisoDuplicada = ObligacionController.avisoDuplicada(obligaciones, aQuien, concepto,
+                lectura.monto(), lectura.fechaVencimiento()).orElse(null);
+        return new DocumentoLeido(lectura.monto(), lectura.fechaVencimiento(), aQuien, categoriaId, concepto, avisoDuplicada);
     }
 }

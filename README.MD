@@ -11,16 +11,15 @@ src/main/java/pe/castillo/
 ├─ config/                      seguridad, CSRF, errores en JSON, fecha de "hoy" en Lima
 ├─ usuario/                     HU-01: usuarios, roles, cuentas iniciales, /api/me
 ├─ categoria/                   las 4 categorías fijas
-├─ beneficiario/                HU-02
 ├─ obligacion/                  HU-03 a HU-06 y HU-10 (en espera)
-├─ lector/                      HU-07: lee el voucher (Tesseract; la IA se agrega después)
+├─ lector/                      HU-07: lee el voucher (IA con respaldo de Tesseract) y los documentos
+├─ documento/                   Nueva obligación: leer un recibo/boleta/factura/cuota/voucher (monto, vencimiento, a quién se paga)
 └─ comprobante/                 HU-07/08/09: subir, verificar con 4 reglas, ver
 src/main/resources/
 ├─ application.properties
 ├─ db/migration/                tablas (Flyway las crea solo al arrancar)
-└─ static/                      pantallas: login, panel, beneficiarios, beneficiario,
-                                beneficiario-nuevo, obligacion-nueva, pago, comprobante-subir,
-                                comprobante-ver, css/, js/
+└─ static/                      pantallas: login, panel, pagos, obligacion-nueva, pago,
+                                comprobante-subir, comprobante-ver, css/, js/ (js/vendor: GSAP y Lenis)
 ```
 
 Avance por HU:
@@ -28,7 +27,7 @@ Avance por HU:
 | HU | Estado |
 |---|---|
 | HU-01 Iniciar sesión según mi rol | hecha |
-| HU-02 Gestionar beneficiarios | hecha |
+| HU-02 Gestionar beneficiarios | retirada por el Product Owner: cada pago guarda "a quién se paga" como texto (escrito o leído del documento) |
 | HU-03 Registrar obligación | hecha |
 | HU-04 Panel y pagos del mes | hecha (Panel = resumen y alertas; menú Pagos = listado con búsqueda y filtros) |
 | HU-05 Alertas de vencimiento | hecha |
@@ -49,9 +48,11 @@ Avance por HU:
 
 `.vscode/` está en `.gitignore`: las claves **no** se suben a GitHub.
 
-## Lector de vouchers (Tesseract)
+## Lector de vouchers (IA y Tesseract)
 
-El voucher se lee con **Tesseract** (OCR gratuito, sin IA). Los PDF de bancos se leen directo del texto del PDF.
+El voucher se lee con **IA** (la misma `ANTHROPIC_API_KEY` de la lectura de documentos), que entiende Yape, Plin y cualquier banco.
+Si no hay clave o la IA no responde, se lee con **Tesseract** (OCR gratuito). Los datos del voucher **no se escriben a mano**:
+si no se lee el monto, la fecha o el número de operación, se pide una imagen más clara.
 
 - **Render**: el `Dockerfile` ya instala Tesseract con español. No hay que hacer nada.
 - **Tu PC (Windows)**: instala Tesseract (instalador de UB Mannheim, marca **Spanish** en idiomas).
@@ -63,6 +64,14 @@ El voucher se lee con **Tesseract** (OCR gratuito, sin IA). Los PDF de bancos se
 - El lector es intercambiable (`LECTOR_VOUCHER`, hoy solo `tesseract`): después se agrega el de IA.
 
 Opcionales: `TESSERACT_CMD`, `TESSERACT_IDIOMAS` (por defecto `spa+eng`), `TESSERACT_LIMITE_SEGUNDOS` (90).
+
+## Nueva obligación: leer desde un documento
+
+En "Nueva obligación" el asistente elige **Escribir a mano** o **Leer desde un documento** (JPG, PNG o PDF, hasta 5 MB).
+El sistema lee el monto y la fecha de vencimiento con reglas generales (palabras como "total a pagar", "vencimiento"; sin plantillas por empresa),
+busca al beneficiario por el RUC/DNI que aparezca en el texto (o por su nombre completo si es único) y sugiere concepto y categoría
+según su última obligación. Todo queda **editable** y marcado "Leído del documento"; lo que no se pudo leer queda vacío.
+El documento **no se guarda** y la lectura no crea nada: solo rellena el formulario. Usa el mismo Tesseract y PDFBox del lector de vouchers.
 
 ## Variables de entorno (Render → Environment)
 

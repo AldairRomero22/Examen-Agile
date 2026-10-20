@@ -2,11 +2,9 @@ package pe.castillo.comprobante;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +35,6 @@ public class ComprobanteService {
     private static final long MAXIMO_BYTES = 5L * 1024 * 1024;
     private static final String FORMATO_NO_PERMITIDO = "Formato o tamaño no permitido";
     private static final String YA_USADO = "Este comprobante ya se usó en otro pago";
-    private static final Pattern NRO_OPERACION = Pattern.compile("[A-Z0-9\\-]{4,40}");
-    private static final BigDecimal MONTO_MAXIMO = new BigDecimal("9999999.99");
 
     private final ComprobanteRepository comprobantes;
     private final VerificacionRepository verificaciones;
@@ -95,11 +91,19 @@ public class ComprobanteService {
             throw new NegocioException(HttpStatus.UNPROCESSABLE_ENTITY,
                     "No parece un voucher de pago. Sube la captura o el PDF de la operación", "archivo");
         }
+        // Pedido del Product Owner: los datos del voucher solo se leen, nunca se escriben a mano.
+        // Si falta alguno, no se guarda y se pide una imagen más clara.
+        if (!lectura.estaCompleta()) {
+            throw new NegocioException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "No se pudo leer " + faltantes(lectura) + " del voucher. Sube una imagen más clara donde se vean"
+                            + " completos el monto, la fecha y el número de operación", "archivo");
+        }
+        String leidoPor = lectura.lector() != null ? lectura.lector() : lector.nombre();
 
         // criterio 5: se guarda el archivo, lo leído, quién lo subió y cuándo
         Comprobante guardado = comprobantes.save(new Comprobante(
                 o.getId(), bytes, ArchivoVoucher.nombreSeguro(archivo.getOriginalFilename()), tipo, ArchivoVoucher.sha256(bytes),
-                lector.nombre(), lectura, usuarioId, OffsetDateTime.now(Fechas.LIMA)));
+                leidoPor, lectura, usuarioId, OffsetDateTime.now(Fechas.LIMA)));
 
         return new ComprobanteLeido(guardado.getId(), guardado.getNombreArchivo(), guardado.getLector(),
                 o.getMonto(), lectura.fecha(), lectura.nroOperacion(), lectura.monto());
@@ -120,55 +124,23 @@ public class ComprobanteService {
         Obligacion o = buscarObligacion(c.getObligacionId());
         exigirAdmiteComprobante(o);
 
-        // Los datos leídos no se pueden cambiar; solo se escriben a mano los que el lector dejó vacíos
-        boolean fechaManual = c.getFechaLeida() == null;
-        boolean nroManual = c.getNroOperacionLeido() == null;
-        boolean montoManual = c.getMontoLeido() == null;
-
-        LocalDate fecha = fechaManual ? form.fecha() : c.getFechaLeida();
-        if (fechaManual && fecha == null) {
-            throw new NegocioException(HttpStatus.BAD_REQUEST, "Escribe la fecha de pago", "fecha");
+        // Los datos del voucher son solo los leídos: no se escriben ni se cambian a mano (pedido del Product Owner)
+        LocalDate fecha = c.getFechaLeida();
+        String nro = c.getNroOperacionLeido();
+        BigDecimal monto = c.getMontoLeido();
+        if (fecha == null || nro == null || monto == null) {
+            throw new NegocioException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Este voucher no se leyó completo. Sube una imagen más clara", "archivo");
         }
-        if (!fechaManual && form.fecha() != null && !form.fecha().equals(fecha)) {
-            throw new NegocioException(HttpStatus.BAD_REQUEST, "El dato leído del voucher no se puede modificar", "fecha");
+        if (form != null && ((form.fecha() != null && !form.fecha().equals(fecha))
+                || (form.nroOperacion() != null && !form.nroOperacion().isBlank()
+                        && !form.nroOperacion().replaceAll("\\s+", "").equalsIgnoreCase(nro))
+                || (form.monto() != null && form.monto().compareTo(monto) != 0))) {
+            throw new NegocioException(HttpStatus.BAD_REQUEST, "Los datos leídos del voucher no se pueden modificar");
         }
-
-        String nro;
-        if (nroManual) {
-            nro = form.nroOperacion() == null ? "" : form.nroOperacion().replaceAll("\\s+", "").toUpperCase();
-            if (nro.isEmpty()) {
-                throw new NegocioException(HttpStatus.BAD_REQUEST, "Escribe el número de operación", "nroOperacion");
-            }
-            if (!NRO_OPERACION.matcher(nro).matches()) {
-                throw new NegocioException(HttpStatus.BAD_REQUEST,
-                        "Número de operación no válido (de 4 a 40 letras o números)", "nroOperacion");
-            }
-        } else {
-            nro = c.getNroOperacionLeido();
-            if (form.nroOperacion() != null && !form.nroOperacion().isBlank()
-                    && !form.nroOperacion().replaceAll("\\s+", "").equalsIgnoreCase(nro)) {
-                throw new NegocioException(HttpStatus.BAD_REQUEST,
-                        "El dato leído del voucher no se puede modificar", "nroOperacion");
-            }
-        }
-
-        BigDecimal monto;
-        if (montoManual) {
-            monto = form.monto();
-            if (monto == null) {
-                throw new NegocioException(HttpStatus.BAD_REQUEST, "Escribe el monto", "monto");
-            }
-            if (monto.signum() <= 0 || monto.stripTrailingZeros().scale() > 2 || monto.compareTo(MONTO_MAXIMO) > 0) {
-                throw new NegocioException(HttpStatus.BAD_REQUEST,
-                        "El monto debe ser mayor que 0 y tener como máximo 2 decimales", "monto");
-            }
-            monto = monto.setScale(2, RoundingMode.UNNECESSARY);
-        } else {
-            monto = c.getMontoLeido();
-            if (form.monto() != null && form.monto().compareTo(monto) != 0) {
-                throw new NegocioException(HttpStatus.BAD_REQUEST, "El dato leído del voucher no se puede modificar", "monto");
-            }
-        }
+        boolean fechaManual = false;
+        boolean nroManual = false;
+        boolean montoManual = false;
 
         // HU-07 criterio 6: pasa a "En verificación" y enseguida se aplican las cuatro reglas (HU-08)
         c.enviar(fecha, nro, monto, fechaManual, nroManual, montoManual);
@@ -293,6 +265,24 @@ public class ComprobanteService {
 
     private String nombreUsuario(Long id) {
         return usuarios.findById(id).map(u -> u.getNombre() + " (" + u.getCorreo() + ")").orElse("—");
+    }
+
+    /** "el monto", "la fecha y el número de operación"... según lo que el lector no pudo leer. */
+    static String faltantes(LecturaVoucher l) {
+        List<String> f = new java.util.ArrayList<>();
+        if (l.monto() == null) {
+            f.add("el monto");
+        }
+        if (l.fecha() == null) {
+            f.add("la fecha de pago");
+        }
+        if (l.nroOperacion() == null) {
+            f.add("el número de operación");
+        }
+        if (f.size() <= 1) {
+            return f.isEmpty() ? "los datos" : f.get(0);
+        }
+        return String.join(", ", f.subList(0, f.size() - 1)) + " ni " + f.get(f.size() - 1);
     }
 
     private static String etiquetaInsignia(boolean manual) {

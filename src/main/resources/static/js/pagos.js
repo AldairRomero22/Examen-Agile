@@ -85,7 +85,7 @@
       '<tr class="fila-click' + (o.estado === 'EN_ESPERA' ? ' fila-en-espera' : '') + '" data-id="' + o.id + '" tabindex="0">' +
         '<td data-label="Concepto"><a href="/pago.html?id=' + o.id + '">' + esc(o.concepto) + '</a></td>' +
         '<td data-label="Categoría">' + esc(o.categoria) + '</td>' +
-        '<td data-label="Beneficiario">' + esc(o.beneficiario) + '</td>' +
+        '<td data-label="A quién se paga">' + esc(o.beneficiario) + '</td>' +
         '<td data-label="Vence">' + formatearFecha(o.fechaVencimiento) + '</td>' +
         '<td data-label="Monto" class="num">' + formatearMonto(o.monto) + '</td>' +
         '<td data-label="Estado">' + insigniaEstado(o.estado, o.estadoEtiqueta) + '</td>' +

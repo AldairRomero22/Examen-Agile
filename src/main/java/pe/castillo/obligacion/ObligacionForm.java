@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-/** HU-03 criterio 1: concepto, categoría, beneficiario, monto y vencimiento obligatorios; observación opcional. */
+/** HU-03 criterio 1: concepto, categoría, a quién se paga, monto y vencimiento obligatorios; observación opcional. */
 public record ObligacionForm(
         @NotBlank(message = "Obligatorio")
         @Size(max = 150, message = "Máximo 150 caracteres")
@@ -18,8 +18,10 @@ public record ObligacionForm(
         @NotNull(message = "Obligatorio")
         Long categoriaId,
 
-        @NotNull(message = "Obligatorio")
-        Long beneficiarioId,
+        /** A quién se paga (texto libre o leído del documento). */
+        @NotBlank(message = "Obligatorio")
+        @Size(max = 150, message = "Máximo 150 caracteres")
+        String beneficiario,
 
         @NotNull(message = "Obligatorio")
         @DecimalMin(value = "0", inclusive = false, message = "El monto debe ser mayor que 0")

@@ -13,18 +13,16 @@ public interface ObligacionRepository extends JpaRepository<Obligacion, Long> {
 
     Optional<Obligacion> findByIdAndActivoTrue(Long id);
 
-    List<Obligacion> findByBeneficiarioIdAndActivoTrueOrderByFechaVencimientoAscIdAsc(Long beneficiarioId);
+    /** Última obligación (por fecha de vencimiento) pagada a alguien: sirve para sugerir concepto y categoría. */
+    Optional<Obligacion> findFirstByBeneficiarioNombreIgnoreCaseAndActivoTrueOrderByFechaVencimientoDescIdDesc(
+            String beneficiarioNombre);
 
-    /** Última obligación (por fecha de vencimiento) de un beneficiario: sirve para sugerir concepto y categoría. */
-    Optional<Obligacion> findFirstByBeneficiarioIdAndActivoTrueOrderByFechaVencimientoDescIdDesc(Long beneficiarioId);
+    /** Evita duplicados: obligaciones activas con el mismo monto y el mismo vencimiento (se compara a quién se paga). */
+    List<Obligacion> findByMontoAndFechaVencimientoAndActivoTrue(BigDecimal monto, LocalDate fechaVencimiento);
 
-    /** Evita duplicados: una obligación activa del mismo beneficiario con el mismo monto y el mismo vencimiento. */
-    Optional<Obligacion> findFirstByBeneficiarioIdAndMontoAndFechaVencimientoAndActivoTrue(
-            Long beneficiarioId, BigDecimal monto, LocalDate fechaVencimiento);
-
-    /** Obligaciones activas de un beneficiario que vencen en un rango (para detectar el mismo concepto en el mismo mes). */
-    List<Obligacion> findByBeneficiarioIdAndActivoTrueAndFechaVencimientoBetweenOrderByFechaVencimientoAscIdAsc(
-            Long beneficiarioId, LocalDate desde, LocalDate hasta);
+    /** A quiénes ya se les registró algún pago, para sugerirlos al escribir y reconocerlos en un documento. */
+    @Query("select distinct o.beneficiarioNombre from Obligacion o where o.activo = true order by o.beneficiarioNombre")
+    List<String> nombresBeneficiarios();
 
     List<Obligacion> findByActivoTrueAndFechaVencimientoBetweenOrderByFechaVencimientoAscIdAsc(
             LocalDate desde, LocalDate hasta);

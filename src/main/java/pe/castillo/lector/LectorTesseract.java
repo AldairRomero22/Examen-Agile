@@ -14,19 +14,14 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 /**
- * Lector con OCR local (Tesseract). Es el lector por defecto mientras no esté el de IA.
+ * Lector con OCR local (Tesseract). Lo usa LectorVoucherAutomatico cuando no hay IA o como respaldo de la IA.
  *
  * - Imagen (JPG/PNG): se pasa por Tesseract. Si faltan datos, se prueba un segundo modo de lectura.
  * - PDF: si trae texto (casi todos los de bancos), se lee ese texto, que es exacto. Si no (PDF escaneado),
  *   se dibuja la primera página y se aplica OCR.
  */
-@Component
-@ConditionalOnProperty(prefix = "castillo", name = "lector", havingValue = "tesseract", matchIfMissing = true)
 public class LectorTesseract implements LectorVoucher {
 
     /** Modos de página de Tesseract: bloque de texto, y texto suelto (para vouchers con recuadros). */
@@ -35,9 +30,7 @@ public class LectorTesseract implements LectorVoucher {
 
     private final OcrTesseract ocr;
 
-    public LectorTesseract(@Value("${castillo.tesseract.comando:tesseract}") String comando,
-                           @Value("${castillo.tesseract.idiomas:spa+eng}") String idiomas,
-                           @Value("${castillo.tesseract.limite-segundos:90}") long limiteSegundos) {
+    public LectorTesseract(String comando, String idiomas, long limiteSegundos) {
         this.ocr = new OcrTesseract(comando, idiomas, limiteSegundos);
     }
 

@@ -35,14 +35,17 @@ public final class ClienteIaDocumento {
     private static final String VERSION_API = "2023-06-01";
 
     static final String INSTRUCCION = """
-            Eres un lector de recibos, facturas y cuotas de pago de Perú. Lee el documento y responde SOLO con un objeto JSON, \
+            Eres un lector de recibos, boletas, facturas, cuotas y vouchers de pago de Perú. Lee el documento y responde SOLO con un objeto JSON, \
             sin texto adicional, con exactamente estos campos:
             {"monto": número o null, "fecha_vencimiento": "AAAA-MM-DD" o null, "emisor_nombre": texto o null, "emisor_ruc": texto o null, "concepto": texto o null, "categoria": texto o null}
             Reglas:
             - monto: el TOTAL A PAGAR final del documento en soles (con IGV y demás cargos), no un subtotal ni la deuda anterior. \
               Usa punto decimal y sin separador de miles. En una cuota de préstamo, el monto de la cuota.
-            - fecha_vencimiento: la fecha límite de pago, no la de emisión ni la del periodo de consumo.
-            - emisor_nombre y emisor_ruc: la empresa que cobra o emite el documento (arriba del documento), no el cliente.
+            - fecha_vencimiento: la fecha límite de pago, no la de emisión ni la del periodo de consumo. \
+              En un voucher o constancia de pago, la fecha de la operación.
+            - emisor_nombre y emisor_ruc: a quién se le paga. En un recibo, boleta, factura o cuota es la empresa o persona \
+              que cobra o emite el documento (arriba del documento), no el cliente. En un voucher o constancia de \
+              transferencia o depósito es el destinatario o beneficiario del pago, no quien paga.
             - concepto: descripción corta (máximo 60 caracteres) de qué se paga, con el mes o periodo si aparece. \
               Ejemplos: "Recibo de luz - setiembre 2026", "Cuota de préstamo 5 de 36", "Factura F001-458 cemento".
             - categoria: exactamente una de estas cuatro: "Servicios" (luz, agua, teléfono, internet, alquiler), \
@@ -66,7 +69,7 @@ public final class ClienteIaDocumento {
 
     /**
      * @param tipoMime image/jpeg, image/png o application/pdf
-     * @return lo leído; "texto" trae el nombre y el RUC del emisor para reconocer al beneficiario
+     * @return lo leído; "texto" trae el nombre y el RUC del emisor para reconocer a quién se paga
      */
     public LecturaDocumento leer(byte[] archivo, String tipoMime) {
         String cuerpo = armarPedido(archivo, tipoMime);
