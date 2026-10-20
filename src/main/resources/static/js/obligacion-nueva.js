@@ -13,6 +13,21 @@
     categorias.map(c => '<option value="' + c.id + '">' + esc(c.nombre) + '</option>').join('');
   el('lista-destinatarios').innerHTML = destinatarios.map(n => '<option value="' + esc(n) + '"></option>').join('');
 
+  // ----- Nombre parecido a uno ya registrado: solo se avisa ("¿Quisiste decir…?"), el asistente decide -----
+  function revisarNombre() {
+    const parecido = Reglas.nombreParecido(el('beneficiario').value, destinatarios);
+    el('sugerencia-nombre').hidden = !parecido;
+    if (parecido) el('sugerencia-texto').textContent = parecido;
+  }
+  let espera = null;
+  el('beneficiario').addEventListener('input', () => { clearTimeout(espera); espera = setTimeout(revisarNombre, 350); });
+  el('usar-sugerencia').addEventListener('click', () => {
+    el('beneficiario').value = el('sugerencia-texto').textContent;
+    el('beneficiario').dispatchEvent(new Event('change'));
+    el('sugerencia-nombre').hidden = true;
+    el('beneficiario').focus();
+  });
+
   // ----- Elegir cómo registrar: a mano o leyendo un documento -----
   const MAXIMO = 5 * 1024 * 1024;
   const pantallas = ['eleccion', 'lectura', 'formulario'];
@@ -111,6 +126,7 @@
       el('ayuda-vencida').hidden = !(d.fechaVencimiento < hoyIso());
     }
     if (d.beneficiario) poner('beneficiario', d.beneficiario);
+    revisarNombre();
     if (d.categoriaId != null && categorias.some(c => c.id === d.categoriaId)) poner('categoriaId', String(d.categoriaId));
     if (d.concepto) poner('concepto', d.concepto);
     el('aviso-leido').hidden = false;
@@ -203,6 +219,7 @@
           // Criterio 6: formulario vacío y listo para el siguiente gasto
           el('formulario').reset();
           quitarMarcasLeido();
+          el('sugerencia-nombre').hidden = true;
           ver('eleccion');
           el('ayuda-vencida').hidden = true;
           el('contador').textContent = '0';

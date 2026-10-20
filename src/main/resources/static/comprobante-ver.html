@@ -41,8 +41,8 @@
           <div class="expediente-cuerpo">
             <div class="visor" id="visor"></div>
             <div class="acciones" style="margin-top:0">
-              <a class="boton boton-secundario" id="abrir" target="_blank" rel="noopener">Abrir en otra pestaña</a>
-              <a class="boton boton-turquesa" id="descargar">Descargar</a>
+              <a class="boton boton-turquesa" id="descargar">Descargar voucher</a>
+              <button type="button" class="boton boton-primario" id="constancia">Descargar constancia (PDF)</button>
             </div>
           </div>
         </div>
@@ -58,7 +58,6 @@
                 <div><dt>Número de operación</dt><dd id="d-nro"></dd></div>
                 <div><dt>Registrado por</dt><dd id="d-subido-por"></dd></div>
                 <div><dt>Registrado el</dt><dd id="d-subido-en"></dd></div>
-                <div><dt>Lector</dt><dd id="d-lector"></dd></div>
               </dl>
               <p class="nota" id="nota-manual" hidden>Los campos marcados «escrito a mano» no los leyó el sistema: los escribió el asistente.</p>
             </div>
@@ -79,6 +78,7 @@
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
   <script src="/js/comprobante-comun.js"></script>
+  <script src="/js/constancia-pdf.js"></script>
   <script src="/js/comprobante-ver.js"></script>
 </body>
 </html>

@@ -61,6 +61,24 @@
     });
   }
 
+  // Constancia en PDF (ambos roles): incluye el comprobante y su verificación si el pago ya tiene uno
+  el('constancia').addEventListener('click', async () => {
+    const boton = el('constancia');
+    boton.disabled = true;
+    try {
+      let comprobante = null;
+      if (p.estado === 'PAGADO' || p.estado === 'OBSERVADO') {
+        const rc = await api('/api/obligaciones/' + p.id + '/comprobante');
+        if (rc.ok) comprobante = await rc.json();
+      }
+      await descargarConstancia(p, comprobante, yo.correo);
+    } catch (err) {
+      mostrarAviso('No se pudo generar el PDF', 'error');
+    } finally {
+      boton.disabled = false;
+    }
+  });
+
   el('contenido').hidden = false;
 
   async function enviar(ruta, cuerpo, mensajeOk) {

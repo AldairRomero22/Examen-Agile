@@ -73,5 +73,46 @@ const Reglas = (() => {
     return null;
   }
 
-  return { nombre, documento, banco, cuenta, concepto, correo, vencimiento, rangoVencimiento };
+
+  /** Como Reglas.empresa del servidor: sin tildes, mayúsculas, signos ni S.A./S.A.C./S.R.L./E.I.R.L./Perú al final. */
+  function empresa(v) {
+    const c = String(v || '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+    const sin = c.replace(/(\s+(s a a|s a c|s r l|e i r l|s a|sac|saa|srl|eirl|sa|pe|peru|del peru))+$/, '').trim();
+    return sin || c;
+  }
+
+  function distancia(a, b) {
+    const fila = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      let previo = fila[0];
+      fila[0] = i;
+      for (let j = 1; j <= b.length; j++) {
+        const guardado = fila[j];
+        fila[j] = Math.min(fila[j] + 1, fila[j - 1] + 1, previo + (a[i - 1] === b[j - 1] ? 0 : 1));
+        previo = guardado;
+      }
+    }
+    return fila[b.length];
+  }
+
+  /**
+   * Nombre ya registrado que parece ser la misma empresa que "escrito" (otra forma de escribirla o un error de tipeo),
+   * o null. Solo es un aviso: el asistente decide si usarlo.
+   */
+  function nombreParecido(escrito, conocidos) {
+    const texto = String(escrito || '').trim().replace(/\s+/g, ' ');
+    const k = empresa(texto);
+    if (k.length < 3 || (conocidos || []).includes(texto)) return null;
+    let mejor = null, puntaje = 0;
+    (conocidos || []).forEach(n => {
+      const kn = empresa(n);
+      if (!kn) return;
+      const p = kn === k ? 1 : 1 - distancia(k, kn) / Math.max(k.length, kn.length);
+      if (p > puntaje) { puntaje = p; mejor = n; }
+    });
+    return puntaje >= 0.8 && mejor !== texto ? mejor : null;
+  }
+
+  return { empresa, nombreParecido, nombre, documento, banco, cuenta, concepto, correo, vencimiento, rangoVencimiento };
 })();

@@ -1,6 +1,6 @@
 // HU-09: ver el comprobante de un pago Pagado u Observado (solo lectura para gerente y asistente)
 (async () => {
-  await iniciarPagina('pagos');
+  const yo = await iniciarPagina('pagos');
   const el = id => document.getElementById(id);
 
   const id = new URLSearchParams(window.location.search).get('id');
@@ -31,7 +31,6 @@
   el('visor').innerHTML = c.tipoMime === 'application/pdf'
     ? '<iframe src="' + url + '" title="Comprobante en PDF"></iframe>'
     : '<img src="' + url + '" alt="Comprobante de pago">';
-  el('abrir').href = url;
   el('descargar').href = url + '?descargar=true';
 
   // ---------- Datos leídos, quién lo registró y cuándo ----------
@@ -41,7 +40,6 @@
   el('d-nro').innerHTML = esc(c.nroOperacion) + (c.nroOperacionManual ? ' ' + mano : '');
   el('d-subido-por').textContent = c.subidoPor;
   el('d-subido-en').textContent = formatearFechaHora(c.subidoEn);
-  el('d-lector').textContent = c.lector === 'TESSERACT' ? 'Lectura automática (OCR)' : 'Lectura automática (IA)';
   el('nota-manual').hidden = !(c.montoManual || c.fechaManual || c.nroOperacionManual);
 
   // ---------- Resultado de las 4 reglas ----------
@@ -55,6 +53,12 @@
     el('subir-otro').href = '/comprobante-subir.html?id=' + p.id;
     el('acciones-observado').hidden = false;
   }
+
+  el('constancia').addEventListener('click', async () => {
+    const boton = el('constancia');
+    boton.disabled = true;
+    try { await descargarConstancia(p, c, yo.correo); } finally { boton.disabled = false; }
+  });
 
   el('contenido').hidden = false;
 })();

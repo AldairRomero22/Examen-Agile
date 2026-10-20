@@ -88,6 +88,10 @@
              placeholder="Persona o empresa que cobra, por ejemplo Hidrandina S.A.">
       <datalist id="lista-destinatarios"></datalist>
       <small class="error-campo" id="error-beneficiario" hidden></small>
+      <div class="sugerencia-nombre" id="sugerencia-nombre" role="status" hidden>
+        <span>¿Quisiste decir <strong id="sugerencia-texto"></strong>? Ya se le pagó con ese nombre.</span>
+        <button type="button" class="boton boton-secundario boton-chico" id="usar-sugerencia">Usar ese nombre</button>
+      </div>
       <small class="ayuda">Si lees un documento, se rellena solo. Mientras escribes se sugieren los nombres a los que ya se pagó.</small>
 
       <label for="monto">Monto (S/) *</label>

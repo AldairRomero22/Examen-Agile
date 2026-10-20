@@ -710,3 +710,9 @@ html.con-animaciones .contenido { animation: none; }   /* GSAP se encarga de la 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
+
+/* "¿Quisiste decir…?" junto a "A quién se paga": aviso que no bloquea */
+.sugerencia-nombre { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  margin-top: 8px; padding: 10px 12px; background: #fdf6dc; border: 1px solid var(--carbon); border-radius: 8px; font-size: .9rem; }
+.sugerencia-nombre[hidden] { display: none; }
+.boton-chico { min-height: 34px; padding: 6px 12px; font-size: .85rem; }

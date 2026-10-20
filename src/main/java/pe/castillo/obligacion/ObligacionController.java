@@ -203,7 +203,8 @@ public class ObligacionController {
     /**
      * Mensaje si la obligación ya está registrada, o vacío si se puede guardar. Es duplicada si hay una activa para
      * la misma persona o empresa (a quién se paga, sin importar mayúsculas, tildes ni espacios) con (a) el mismo monto
-     * y vencimiento, o (b) el mismo concepto en el mismo mes de vencimiento, aunque el monto cambie.
+     * y vencimiento, o (b) el mismo concepto en el mismo mes de vencimiento, aunque el monto cambie; o si
+     * (c) ya hay un recibo del mismo servicio básico (luz, agua, internet, teléfono, gas) en ese mes, a quien sea.
      * "concepto" puede ser null (se revisa solo la regla a).
      */
     public static java.util.Optional<String> avisoDuplicada(ObligacionRepository repo, String aQuien,
@@ -211,9 +212,9 @@ public class ObligacionController {
         if (aQuien == null || aQuien.isBlank() || monto == null || vencimiento == null) {
             return java.util.Optional.empty();
         }
-        String quien = Reglas.clave(aQuien);
+        String quien = Reglas.empresa(aQuien);
         java.util.Optional<Obligacion> exacta = repo.findByMontoAndFechaVencimientoAndActivoTrue(monto, vencimiento).stream()
-                .filter(o -> Reglas.clave(o.getBeneficiarioNombre()).equals(quien))
+                .filter(o -> Reglas.empresa(o.getBeneficiarioNombre()).equals(quien))
                 .findFirst();
         if (exacta.isPresent()) {
             return exacta.map(ObligacionController::mensajeDuplicada);
@@ -223,12 +224,34 @@ public class ObligacionController {
         }
         String clave = Reglas.clave(concepto);
         YearMonth mes = YearMonth.from(vencimiento);
-        return repo.findByActivoTrueAndFechaVencimientoBetweenOrderByFechaVencimientoAscIdAsc(
-                        mes.atDay(1), mes.atEndOfMonth()).stream()
-                .filter(o -> Reglas.clave(o.getBeneficiarioNombre()).equals(quien))
+        List<Obligacion> delMes = repo.findByActivoTrueAndFechaVencimientoBetweenOrderByFechaVencimientoAscIdAsc(
+                mes.atDay(1), mes.atEndOfMonth());
+        java.util.Optional<String> mismoMes = delMes.stream()
+                .filter(o -> Reglas.empresa(o.getBeneficiarioNombre()).equals(quien))
                 .filter(o -> Reglas.clave(o.getConcepto()).equals(clave))
                 .findFirst()
                 .map(ObligacionController::mensajeMismoMes);
+        if (mismoMes.isPresent()) {
+            return mismoMes;
+        }
+        // (c) Un solo recibo de cada servicio básico (luz, agua, internet, teléfono, gas) por mes, sea a quien sea
+        String servicio = Reglas.servicio(concepto);
+        if (servicio == null) {
+            return java.util.Optional.empty();
+        }
+        return delMes.stream()
+                .filter(o -> servicio.equals(Reglas.servicio(o.getConcepto())))
+                .findFirst()
+                .map(o -> mensajeServicioDelMes(o, servicio, mes));
+    }
+
+    /** Aviso cuando ya hay un recibo del mismo servicio (por ejemplo luz) en ese mes. */
+    public static String mensajeServicioDelMes(Obligacion existente, String servicio, YearMonth mes) {
+        String nombreMes = mes.format(java.time.format.DateTimeFormatter.ofPattern("MMMM 'de' yyyy",
+                java.util.Locale.forLanguageTag("es-PE")));
+        return "Ya hay un recibo de " + servicio + " en " + nombreMes + ": «" + existente.getConcepto() + "» para "
+                + existente.getBeneficiarioNombre() + " (S/ " + soles(existente) + ", vence " + dia(existente)
+                + "). Solo se registra un recibo de " + servicio + " por mes.";
     }
 
     /** Texto del aviso cuando ya existe la misma obligación. */

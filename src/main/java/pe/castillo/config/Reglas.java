@@ -112,6 +112,39 @@ public final class Reglas {
         return sinTildes.toLowerCase(java.util.Locale.ROOT).replaceAll("[^\\p{L}\\p{N}]+", " ").trim();
     }
 
+    /** Terminaciones legales que no cambian la empresa: "Hidrandina S.A.C." y "HIDRANDINA SA" son la misma. */
+    private static final Pattern SUFIJO_EMPRESA = Pattern.compile(
+            "(\\s+(s a a|s a c|s r l|e i r l|s a|sac|saa|srl|eirl|sa|pe|peru|del peru))+$");
+
+    /** Para comparar a quién se paga: como clave() y además sin S.A., S.A.C., S.R.L., E.I.R.L. ni "Perú" al final. */
+    public static String empresa(String nombre) {
+        String c = clave(nombre);
+        String sin = SUFIJO_EMPRESA.matcher(c).replaceAll("").trim();
+        return sin.isEmpty() ? c : sin;
+    }
+
+    private static final String[][] SERVICIOS = {
+            {"luz", "\\b(luz|electricidad|energia|electrica|electrico)\\b"},
+            {"agua", "\\b(agua|desague|alcantarillado)\\b"},
+            {"internet", "\\binternet\\b"},
+            {"teléfono", "\\b(telefono|telefonia|celular)\\b"},
+            {"gas", "\\bgas\\b"}
+    };
+
+    /**
+     * Servicio básico del concepto ("luz", "agua", "internet", "teléfono", "gas") o null si no es uno.
+     * Solo puede haber un recibo de cada servicio por mes.
+     */
+    public static String servicio(String concepto) {
+        String c = clave(concepto);
+        for (String[] s : SERVICIOS) {
+            if (Pattern.compile(s[1]).matcher(c).find()) {
+                return s[0];
+            }
+        }
+        return null;
+    }
+
     /** Vencimiento: no más de 2 años atrás (queda Vencido) ni más de 5 años adelante. */
     public static String vencimiento(LocalDate fecha, LocalDate hoy) {
         LocalDate min = hoy.minusYears(2);
