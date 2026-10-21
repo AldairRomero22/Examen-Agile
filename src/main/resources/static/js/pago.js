@@ -136,7 +136,6 @@
       el('observacion').textContent = p.observacion;
       el('caja-observacion').hidden = false;
     }
-    el('volver').href = '/pagos.html?mes=' + p.fechaVencimiento.slice(0, 7);
 
     // HU-10 criterios 2 y 3: nota del gerente visible para los dos roles
     el('caja-espera').hidden = !p.enEspera;
