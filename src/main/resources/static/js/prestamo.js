@@ -21,15 +21,15 @@
     dato('Saldo por pagar', formatearMonto(p.saldoPendiente)) +
     dato('Total de intereses', formatearMonto(p.totalIntereses));
 
-  // Cada cuota se paga como cualquier otro pago: el botón crea su pago y lleva a subir el voucher
+  // El sistema no paga: solo verifica. El botón crea el pago de la cuota y lleva a subir su voucher
   const esAsistente = yo.rol !== 'GERENTE';
   const celdaPago = c => {
     if (c.obligacionId) {
       return '<td data-label="Pago"><a class="enlace-pago-cuota" href="/pago.html?id=' + c.obligacionId + '">' +
         insigniaEstado(c.estado, c.estadoEtiqueta) + '</a></td>';
     }
-    if (!esAsistente) return '<td data-label="Pago" class="sin-pago">Sin registrar</td>';
-    return '<td data-label="Pago"><button type="button" class="boton boton-secundario boton-chico" data-cuota="' + c.numero + '">Pagar cuota</button></td>';
+    if (!esAsistente) return '<td data-label="Pago" class="sin-pago">Sin voucher</td>';
+    return '<td data-label="Pago"><button type="button" class="boton boton-secundario boton-chico" data-cuota="' + c.numero + '">Subir voucher</button></td>';
   };
 
   const hoy = hoyIso();
@@ -61,13 +61,15 @@
       const r = await api('/api/prestamos/' + encodeURIComponent(id) + '/cuotas/' + boton.dataset.cuota + '/pago', { method: 'POST' });
       const datos = await r.json().catch(() => ({}));
       if (!r.ok || !datos.obligacionId) {
-        mostrarAviso(datos.mensaje || 'No se pudo registrar el pago de la cuota. Intenta de nuevo.', 'error');
+        mostrarAviso(datos.mensaje || 'No se pudo preparar el voucher de la cuota. Intenta de nuevo.', 'error');
         boton.disabled = false;
         return;
       }
-      location.href = '/pago.html?id=' + datos.obligacionId + (datos.yaExistia ? '' : '&cuota=1');
+      // el sistema no paga: lleva directo a subir el voucher de esa cuota
+      location.href = datos.yaExistia ? '/pago.html?id=' + datos.obligacionId
+        : '/comprobante-subir.html?id=' + datos.obligacionId + '&cuota=1';
     } catch (err) {
-      mostrarAviso('No se pudo registrar el pago de la cuota. Revisa tu conexión e intenta de nuevo.', 'error');
+      mostrarAviso('No se pudo preparar el voucher de la cuota. Revisa tu conexión e intenta de nuevo.', 'error');
       boton.disabled = false;
     }
   });

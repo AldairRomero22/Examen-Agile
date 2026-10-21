@@ -18,9 +18,9 @@
   pintar();
   pintarVerificacion();
 
-  // Viene de "Pagar cuota" en el cronograma de un préstamo
+  // Viene de "Subir voucher" en el cronograma de un préstamo
   if (params.has('cuota')) {
-    mostrarAviso('Pago de la cuota registrado. Sube el voucher para verificarlo.', 'ok');
+    mostrarAviso('Esta cuota ya está registrada como pago. Sube su voucher para verificarla.', 'ok');
   }
 
   // HU-06 criterio 2: a quién se paga

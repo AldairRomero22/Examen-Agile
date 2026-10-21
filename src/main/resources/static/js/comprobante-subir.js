@@ -7,7 +7,8 @@
   const TIPOS_OK = ['image/jpeg', 'image/png', 'application/pdf'];
   const EXT_OK = /\.(jpe?g|png|pdf)$/i;
 
-  const id = new URLSearchParams(window.location.search).get('id');
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
   const r = await api('/api/obligaciones/' + encodeURIComponent(id || ''));
   if (!r.ok) {
     el('no-existe').hidden = false;
@@ -15,6 +16,11 @@
   }
   const p = await r.json();
   el('volver').href = '/pago.html?id=' + p.id;
+
+  // Viene de "Subir voucher" en el cronograma de un préstamo
+  if (params.has('cuota')) {
+    mostrarAviso('Cuota del préstamo lista para verificarse. Sube el voucher de este pago.', 'ok');
+  }
 
   // ---------- HU-07 criterio 1: solo Por pagar, Por vencer, Vencido u Observado ----------
   const mensajeBloqueo = {
