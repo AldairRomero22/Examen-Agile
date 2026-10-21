@@ -123,3 +123,26 @@ function formatearFechaHora(iso) {
     hour: '2-digit', minute: '2-digit', hour12: false
   });
 }
+
+const NOMBRES_MES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'];
+
+/** "2026-10" -> "Octubre de 2026" */
+function nombreMes(aaaaMm) {
+  const [a, m] = aaaaMm.split('-').map(Number);
+  const n = NOMBRES_MES[m - 1] || '';
+  return n.charAt(0).toUpperCase() + n.slice(1) + ' de ' + a;
+}
+
+/**
+ * Llena el selector de mes: "Todos los meses" y cada mes que tiene pagos (más el mes actual), en orden.
+ * Devuelve el mes que quedó elegido ('' = todos).
+ */
+function llenarMeses(select, pagos, elegido) {
+  const meses = new Set(pagos.map(o => String(o.fechaVencimiento).slice(0, 7)));
+  meses.add(hoyIso().slice(0, 7));
+  if (elegido) meses.add(elegido);
+  select.innerHTML = '<option value="">Todos los meses</option>' +
+    [...meses].sort().map(m => '<option value="' + m + '">' + nombreMes(m) + '</option>').join('');
+  select.value = elegido || '';
+  return select.value;
+}

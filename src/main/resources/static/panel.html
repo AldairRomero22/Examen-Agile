@@ -21,11 +21,11 @@
       <div>
         <span class="etiqueta-seccion"><span class="cuadro">C</span> Castillo · Control de pagos</span>
         <h1 id="titulo-lista">Cada pago, bajo control</h1>
-        <p id="subtitulo-lista">Resumen del mes y alertas de vencimiento. El detalle de cada pago está en Pagos.</p>
+        <p id="subtitulo-lista">Resumen de todos los pagos y alertas de vencimiento. Elige un mes para ver solo ese.</p>
       </div>
       <div class="acciones-cabecera">
         <label class="selector-mes" id="caja-mes">Mes
-          <input type="month" id="mes">
+          <select id="mes" aria-label="Elegir mes"><option value="">Todos los meses</option></select>
         </label>
         <a href="/obligacion-nueva.html" class="boton boton-primario solo-asistente" id="nueva-obligacion">+ Nueva obligación</a>
       </div>
@@ -55,7 +55,7 @@
       <ul class="alertas-lista" id="alertas-lista"></ul>
     </section>
 
-    <p class="ir-a-pagos"><a href="/pagos.html" id="ir-pagos">Ver todos los pagos del mes →</a></p>
+    <p class="ir-a-pagos"><a href="/pagos.html" id="ir-pagos">Ver la lista de pagos →</a></p>
   </main>
 
   <script src="/js/vendor/gsap.min.js"></script>

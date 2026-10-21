@@ -1,4 +1,4 @@
-// Menú "Pagos": listado completo del mes (HU-04) con filtros por estado, categoría y búsqueda.
+// Menú "Pagos": listado de todos los pagos o de un mes (HU-04) con filtros por estado, categoría y búsqueda.
 (async () => {
   await iniciarPagina('pagos');
 
@@ -16,7 +16,8 @@
   const filtroCategoria = document.getElementById('filtro-categoria');
   const buscador = document.getElementById('buscar');
   const normal = t => (t || '').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-  let lista = [];
+  let todos = [];   // todos los pagos de todos los meses
+  let lista = [];   // los que se ven: todos o los del mes elegido
   let estadoElegido = params.get('estado') || '';
 
   if (params.has('registrado')) mostrarAviso('Obligación registrada correctamente', 'ok');
@@ -42,20 +43,24 @@
     lista = r.ok ? await r.json() : [];
     pintar();
   } else {
-    campoMes.value = params.get('mes') || hoyIso().slice(0, 7);
-    campoMes.addEventListener('change', cargarMes);
-    await cargarMes();
-  }
-
-  async function cargarMes() {
-    if (!campoMes.value) return;
-    const r = await api('/api/obligaciones?mes=' + encodeURIComponent(campoMes.value));
+    // Pedido del Product Owner: por defecto todos los pagos de todos los meses; el mes es un filtro opcional
+    const r = await api('/api/obligaciones?mes=todos');
     if (!r.ok) {
       document.getElementById('cargando').hidden = true;
       mostrarAviso('No se pudo cargar la lista', 'error');
       return;
     }
-    lista = await r.json();
+    todos = await r.json();
+    llenarMeses(campoMes, todos, params.get('mes') || '');
+    campoMes.addEventListener('change', filtrarMes);
+    filtrarMes();
+  }
+
+  function filtrarMes() {
+    const mes = campoMes.value;
+    lista = mes ? todos.filter(o => String(o.fechaVencimiento).startsWith(mes)) : todos;
+    document.getElementById('titulo-tabla').textContent = mes ? 'Pagos de ' + nombreMes(mes).toLowerCase() : 'Todos los pagos';
+    document.getElementById('vacio').textContent = mes ? 'No hay pagos con vencimiento en ' + nombreMes(mes).toLowerCase() : 'Aún no hay pagos registrados';
     pintar();
   }
 

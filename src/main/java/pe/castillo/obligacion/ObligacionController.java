@@ -55,9 +55,18 @@ public class ObligacionController {
         this.usuarios = usuarios;
     }
 
-    /** HU-04: obligaciones cuyo vencimiento cae en el mes (AAAA-MM), del más próximo al más lejano. */
+    /**
+     * HU-04: obligaciones cuyo vencimiento cae en el mes (AAAA-MM), del más próximo al más lejano.
+     * Con mes=todos: todos los pagos de todos los meses (anteriores, actual y futuros), como pidió el Product Owner.
+     */
     @GetMapping
     public List<ObligacionResumen> listar(@RequestParam(required = false) String mes) {
+        if ("todos".equalsIgnoreCase(mes)) {
+            LocalDate hoy = Fechas.hoy();
+            return obligaciones.findByActivoTrueOrderByFechaVencimientoAscIdAsc().stream()
+                    .map(o -> ObligacionResumen.de(o, hoy))
+                    .toList();
+        }
         YearMonth ym;
         try {
             ym = (mes == null || mes.isBlank()) ? YearMonth.from(Fechas.hoy()) : YearMonth.parse(mes);

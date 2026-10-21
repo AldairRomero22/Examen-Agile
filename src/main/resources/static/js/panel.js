@@ -1,4 +1,4 @@
-// HU-04 (resumen del mes: total y tarjetas por estado) + HU-05 (alertas de vencimiento).
+// HU-04 (resumen de todos los pagos o de un mes: total y tarjetas por estado) + HU-05 (alertas de vencimiento).
 // El listado completo con filtros vive en pagos.js (menú "Pagos").
 (async () => {
   await iniciarPagina('panel');
@@ -24,19 +24,23 @@
 
   const params = new URLSearchParams(window.location.search);
   const campoMes = document.getElementById('mes');
-  let lista = [];
+  let todos = [];   // todos los pagos de todos los meses
+  let lista = [];   // los que se ven: todos o los del mes elegido
 
   if (params.has('registrado')) mostrarAviso('Obligación registrada correctamente', 'ok');
 
   await cargarAlertas();
 
-  campoMes.value = params.get('mes') || hoyIso().slice(0, 7);
-  campoMes.addEventListener('change', cargarMes);
-  await cargarMes();
+  // Pedido del Product Owner: por defecto se ven todos los pagos (meses anteriores, actual y futuros)
+  await cargarTodos();
+  llenarMeses(campoMes, todos, params.get('mes') || '');
+  campoMes.addEventListener('change', filtrarMes);
+  filtrarMes();
 
   // Ir a Pagos conservando el mes elegido (y el estado si se toca una tarjeta)
   function irAPagos(estado) {
-    const q = new URLSearchParams({ mes: campoMes.value });
+    const q = new URLSearchParams();
+    if (campoMes.value) q.set('mes', campoMes.value);
     if (estado) q.set('estado', estado);
     window.location.href = '/pagos.html?' + q.toString();
   }
@@ -75,17 +79,21 @@
       '</a></li>').join('');
   }
 
-  // ---------- HU-04: pagos del mes ----------
-  async function cargarMes() {
-    if (!campoMes.value) return;
-    const r = await api('/api/obligaciones?mes=' + encodeURIComponent(campoMes.value));
+  // ---------- HU-04: todos los pagos, o los del mes elegido ----------
+  async function cargarTodos() {
+    const r = await api('/api/obligaciones?mes=todos');
     if (!r.ok) {
       mostrarAviso('No se pudo cargar la lista', 'error');
       return;
     }
-    lista = await r.json();
+    todos = await r.json();
+  }
+
+  function filtrarMes() {
+    const mes = campoMes.value;
+    lista = mes ? todos.filter(o => String(o.fechaVencimiento).startsWith(mes)) : todos;
     pintarResumen();
-    document.getElementById('ir-pagos').href = '/pagos.html?mes=' + encodeURIComponent(campoMes.value);
+    document.getElementById('ir-pagos').href = '/pagos.html' + (mes ? '?mes=' + encodeURIComponent(mes) : '');
   }
 
   // Criterio 1: total del mes y, por estado, cantidad y suma
@@ -100,7 +108,7 @@
     document.getElementById('total').innerHTML =
       '<button type="button" class="tarjeta-resumen tarjeta-total" data-estado="">' +
         '<span>' +
-          '<span class="tarjeta-etiqueta">Total del mes</span><br>' +
+          '<span class="tarjeta-etiqueta">' + (campoMes.value ? 'Total de ' + nombreMes(campoMes.value).toLowerCase() : 'Total de todos los pagos') + '</span><br>' +
           '<span class="tarjeta-monto">' + formatearMonto(sumarMontos(lista)) + '</span><br>' +
           '<span class="tarjeta-cantidad">' + gastos(lista) + '</span>' +
         '</span>' +

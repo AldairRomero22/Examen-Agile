@@ -24,6 +24,9 @@ public interface ObligacionRepository extends JpaRepository<Obligacion, Long> {
     @Query("select distinct o.beneficiarioNombre from Obligacion o where o.activo = true order by o.beneficiarioNombre")
     List<String> nombresBeneficiarios();
 
+    /** Todos los pagos activos de todos los meses. */
+    List<Obligacion> findByActivoTrueOrderByFechaVencimientoAscIdAsc();
+
     List<Obligacion> findByActivoTrueAndFechaVencimientoBetweenOrderByFechaVencimientoAscIdAsc(
             LocalDate desde, LocalDate hasta);
 

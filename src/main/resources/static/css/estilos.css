@@ -151,7 +151,7 @@ body.pagina-login { padding-left: 0; }
 .encabezado-editorial p { margin: 0; color: var(--texto-suave); font-size: 1rem; }
 .acciones-cabecera { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .selector-mes { display: flex; align-items: center; gap: 8px; font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
-.selector-mes input {
+.selector-mes input, .selector-mes select {
   padding: 9px 12px; min-height: 42px; border: 1px solid var(--carbon); border-radius: 8px; background: var(--blanco);
   font-family: var(--fuente-titulo); font-weight: 600; font-size: .95rem; box-shadow: var(--sombra); color: var(--carbon);
 }
@@ -208,7 +208,7 @@ body.pagina-login { padding-left: 0; }
   border: 1px solid var(--carbon); border-radius: 8px; background: var(--blanco); color: var(--texto);
 }
 .formulario input:focus, .formulario select:focus, .formulario textarea:focus,
-.selector-mes input:focus, #filtro-categoria:focus {
+.selector-mes input:focus, .selector-mes select:focus, #filtro-categoria:focus {
   outline: none; box-shadow: var(--sombra);
 }
 .formulario textarea { resize: vertical; min-height: 84px; }
@@ -528,7 +528,7 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible, summary:focus-v
   outline: 3px solid var(--turquesa); outline-offset: 2px;
 }
 .formulario input:focus-visible, .formulario select:focus-visible, .formulario textarea:focus-visible,
-.buscador:focus, #filtro-categoria:focus, .selector-mes input:focus {
+.buscador:focus, #filtro-categoria:focus, .selector-mes input:focus, .selector-mes select:focus {
   outline: none; box-shadow: var(--sombra), 0 0 0 3px rgba(85, 197, 190, .45);
 }
 .fila-click:focus-visible { outline: 3px solid var(--turquesa); outline-offset: -3px; }
@@ -659,7 +659,7 @@ button.tarjeta-total > span:last-child { min-width: 0; }
   .contenido { padding-bottom: 40px; }
   .acciones-cabecera { width: 100%; }
   .acciones-cabecera > * { flex: 1 1 auto; }
-  .selector-mes input { flex: 1; min-width: 0; }
+  .selector-mes input, .selector-mes select { flex: 1; min-width: 0; }
   .acciones .boton, .acciones-pago .boton { flex: 1 1 auto; }
   .acciones-pago > div { width: 100%; }
   .lista-cabecera, .filtros { padding-left: 14px; padding-right: 14px; }
@@ -716,3 +716,6 @@ html.con-animaciones .contenido { animation: none; }   /* GSAP se encarga de la 
   margin-top: 8px; padding: 10px 12px; background: #fdf6dc; border: 1px solid var(--carbon); border-radius: 8px; font-size: .9rem; }
 .sugerencia-nombre[hidden] { display: none; }
 .boton-chico { min-height: 34px; padding: 6px 12px; font-size: .85rem; }
+
+/* Selector de mes: "Todos los meses" o un mes */
+.selector-mes select { cursor: pointer; text-transform: none; letter-spacing: 0; }

@@ -21,14 +21,14 @@
       <div>
         <span class="etiqueta-seccion"><span class="cuadro">C</span> Castillo · Pagos</span>
         <h1 id="titulo-lista">Pagos</h1>
-        <p id="subtitulo-lista">Todos los pagos del mes: busca, filtra y abre el detalle de cada uno.</p>
+        <p id="subtitulo-lista">Todos los pagos, de todos los meses: busca, filtra y abre el detalle de cada uno.</p>
       </div>
       <div class="acciones-cabecera">
         <label class="selector-mes" id="caja-mes">Mes
-          <input type="month" id="mes">
+          <select id="mes" aria-label="Elegir mes"><option value="">Todos los meses</option></select>
         </label>
         <a href="/obligacion-nueva.html" class="boton boton-primario solo-asistente" id="nueva-obligacion">+ Nueva obligación</a>
-        <a href="/pagos.html" id="volver-mes" class="boton boton-secundario" hidden>← Volver a Pagos del mes</a>
+        <a href="/pagos.html" id="volver-mes" class="boton boton-secundario" hidden>← Volver a todos los pagos</a>
       </div>
     </section>
 
@@ -39,7 +39,7 @@
     <!-- HU-04: lista del mes con filtros combinables -->
     <section class="lista-tarjeta">
       <div class="lista-cabecera">
-        <h2 id="titulo-tabla">Pagos del mes</h2>
+        <h2 id="titulo-tabla">Todos los pagos</h2>
         <span class="lista-contador" id="contador-lista"></span>
       </div>
       <div class="filtros" id="filtros">
@@ -53,7 +53,7 @@
       </div>
 
       <div id="cargando" class="cargando" role="status"><span class="girando" aria-hidden="true"></span>Cargando pagos…</div>
-      <div id="vacio" class="vacio" hidden>Aún no hay pagos registrados este mes</div>
+      <div id="vacio" class="vacio" hidden>Aún no hay pagos registrados</div>
       <div class="tabla-envoltorio" id="envoltorio" hidden>
         <table class="tabla tabla-movil">
           <thead>
