@@ -87,6 +87,22 @@
     el('plazo').value = el('plazo').value.replace(/\D/g, '');
     ajustarFilas();
   });
+  // ---------- Qué se puede escribir en cada campo ----------
+  // Importes: solo números, punto o coma decimal (con hasta 2 decimales); nada de letras ni símbolos
+  const soloImporte = v => v.replace(/[^\d.,]/g, '').replace(/(\.\d{2})\d+/, '$1');
+  el('monto').addEventListener('input', () => { el('monto').value = soloImporte(el('monto').value); });
+  // Interés anual: solo números y, si quieren, el signo %
+  el('tasa').addEventListener('input', () => {
+    const t = el('tasa').value.replace(',', '.').replace(/[^\d.%]/g, '').replace(/%/g, '').replace(/(\.\d{4})\d+/, '$1');
+    el('tasa').value = t;
+  });
+  // N.º de crédito: letras, números y guiones
+  el('nroCredito').addEventListener('input', () => { el('nroCredito').value = el('nroCredito').value.replace(/[^A-Za-z0-9-]/g, '').toUpperCase(); });
+  // Importes del cronograma: igual que el monto
+  filas.addEventListener('input', e => {
+    if (IMPORTES.includes(e.target.dataset.campo)) e.target.value = soloImporte(e.target.value);
+  });
+
   ['monto', 'tasa'].forEach(id => el(id).addEventListener('change', () => { el(id).value = limpiarImporte(el(id).value).replace('%', ''); }));
   filas.addEventListener('change', e => {
     if (IMPORTES.includes(e.target.dataset.campo)) e.target.value = limpiarImporte(e.target.value);
@@ -113,12 +129,25 @@
   let temporizador = null;
   function revisarPronto() { clearTimeout(temporizador); temporizador = setTimeout(revisar, 250); }
 
+  // N.º de crédito repetido: se avisa mientras escribe (el servidor igual lo vuelve a revisar al guardar)
+  const existentes = new Map();   // N.º de crédito en mayúsculas -> entidad
+  try {
+    const r = await api('/api/prestamos');
+    if (r.ok) (await r.json()).forEach(p => existentes.set(String(p.nroCredito).toUpperCase(), p.entidad));
+  } catch (e) { /* sin lista: solo revisará el servidor al guardar */ }
+  function creditoRepetido() {
+    const nro = el('nroCredito').value.trim().toUpperCase();
+    if (!nro || !existentes.has(nro)) return [];
+    return [{ fila: 0, campo: 'nroCredito', bloquea: true,
+      mensaje: 'Ya existe un crédito con el N.º ' + nro + ' (' + existentes.get(nro) + '). Un número de crédito no se puede repetir' }];
+  }
+
   // Lo que solo sabe el servidor (por ejemplo, un N.º de crédito ya registrado) se mantiene mientras no cambie ese dato
   let delServidor = [];
   function revisar() {
     const propios = ReglasPrestamo.revisar(leerDatos(), hoyIso());
     delServidor = delServidor.filter(p => p.campo !== 'nroCredito' || p.valor === el('nroCredito').value.trim());
-    return pintar(delServidor.concat(propios));
+    return pintar(creditoRepetido().concat(delServidor, propios));
   }
 
   function pintar(problemas) {

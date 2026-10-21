@@ -115,6 +115,7 @@ const Reglas = (() => {
   }
 
   // ----- ¿El concepto corresponde a la categoría elegida? Solo se avisa, no se bloquea -----
+  const CATEGORIA_PRESTAMOS = 'Préstamos de capital';
   const PALABRAS_CATEGORIA = {
     'Servicios': ['luz', 'agua', 'internet', 'telefono', 'telefonia', 'celular', 'gas', 'alquiler', 'arrendamiento', 'electricidad', 'energia', 'cable'],
     'Impuestos': ['igv', 'renta', 'sunat', 'afp', 'essalud', 'onp', 'impuesto', 'impuestos', 'tributo', 'tributos', 'detraccion', 'predial', 'arbitrios'],
@@ -137,8 +138,8 @@ const Reglas = (() => {
     const sugeridas = categoriasDelConcepto(concepto);
     if (sugeridas.length === 0 || sugeridas.includes(categoria)) return null;
     const lista = sugeridas.map(c => '«' + c + '»').join(' o ');
-    return { sugeridas, mensaje: 'El concepto parece de ' + lista + ', pero elegiste «' + categoria + '». Si está bien así, guarda igual.' };
+    return { sugeridas, mensaje: 'El concepto parece de ' + lista + ', pero elegiste «' + categoria + '».' + (categoria === CATEGORIA_PRESTAMOS ? '' : ' Si está bien así, guarda igual.') };
   }
 
-  return { empresa, nombreParecido, categoriasDelConcepto, avisoCategoria, nombre, documento, banco, cuenta, concepto, correo, vencimiento, rangoVencimiento };
+  return { empresa, nombreParecido, categoriasDelConcepto, avisoCategoria, CATEGORIA_PRESTAMOS, nombre, documento, banco, cuenta, concepto, correo, vencimiento, rangoVencimiento };
 })();

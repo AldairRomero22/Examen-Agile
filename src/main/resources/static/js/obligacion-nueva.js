@@ -77,6 +77,7 @@
   });
 
   // ----- Concepto y categoría que no cuadran: solo se avisa, el asistente decide -----
+  const MENSAJE_PRESTAMO = 'Los préstamos no se registran aquí. Regístralos en el apartado Préstamos, con su cronograma de cuotas';
   const nombreCategoria = () => { const c = categorias.find(x => String(x.id) === el('categoriaId').value); return c ? c.nombre : null; };
   function revisarCategoria() {
     const nombre = nombreCategoria();
@@ -87,9 +88,11 @@
       const unica = aviso.sugeridas.length === 1 ? categorias.find(c => c.nombre === aviso.sugeridas[0]) : null;
       el('usar-categoria').hidden = !unica;
       el('usar-categoria').dataset.id = unica ? unica.id : '';
+      // si se queda con «Préstamos de capital», también puede ir a registrar el préstamo
+      el('ir-prestamos-aviso').hidden = nombre !== Reglas.CATEGORIA_PRESTAMOS;
     }
     // los préstamos con cronograma tienen su propio apartado (no se repite si ya hay otro aviso)
-    el('aviso-prestamo').hidden = !(nombre === 'Préstamos de capital' && !aviso);
+    el('aviso-prestamo').hidden = !(nombre === Reglas.CATEGORIA_PRESTAMOS && !aviso);
   }
   let esperaCategoria = null;
   el('concepto').addEventListener('input', () => { clearTimeout(esperaCategoria); esperaCategoria = setTimeout(revisarCategoria, 350); });
@@ -245,6 +248,7 @@
       }
     };
     ['concepto', 'categoriaId', 'beneficiario', 'ruc', 'monto', 'fechaVencimiento'].forEach(pedir);
+    if (nombreCategoria() === Reglas.CATEGORIA_PRESTAMOS) { marcarError('categoriaId', MENSAJE_PRESTAMO); hayErrores = true; }
     const conceptoMal = el('concepto').value.trim() !== '' && Reglas.concepto(el('concepto').value);
     if (conceptoMal) { marcarError('concepto', conceptoMal); hayErrores = true; }
     const aQuienMal = el('beneficiario').value.trim() !== '' && Reglas.nombre(el('beneficiario').value);

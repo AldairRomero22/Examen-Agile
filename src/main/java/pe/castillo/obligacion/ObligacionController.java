@@ -198,6 +198,11 @@ public class ObligacionController {
         Categoria categoria = categorias.findById(form.categoriaId())
                 .filter(Categoria::isActivo)
                 .orElseThrow(() -> new NegocioException(HttpStatus.BAD_REQUEST, "Elige una categoría válida", "categoriaId"));
+        // Los préstamos tienen cronograma de cuotas: se registran en su propio apartado, no como una obligación suelta
+        if ("Préstamos de capital".equalsIgnoreCase(categoria.getNombre())) {
+            throw new NegocioException(HttpStatus.BAD_REQUEST,
+                    "Los préstamos no se registran aquí. Regístralos en el apartado Préstamos, con su cronograma de cuotas", "categoriaId");
+        }
         String aQuien = form.beneficiario().trim().replaceAll("\\s+", " ");
         String ruc = form.ruc().trim();
 
