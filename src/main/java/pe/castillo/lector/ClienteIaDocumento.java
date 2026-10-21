@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Lector de recibos, facturas y cuotas con IA de visión (API de Anthropic, "Messages").
- * Se le envía la imagen o el PDF y devuelve el monto a pagar, el vencimiento y quién emite el documento.
+ * Se le envía la imagen o el PDF y devuelve el tipo de documento, el monto a pagar, el vencimiento y quién lo emite.
  *
  * - Sin dependencias de Spring, para poder probarla sola (con un servidor falso).
  * - El documento viaja a Anthropic solo para leerlo; el sistema no lo guarda.
@@ -35,17 +35,20 @@ public final class ClienteIaDocumento {
     private static final String VERSION_API = "2023-06-01";
 
     static final String INSTRUCCION = """
-            Eres un lector de recibos, boletas, facturas, cuotas y vouchers de pago de Perú. Lee el documento y responde SOLO con un objeto JSON, \
-            sin texto adicional, con exactamente estos campos:
-            {"monto": número o null, "fecha_vencimiento": "AAAA-MM-DD" o null, "emisor_nombre": texto o null, "emisor_ruc": texto o null, "concepto": texto o null, "categoria": texto o null}
+            Eres un lector de documentos de cobro de Perú: recibos (luz, agua, teléfono, internet), facturas y cuotas de \
+            préstamos. Lee el documento y responde SOLO con un objeto JSON, sin texto adicional, con exactamente estos campos:
+            {"tipo": texto, "monto": número o null, "fecha_vencimiento": "AAAA-MM-DD" o null, "emisor_nombre": texto o null, "emisor_ruc": texto o null, "concepto": texto o null, "categoria": texto o null}
             Reglas:
+            - tipo: exactamente uno de "RECIBO", "FACTURA", "CUOTA", "BOLETA", "VOUCHER" u "OTRO".
+              "VOUCHER" es la prueba de un pago ya hecho: captura de Yape o Plin, constancia de transferencia o depósito, \
+              ticket de agente o ventanilla, "operación exitosa". "BOLETA" es una boleta de venta de una compra ya pagada. \
+              Si es un comprobante electrónico de un servicio (luz, agua, teléfono, internet) con fecha de vencimiento, \
+              aunque diga boleta, usa "RECIBO".
             - monto: el TOTAL A PAGAR final del documento en soles (con IGV y demás cargos), no un subtotal ni la deuda anterior. \
               Usa punto decimal y sin separador de miles. En una cuota de préstamo, el monto de la cuota.
-            - fecha_vencimiento: la fecha límite de pago, no la de emisión ni la del periodo de consumo. \
-              En un voucher o constancia de pago, la fecha de la operación.
-            - emisor_nombre y emisor_ruc: a quién se le paga. En un recibo, boleta, factura o cuota es la empresa o persona \
-              que cobra o emite el documento (arriba del documento), no el cliente. En un voucher o constancia de \
-              transferencia o depósito es el destinatario o beneficiario del pago, no quien paga.
+            - fecha_vencimiento: la fecha límite de pago, no la de emisión ni la del periodo de consumo.
+            - emisor_nombre y emisor_ruc: a quién se le paga: la empresa o persona que cobra o emite el documento \
+              (arriba del documento), no el cliente.
             - concepto: descripción corta (máximo 60 caracteres) de qué se paga, con el mes o periodo si aparece. \
               Ejemplos: "Recibo de luz - setiembre 2026", "Cuota de préstamo 5 de 36", "Factura F001-458 cemento".
             - categoria: exactamente una de estas cuatro: "Servicios" (luz, agua, teléfono, internet, alquiler), \
@@ -179,7 +182,12 @@ public final class ClienteIaDocumento {
         String textoEmisor = ((ruc != null ? "RUC " + ruc + "\n" : "") + (nombre != null ? nombre : "")).trim();
         String concepto = limpio(datos.path("concepto"), 150);
         String categoria = categoriaFija(limpio(datos.path("categoria"), 40));
-        return new LecturaDocumento(fecha, monto, textoEmisor, nombre, ruc, concepto, categoria);
+        String tipo = limpio(datos.path("tipo"), 20);
+        tipo = tipo == null ? null : tipo.trim().toUpperCase(java.util.Locale.ROOT);
+        if (tipo != null && !List.of("RECIBO", "FACTURA", "CUOTA", "BOLETA", "VOUCHER", "OTRO").contains(tipo)) {
+            tipo = null;
+        }
+        return new LecturaDocumento(fecha, monto, textoEmisor, nombre, ruc, concepto, categoria, tipo);
     }
 
     private static final List<String> CATEGORIAS = List.of("Servicios", "Impuestos", "Proveedores", "Préstamos de capital");

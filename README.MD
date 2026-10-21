@@ -13,7 +13,7 @@ src/main/java/pe/castillo/
 ├─ categoria/                   las 4 categorías fijas
 ├─ obligacion/                  HU-03 a HU-06 y HU-10 (en espera)
 ├─ lector/                      HU-07: lee el voucher (IA con respaldo de Tesseract) y los documentos
-├─ documento/                   Nueva obligación: leer un recibo/boleta/factura/cuota/voucher (monto, vencimiento, a quién se paga)
+├─ documento/                   Nueva obligación: leer un recibo/factura/cuota (monto, vencimiento, a quién se paga); rechaza vouchers y boletas
 └─ comprobante/                 HU-07/08/09: subir, verificar con 4 reglas, ver
 src/main/resources/
 ├─ application.properties
@@ -71,6 +71,7 @@ En "Nueva obligación" el asistente elige **Escribir a mano** o **Leer desde un 
 El sistema lee el monto y la fecha de vencimiento con reglas generales (palabras como "total a pagar", "vencimiento"; sin plantillas por empresa),
 busca al beneficiario por el RUC/DNI que aparezca en el texto (o por su nombre completo si es único) y sugiere concepto y categoría
 según su última obligación. Todo queda **editable** y marcado "Leído del documento"; lo que no se pudo leer queda vacío.
+Solo se aceptan documentos de cobro (**recibo, factura o cuota**). Si se sube un **voucher** o una **boleta**, no se rellena nada y se avisa que el voucher va en "Subir comprobante" del pago.
 El documento **no se guarda** y la lectura no crea nada: solo rellena el formulario. Usa el mismo Tesseract y PDFBox del lector de vouchers.
 
 ## Variables de entorno (Render → Environment)

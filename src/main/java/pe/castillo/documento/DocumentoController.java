@@ -37,6 +37,32 @@ public class DocumentoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(DocumentoController.class);
     private static final long MAXIMO_BYTES = 5L * 1024 * 1024;
+    static final String ES_VOUCHER = "Este documento es un voucher (prueba de un pago ya hecho). Los vouchers se suben en "
+            + "‘Subir comprobante’ del pago correspondiente.";
+    static final String ES_BOLETA = "Este documento es una boleta (comprobante de una compra ya pagada). Aquí solo se "
+            + "registran recibos, facturas o cuotas por pagar.";
+
+    /**
+     * Sin IA (solo Tesseract) el tipo se reconoce por el texto: frases típicas de un voucher o de una boleta de venta.
+     * Si nada calza, null (se trata como documento de cobro).
+     */
+    static String tipoPorTexto(String texto) {
+        String t = Reglas.clave(texto);
+        if (t.isEmpty()) {
+            return null;
+        }
+        boolean cobro = t.contains("vencimiento") || t.contains("vence") || t.contains("fecha limite");
+        if (!cobro && (t.contains("yapeaste") || t.contains("plineaste") || t.contains("constancia de transferencia")
+                || t.contains("operacion exitosa") || t.contains("transferencia exitosa")
+                || t.contains("pago realizado exitosamente") || t.contains("constancia de deposito"))) {
+            return "VOUCHER";
+        }
+        if (!cobro && t.contains("boleta de venta")) {
+            return "BOLETA";
+        }
+        return null;
+    }
+
     private static final String FORMATO_NO_PERMITIDO = "Formato o tamaño no permitido. Usa JPG, PNG o PDF de hasta 5 MB";
 
     private final LectorDocumento lector;
@@ -75,6 +101,16 @@ public class DocumentoController {
             LOG.warn("No se pudo leer el documento: {}", e.getMessage(), e);
             throw new NegocioException(HttpStatus.SERVICE_UNAVAILABLE,
                     "No se pudo leer el documento. Intenta de nuevo o escribe los datos a mano");
+        }
+
+        // En "Nueva obligación" solo se leen documentos de cobro (recibo, factura o cuota).
+        // Un voucher o una boleta prueban un pago ya hecho: no se rellena nada y se explica dónde van.
+        String tipoDocumento = lectura.tipo() != null ? lectura.tipo() : tipoPorTexto(lectura.texto());
+        if ("VOUCHER".equals(tipoDocumento)) {
+            throw new NegocioException(HttpStatus.UNPROCESSABLE_ENTITY, ES_VOUCHER, "archivo");
+        }
+        if ("BOLETA".equals(tipoDocumento)) {
+            throw new NegocioException(HttpStatus.UNPROCESSABLE_ENTITY, ES_BOLETA, "archivo");
         }
 
         // A quién se paga: si el nombre leído (o el texto del documento) coincide con alguien a quien ya se le pagó,
