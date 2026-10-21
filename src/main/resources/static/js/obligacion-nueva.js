@@ -76,6 +76,29 @@
     el('beneficiario').focus();
   });
 
+  // ----- Concepto y categoría que no cuadran: solo se avisa, el asistente decide -----
+  const nombreCategoria = () => { const c = categorias.find(x => String(x.id) === el('categoriaId').value); return c ? c.nombre : null; };
+  function revisarCategoria() {
+    const nombre = nombreCategoria();
+    const aviso = Reglas.avisoCategoria(el('concepto').value, nombre);
+    el('aviso-categoria').hidden = !aviso;
+    if (aviso) {
+      el('aviso-categoria-texto').textContent = aviso.mensaje;
+      const unica = aviso.sugeridas.length === 1 ? categorias.find(c => c.nombre === aviso.sugeridas[0]) : null;
+      el('usar-categoria').hidden = !unica;
+      el('usar-categoria').dataset.id = unica ? unica.id : '';
+    }
+    // los préstamos con cronograma tienen su propio apartado (no se repite si ya hay otro aviso)
+    el('aviso-prestamo').hidden = !(nombre === 'Préstamos de capital' && !aviso);
+  }
+  let esperaCategoria = null;
+  el('concepto').addEventListener('input', () => { clearTimeout(esperaCategoria); esperaCategoria = setTimeout(revisarCategoria, 350); });
+  el('categoriaId').addEventListener('change', revisarCategoria);
+  el('usar-categoria').addEventListener('click', () => {
+    el('categoriaId').value = el('usar-categoria').dataset.id;
+    revisarCategoria();
+  });
+
   // ----- Elegir cómo registrar: a mano o leyendo un documento -----
   const MAXIMO = 5 * 1024 * 1024;
   const pantallas = ['eleccion', 'lectura', 'formulario'];
@@ -179,6 +202,7 @@
     completarRuc();
     if (d.categoriaId != null && categorias.some(c => c.id === d.categoriaId)) poner('categoriaId', String(d.categoriaId));
     if (d.concepto) poner('concepto', d.concepto);
+    revisarCategoria();
     el('aviso-leido').hidden = false;
     // el documento ya está registrado: se avisa de entrada (el servidor igual lo rechazaría al guardar)
     if (d.avisoDuplicada) mostrarAviso(d.avisoDuplicada, 'error');
@@ -276,6 +300,8 @@
           el('formulario').reset();
           quitarMarcasLeido();
           el('sugerencia-nombre').hidden = true;
+          el('aviso-categoria').hidden = true;
+          el('aviso-prestamo').hidden = true;
           ver('eleccion');
           el('ayuda-vencida').hidden = true;
           el('contador').textContent = '0';

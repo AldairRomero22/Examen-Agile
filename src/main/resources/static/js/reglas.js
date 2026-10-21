@@ -114,5 +114,31 @@ const Reglas = (() => {
     return puntaje >= 0.8 && mejor !== texto ? mejor : null;
   }
 
-  return { empresa, nombreParecido, nombre, documento, banco, cuenta, concepto, correo, vencimiento, rangoVencimiento };
+  // ----- ¿El concepto corresponde a la categoría elegida? Solo se avisa, no se bloquea -----
+  const PALABRAS_CATEGORIA = {
+    'Servicios': ['luz', 'agua', 'internet', 'telefono', 'telefonia', 'celular', 'gas', 'alquiler', 'arrendamiento', 'electricidad', 'energia', 'cable'],
+    'Impuestos': ['igv', 'renta', 'sunat', 'afp', 'essalud', 'onp', 'impuesto', 'impuestos', 'tributo', 'tributos', 'detraccion', 'predial', 'arbitrios'],
+    'Préstamos de capital': ['prestamo', 'prestamos', 'credito', 'creditos', 'cuota', 'cuotas', 'cronograma', 'leasing', 'hipoteca', 'financiamiento']
+  };
+  const sinTildes = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  /** Categorías que sugiere el concepto (por palabras completas), p. ej. "Recibo de luz" -> ['Servicios']. */
+  function categoriasDelConcepto(concepto) {
+    const palabras = new Set(sinTildes(concepto).split(/[^a-z0-9ñ]+/).filter(Boolean));
+    return Object.keys(PALABRAS_CATEGORIA).filter(c => PALABRAS_CATEGORIA[c].some(p => palabras.has(p)));
+  }
+
+  /**
+   * Si el concepto apunta claramente a otra categoría, devuelve { sugeridas, mensaje }; si todo cuadra o el concepto
+   * no dice nada claro, null. Solo es un aviso: el asistente decide.
+   */
+  function avisoCategoria(concepto, categoria) {
+    if (!categoria) return null;
+    const sugeridas = categoriasDelConcepto(concepto);
+    if (sugeridas.length === 0 || sugeridas.includes(categoria)) return null;
+    const lista = sugeridas.map(c => '«' + c + '»').join(' o ');
+    return { sugeridas, mensaje: 'El concepto parece de ' + lista + ', pero elegiste «' + categoria + '». Si está bien así, guarda igual.' };
+  }
+
+  return { empresa, nombreParecido, categoriasDelConcepto, avisoCategoria, nombre, documento, banco, cuenta, concepto, correo, vencimiento, rangoVencimiento };
 })();

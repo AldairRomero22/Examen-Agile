@@ -82,6 +82,14 @@
       <label for="categoriaId">Categoría *</label>
       <select id="categoriaId"><option value="">Elige una categoría</option></select>
       <small class="error-campo" id="error-categoriaId" hidden></small>
+      <div class="sugerencia-nombre" id="aviso-categoria" role="status" hidden>
+        <span id="aviso-categoria-texto"></span>
+        <button type="button" class="boton boton-secundario boton-chico" id="usar-categoria" hidden>Cambiar a esa categoría</button>
+      </div>
+      <div class="sugerencia-nombre" id="aviso-prestamo" role="status" hidden>
+        <span>Los préstamos con cronograma de cuotas se registran en el apartado <strong>Préstamos</strong>.</span>
+        <a class="boton boton-secundario boton-chico" href="/prestamo-nuevo.html">Ir a Préstamos</a>
+      </div>
 
       <label for="beneficiario">A quién se paga *</label>
       <input id="beneficiario" type="text" maxlength="150" list="lista-destinatarios" autocomplete="off"
