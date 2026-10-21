@@ -317,7 +317,11 @@ body.pagina-login { padding-left: 0; }
 .alerta-por-vencer .alerta-dias { background: var(--amarillo); }
 .alerta-monto { font-family: var(--fuente-titulo); font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums; text-align: right; min-width: 120px; }
 .alerta-boton { padding: 7px 14px; border: 1px solid var(--carbon); border-radius: 8px; background: var(--carbon); color: #fff; font-family: var(--fuente-titulo); font-weight: 600; font-size: .85rem; box-shadow: 2px 2px 0 #000; }
-#ver-todos { font-size: .85rem; font-weight: 600; }
+#ver-todos, #ver-prestamos { font-size: .85rem; font-weight: 600; }
+.alerta-prestamo .alerta-icono { background: var(--turquesa-claro); }
+.alerta-prestamo .alerta-dias { background: var(--turquesa-claro); }
+.alerta-prestamo.alerta-por-vencer .alerta-dias { background: var(--amarillo); }
+.cuotas-prestamo[hidden] { display: none; }
 
 /* ---------- HU-04: resumen por estado ---------- */
 .bloque-resumen { display: grid; grid-template-columns: 7fr 5fr; gap: 24px; align-items: stretch; margin-bottom: 28px; }

@@ -22,6 +22,9 @@
     OBSERVADO: svg('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 115 0c0 1.7-2.5 2-2.5 3.5M12 17v.5"/>')
   };
 
+  const ICONO_BANCO = svg('<path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6z"/>');
+  const MS_DIA = 86400000;
+
   const params = new URLSearchParams(window.location.search);
   const campoMes = document.getElementById('mes');
   let todos = [];   // todos los pagos de todos los meses
@@ -30,6 +33,7 @@
   if (params.has('registrado')) mostrarAviso('Obligación registrada correctamente', 'ok');
 
   await cargarAlertas();
+  await cargarCuotasPrestamo();
 
   // Pedido del Product Owner: por defecto se ven todos los pagos (meses anteriores, actual y futuros)
   await cargarTodos();
@@ -43,6 +47,35 @@
     if (campoMes.value) q.set('mes', campoMes.value);
     if (estado) q.set('estado', estado);
     window.location.href = '/pagos.html?' + q.toString();
+  }
+
+  // ---------- Próximas cuotas de préstamos de capital (solo consulta) ----------
+  async function cargarCuotasPrestamo() {
+    const caja = document.getElementById('cuotas-prestamo');
+    let prestamos = [];
+    try {
+      const r = await api('/api/prestamos');
+      if (r.ok) prestamos = await r.json();
+    } catch (e) { /* sin préstamos o sin conexión: la tarjeta simplemente no se muestra */ }
+    const proximas = prestamos.filter(p => p.proximaCuota)
+      .sort((a, b) => String(a.proximoVencimiento).localeCompare(String(b.proximoVencimiento)));
+    if (proximas.length === 0) { caja.hidden = true; return; }
+    const hoy = Date.parse(hoyIso() + 'T00:00:00Z');
+    document.getElementById('contador-prestamos').textContent = proximas.length + (proximas.length === 1 ? ' préstamo' : ' préstamos');
+    document.getElementById('cuotas-lista').innerHTML = proximas.slice(0, 3).map(p => {
+      const dias = Math.round((Date.parse(p.proximoVencimiento + 'T00:00:00Z') - hoy) / MS_DIA);
+      return '<li><a class="alerta alerta-prestamo' + (dias <= 7 ? ' alerta-por-vencer' : '') + '" href="/prestamo.html?id=' + p.id + '">' +
+        '<span class="alerta-icono">' + ICONO_BANCO + '</span>' +
+        '<span class="alerta-texto">' +
+          '<span class="alerta-concepto">' + esc(p.entidad) + ' · cuota ' + p.proximaCuota + ' de ' + p.plazo + '</span>' +
+          '<span class="alerta-sub">Crédito ' + esc(p.nroCredito) + ' · vence el ' + formatearFecha(p.proximoVencimiento) + '</span>' +
+        '</span>' +
+        '<span class="alerta-dias">' + textoDias(dias) + '</span>' +
+        '<span class="alerta-monto">' + formatearMonto(p.proximoMonto) + '</span>' +
+        '<span class="alerta-boton">Ver cronograma</span>' +
+      '</a></li>';
+    }).join('');
+    caja.hidden = false;
   }
 
   async function cargarAlertas() {
