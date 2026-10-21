@@ -71,7 +71,7 @@
     const texto = normal(buscador.value.trim());
     const base = lista.filter(o =>
       (!categoria || o.categoria === categoria) &&
-      (!texto || normal(o.concepto).includes(texto) || normal(o.beneficiario).includes(texto)));
+      (!texto || normal(o.concepto).includes(texto) || normal(o.beneficiario).includes(texto) || normal(o.ruc).includes(texto)));
     const visibles = base.filter(o => !estadoElegido || o.estado === estadoElegido);
 
     const chips = [['', 'Todos']].concat(ORDEN_ESTADOS).map(([codigo, etiqueta], i) => {

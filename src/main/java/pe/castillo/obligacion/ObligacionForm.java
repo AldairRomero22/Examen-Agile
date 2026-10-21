@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-/** HU-03 criterio 1: concepto, categoría, a quién se paga, monto y vencimiento obligatorios; observación opcional. */
+/** HU-03 criterio 1: concepto, categoría, a quién se paga, su RUC o DNI, monto y vencimiento obligatorios; observación opcional. */
 public record ObligacionForm(
         @NotBlank(message = "Obligatorio")
         @Size(max = 150, message = "Máximo 150 caracteres")
@@ -22,6 +22,10 @@ public record ObligacionForm(
         @NotBlank(message = "Obligatorio")
         @Size(max = 150, message = "Máximo 150 caracteres")
         String beneficiario,
+
+        /** RUC (empresa, 11 dígitos) o DNI (persona, 8 dígitos) de a quién se paga. */
+        @NotBlank(message = "Obligatorio")
+        String ruc,
 
         @NotNull(message = "Obligatorio")
         @DecimalMin(value = "0", inclusive = false, message = "El monto debe ser mayor que 0")

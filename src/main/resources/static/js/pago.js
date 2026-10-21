@@ -19,6 +19,7 @@
 
   // HU-06 criterio 2: a quién se paga
   el('beneficiario').textContent = p.beneficiario;
+  el('ruc-pago').textContent = p.ruc ? (p.ruc.length === 11 ? 'RUC ' : 'DNI ') + p.ruc : 'Sin RUC registrado';
 
   // ---------- HU-10: acciones del gerente ----------
   if (esGerente) {

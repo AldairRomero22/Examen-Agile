@@ -719,3 +719,57 @@ html.con-animaciones .contenido { animation: none; }   /* GSAP se encarga de la 
 
 /* Selector de mes: "Todos los meses" o un mes */
 .selector-mes select { cursor: pointer; text-transform: none; letter-spacing: 0; }
+
+/* ---------- Préstamos de capital ---------- */
+.datos-prestamo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 18px 0 26px; }
+.dato-prestamo { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; background: var(--blanco);
+  border: 1px solid var(--carbon); border-radius: 10px; box-shadow: var(--sombra); }
+.dato-prestamo strong { font-family: var(--fuente-titulo); font-size: 1.05rem; }
+.tabla-cronograma td, .tabla-cronograma th { padding: 9px 12px; }
+.tabla-cronograma tfoot td { background: var(--marfil); border-top: 1px solid var(--carbon); }
+.fila-proxima td { background: #e3fbf8; font-weight: 600; }
+.fila-proxima td:first-child { box-shadow: inset 4px 0 0 var(--carbon); }
+.fila-pasada td { color: var(--texto-suave); }
+
+.grid-prestamo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 18px; }
+.grid-prestamo > div { display: flex; flex-direction: column; min-width: 0; }
+.cronograma-cabecera { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin: 28px 0 12px; }
+.cronograma-cabecera h3 { margin: 0 0 4px; }
+.cronograma-cabecera .nota { margin: 0; }
+.acciones-cronograma { display: flex; gap: 8px; flex-wrap: wrap; }
+.tabla-editable td { padding: 4px 6px; }
+.tabla-editable input, .tabla-editable select { width: 100%; min-width: 108px; min-height: 36px; padding: 6px 8px; font-size: .88rem; }
+.tabla-editable input[type="date"] { min-width: 140px; }
+.tabla-editable input[inputmode="decimal"] { text-align: right; font-family: var(--fuente-titulo); }
+.tabla-editable .celda-numero { font-weight: 600; width: 44px; }
+.celda-error { border-color: var(--error) !important; background: #fdecea !important; box-shadow: inset 0 0 0 1px var(--error); }
+.celda-aviso { border-color: #b7791f !important; background: #fff7e0 !important; }
+
+.revision { margin-top: 18px; }
+.revision:empty { display: none; }
+.revision-ok, .revision-error, .revision-aviso { padding: 14px 16px; border: 1px solid var(--carbon); border-radius: 10px; }
+.revision-ok { background: #e3fbf8; }
+.revision-error { background: #fdecea; }
+.revision-aviso { background: #fff7e0; }
+.lista-problemas { margin: 10px 0 0; padding-left: 20px; max-height: 320px; overflow-y: auto; }
+.lista-problemas li { margin: 4px 0; }
+.problema-error { color: #7a1d12; }
+.problema-aviso { color: #7a4d00; }
+.enlace-problema { background: none; border: none; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-thickness: 1px; }
+
+@media (max-width: 900px) {
+  .grid-prestamo, .datos-prestamo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .grid-prestamo, .datos-prestamo { grid-template-columns: 1fr; }
+}
+.grid-prestamo label { margin-top: 14px !important; }
+
+/* Leer el cronograma desde un archivo */
+.lectura-cronograma { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  padding: 14px 16px; margin-bottom: 18px; background: var(--marfil); border: 1px dashed var(--carbon); border-radius: 10px; }
+.lectura-cronograma > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 260px; }
+.lectura-cronograma label { margin: 0 !important; cursor: pointer; text-transform: none; letter-spacing: 0; font-size: .95rem; }
+.solo-lector { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.deshabilitado { opacity: .55; pointer-events: none; }
+#leyendo, #aviso-leido { margin-bottom: 14px; }

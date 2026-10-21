@@ -24,6 +24,16 @@ public interface ObligacionRepository extends JpaRepository<Obligacion, Long> {
     @Query("select distinct o.beneficiarioNombre from Obligacion o where o.activo = true order by o.beneficiarioNombre")
     List<String> nombresBeneficiarios();
 
+    /** A quiénes ya se les pagó, con su RUC o DNI (si lo tienen), para autocompletar. */
+    @Query("""
+            select o.beneficiarioNombre, max(o.beneficiarioDocumento) from Obligacion o
+            where o.activo = true group by o.beneficiarioNombre order by o.beneficiarioNombre
+            """)
+    List<Object[]> nombresConDocumento();
+
+    /** Pagos activos que ya tienen RUC o DNI: para que un RUC sea de una sola empresa y viceversa. */
+    List<Obligacion> findByActivoTrueAndBeneficiarioDocumentoIsNotNull();
+
     /** Todos los pagos activos de todos los meses. */
     List<Obligacion> findByActivoTrueOrderByFechaVencimientoAscIdAsc();
 

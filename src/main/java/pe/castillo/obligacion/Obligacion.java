@@ -34,6 +34,10 @@ public class Obligacion {
     @Column(name = "beneficiario_nombre", nullable = false, length = 150)
     private String beneficiarioNombre;
 
+    /** RUC (11 dígitos) o DNI (8) de a quién se paga. Null solo en pagos registrados antes de pedirlo. */
+    @Column(name = "beneficiario_documento", length = 11)
+    private String beneficiarioDocumento;
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal monto;
 
@@ -83,11 +87,12 @@ public class Obligacion {
 
     protected Obligacion() { }
 
-    public Obligacion(String concepto, Categoria categoria, String beneficiarioNombre, BigDecimal monto,
-                      LocalDate fechaVencimiento, String observacion, Long registradoPor) {
+    public Obligacion(String concepto, Categoria categoria, String beneficiarioNombre, String beneficiarioDocumento,
+                      BigDecimal monto, LocalDate fechaVencimiento, String observacion, Long registradoPor) {
         this.concepto = concepto;
         this.categoria = categoria;
         this.beneficiarioNombre = beneficiarioNombre;
+        this.beneficiarioDocumento = beneficiarioDocumento;
         this.monto = monto;
         this.fechaVencimiento = fechaVencimiento;
         this.observacion = observacion;
@@ -98,6 +103,7 @@ public class Obligacion {
     public String getConcepto() { return concepto; }
     public Categoria getCategoria() { return categoria; }
     public String getBeneficiarioNombre() { return beneficiarioNombre; }
+    public String getBeneficiarioDocumento() { return beneficiarioDocumento; }
     public BigDecimal getMonto() { return monto; }
     public LocalDate getFechaVencimiento() { return fechaVencimiento; }
     public String getObservacion() { return observacion; }

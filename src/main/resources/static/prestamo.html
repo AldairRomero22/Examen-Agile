@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castillo · Detalle del préstamo</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <header id="barra"></header>
+
+  <main class="contenido">
+    <p class="volver"><a href="/prestamos.html">← Volver a Préstamos</a></p>
+
+    <div id="no-existe" class="vacio" hidden>Préstamo no encontrado. <a href="/prestamos.html">Volver a Préstamos</a></div>
+
+    <section id="contenido" hidden>
+      <div class="pago-cabecera">
+        <div>
+          <span class="etiqueta-seccion"><span class="cuadro">C</span> Préstamo de capital</span>
+          <h1 id="titulo"></h1>
+          <div class="pago-monto" id="monto"></div>
+        </div>
+        <div class="pago-lateral">
+          <span class="etiqueta-seccion">Registrado por</span>
+          <strong id="registrado"></strong>
+        </div>
+      </div>
+
+      <div class="datos-prestamo" id="datos"></div>
+
+      <section class="lista-tarjeta">
+        <div class="lista-cabecera">
+          <h2>Cronograma de pagos</h2>
+          <span class="lista-contador">Solo consulta · la fila resaltada es la próxima cuota</span>
+        </div>
+        <div class="tabla-envoltorio">
+          <table class="tabla tabla-cronograma">
+            <thead>
+              <tr>
+                <th class="num">N.º</th><th>Vencimiento</th><th>Tipo de cuota</th><th class="num">Saldo inicial</th>
+                <th class="num">Interés</th><th class="num">Amortización</th><th class="num">Cuota a pagar</th><th class="num">Saldo final</th>
+              </tr>
+            </thead>
+            <tbody id="filas"></tbody>
+            <tfoot id="totales"></tfoot>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/js/vendor/gsap.min.js"></script>
+  <script src="/js/vendor/ScrollTrigger.min.js"></script>
+  <script src="/js/vendor/lenis.min.js"></script>
+  <script src="/js/animaciones.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/prestamo.js"></script>
+</body>
+</html>

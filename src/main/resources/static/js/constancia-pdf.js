@@ -164,6 +164,7 @@
     // ---- Datos del pago ----
     seccion(pdf, 'Datos del pago');
     fila(pdf, 'A quién se paga', p.beneficiario);
+    if (p.ruc) fila(pdf, p.ruc.length === 11 ? 'RUC' : 'DNI', p.ruc);
     fila(pdf, 'Categoría', p.categoria);
     fila(pdf, 'Fecha de vencimiento', formatearFecha(p.fechaVencimiento));
     fila(pdf, 'Estado', p.estadoEtiqueta || p.estado);

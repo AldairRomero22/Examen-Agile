@@ -21,6 +21,7 @@ public record ObligacionDetalle(
         String registradoPor,
         OffsetDateTime registradoEn,
         String beneficiario,
+        String ruc,
         boolean enEspera,
         String notaEspera,
         String esperaPor,

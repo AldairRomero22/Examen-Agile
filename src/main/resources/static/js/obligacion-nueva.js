@@ -1,17 +1,64 @@
 (async () => {
   await iniciarPagina('obligacion');
 
-  const campos = ['concepto', 'categoriaId', 'beneficiario', 'monto', 'fechaVencimiento', 'observacion'];
+  const campos = ['concepto', 'categoriaId', 'beneficiario', 'ruc', 'monto', 'fechaVencimiento', 'observacion'];
   const el = id => document.getElementById(id);
 
   // ----- Criterio 2: categorías fijas. "A quién se paga" se escribe; se sugieren los nombres a los que ya se pagó -----
   const [rCat, rDest] = await Promise.all([api('/api/categorias'), api('/api/obligaciones/destinatarios')]);
   const categorias = rCat.ok ? await rCat.json() : [];
-  const destinatarios = rDest.ok ? await rDest.json() : [];
+  // [{nombre, ruc}]: a quién ya se le pagó y su RUC o DNI (ruc null si se registró antes de pedirlo)
+  const conocidos = rDest.ok ? await rDest.json() : [];
+  const destinatarios = conocidos.map(d => d.nombre);
 
   el('categoriaId').innerHTML = '<option value="">Elige una categoría</option>' +
     categorias.map(c => '<option value="' + c.id + '">' + esc(c.nombre) + '</option>').join('');
   el('lista-destinatarios').innerHTML = destinatarios.map(n => '<option value="' + esc(n) + '"></option>').join('');
+
+  // ----- RUC o DNI: un RUC es de una sola empresa y una empresa tiene un solo RUC -----
+  const rucDe = nombre => {
+    const k = Reglas.empresa(nombre);
+    const d = conocidos.find(x => x.ruc && Reglas.empresa(x.nombre) === k);
+    return d ? d.ruc : null;
+  };
+  const duenoDe = ruc => conocidos.find(x => x.ruc === ruc) || null;
+
+  /** Revisa el RUC escrito contra lo ya registrado y avisa en el campo (el servidor hace lo mismo al guardar). */
+  function revisarRuc() {
+    const ruc = el('ruc').value.trim();
+    const nombre = el('beneficiario').value.trim();
+    marcarError('ruc', '');
+    if (!/^(\d{8}|\d{11})$/.test(ruc)) return null;
+    const formato = Reglas.documento(ruc);
+    if (formato) { marcarError('ruc', formato); return formato; }
+    const dueno = duenoDe(ruc);
+    if (dueno && nombre && Reglas.empresa(dueno.nombre) !== Reglas.empresa(nombre)) {
+      const msg = 'Este ' + (ruc.length === 11 ? 'RUC' : 'DNI') + ' ya está registrado para «' + dueno.nombre + '».';
+      marcarError('ruc', msg);
+      return msg;
+    }
+    const suyo = nombre ? rucDe(nombre) : null;
+    if (suyo && suyo !== ruc) {
+      const msg = '«' + nombre + '» ya está registrada con el ' + (suyo.length === 11 ? 'RUC' : 'DNI') + ' ' + suyo + '.';
+      marcarError('ruc', msg);
+      return msg;
+    }
+    return null;
+  }
+
+  /** Al elegir una empresa conocida se completa su RUC; al escribir un RUC conocido, su nombre. */
+  function completarRuc() {
+    const suyo = rucDe(el('beneficiario').value);
+    if (suyo && !el('ruc').value.trim()) el('ruc').value = suyo;
+    revisarRuc();
+  }
+  el('ruc').addEventListener('input', () => {
+    el('ruc').value = el('ruc').value.replace(/\D/g, '').slice(0, 11);
+    const dueno = duenoDe(el('ruc').value);
+    if (dueno && !el('beneficiario').value.trim()) el('beneficiario').value = dueno.nombre;
+    revisarRuc();
+  });
+  el('beneficiario').addEventListener('change', completarRuc);
 
   // ----- Nombre parecido a uno ya registrado: solo se avisa ("¿Quisiste decir…?"), el asistente decide -----
   function revisarNombre() {
@@ -24,6 +71,7 @@
   el('usar-sugerencia').addEventListener('click', () => {
     el('beneficiario').value = el('sugerencia-texto').textContent;
     el('beneficiario').dispatchEvent(new Event('change'));
+    completarRuc();
     el('sugerencia-nombre').hidden = true;
     el('beneficiario').focus();
   });
@@ -126,7 +174,9 @@
       el('ayuda-vencida').hidden = !(d.fechaVencimiento < hoyIso());
     }
     if (d.beneficiario) poner('beneficiario', d.beneficiario);
+    if (d.ruc) poner('ruc', d.ruc);
     revisarNombre();
+    completarRuc();
     if (d.categoriaId != null && categorias.some(c => c.id === d.categoriaId)) poner('categoriaId', String(d.categoriaId));
     if (d.concepto) poner('concepto', d.concepto);
     el('aviso-leido').hidden = false;
@@ -170,11 +220,15 @@
         hayErrores = true;
       }
     };
-    ['concepto', 'categoriaId', 'beneficiario', 'monto', 'fechaVencimiento'].forEach(pedir);
+    ['concepto', 'categoriaId', 'beneficiario', 'ruc', 'monto', 'fechaVencimiento'].forEach(pedir);
     const conceptoMal = el('concepto').value.trim() !== '' && Reglas.concepto(el('concepto').value);
     if (conceptoMal) { marcarError('concepto', conceptoMal); hayErrores = true; }
     const aQuienMal = el('beneficiario').value.trim() !== '' && Reglas.nombre(el('beneficiario').value);
     if (aQuienMal) { marcarError('beneficiario', aQuienMal); hayErrores = true; }
+    if (el('ruc').value.trim() !== '') {
+      const rucMal = Reglas.documento(el('ruc').value) || revisarRuc();
+      if (rucMal) { marcarError('ruc', rucMal); hayErrores = true; }
+    }
     const fechaMal = el('fechaVencimiento').value !== '' && Reglas.vencimiento(el('fechaVencimiento').value, hoyIso());
     if (fechaMal) { marcarError('fechaVencimiento', fechaMal); hayErrores = true; }
 
@@ -202,6 +256,7 @@
           concepto: el('concepto').value.trim(),
           categoriaId: Number(el('categoriaId').value),
           beneficiario: el('beneficiario').value.trim().replace(/\s+/g, ' '),
+          ruc: el('ruc').value.trim(),
           monto: monto,
           fechaVencimiento: el('fechaVencimiento').value,
           observacion: el('observacion').value.trim() || null
@@ -213,6 +268,7 @@
         // el nombre nuevo queda sugerido para el siguiente registro
         if (datos.beneficiario && !destinatarios.includes(datos.beneficiario)) {
           destinatarios.push(datos.beneficiario);
+          conocidos.push({ nombre: datos.beneficiario, ruc: datos.ruc || null });
           el('lista-destinatarios').insertAdjacentHTML('beforeend', '<option value="' + esc(datos.beneficiario) + '"></option>');
         }
         if (registrarOtra) {

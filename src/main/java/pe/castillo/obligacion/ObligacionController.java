@@ -93,9 +93,14 @@ public class ObligacionController {
 
     /** A quiénes ya se les registró algún pago: el formulario los sugiere mientras se escribe. */
     @GetMapping("/destinatarios")
-    public List<String> destinatarios() {
-        return obligaciones.nombresBeneficiarios();
+    public List<Destinatario> destinatarios() {
+        return obligaciones.nombresConDocumento().stream()
+                .map(f -> new Destinatario((String) f[0], (String) f[1]))
+                .toList();
     }
+
+    /** A quién ya se le pagó y su RUC o DNI (null si se registró antes de pedirlo). */
+    public record Destinatario(String nombre, String ruc) { }
 
     /** HU-06: detalle del pago. Si no existe: "Pago no encontrado". */
     @GetMapping("/{id}")
@@ -167,6 +172,7 @@ public class ObligacionController {
                 nombreUsuario(o.getRegistradoPor()),
                 o.getRegistradoEn(),
                 o.getBeneficiarioNombre(),
+                o.getBeneficiarioDocumento(),
                 o.isEnEspera(),
                 o.isEnEspera() ? o.getNotaEspera() : null,
                 o.isEnEspera() ? nombreUsuario(o.getEsperaPor()) : null,
@@ -185,6 +191,7 @@ public class ObligacionController {
         Map<String, String> errores = new LinkedHashMap<>();
         ValidacionException.agregar(errores, "concepto", Reglas.concepto(form.concepto()));
         ValidacionException.agregar(errores, "beneficiario", Reglas.nombre(form.beneficiario()));
+        ValidacionException.agregar(errores, "ruc", Reglas.documento(form.ruc()));
         ValidacionException.agregar(errores, "fechaVencimiento", Reglas.vencimiento(form.fechaVencimiento(), Fechas.hoy()));
         ValidacionException.lanzarSiHay(errores);
 
@@ -192,6 +199,11 @@ public class ObligacionController {
                 .filter(Categoria::isActivo)
                 .orElseThrow(() -> new NegocioException(HttpStatus.BAD_REQUEST, "Elige una categoría válida", "categoriaId"));
         String aQuien = form.beneficiario().trim().replaceAll("\\s+", " ");
+        String ruc = form.ruc().trim();
+
+        // Un RUC es de una sola empresa y una empresa tiene un solo RUC (pedido del Product Owner).
+        // Si la empresa ya existe escrita de otra forma ("HIDRANDINA S.A."), se guarda con el nombre ya registrado.
+        aQuien = nombreSegunRuc(obligaciones, aQuien, ruc);
 
         // No se permite registrar dos veces lo mismo (ver avisoDuplicada)
         avisoDuplicada(obligaciones, aQuien, form.concepto(), form.monto(), form.fechaVencimiento())
@@ -204,7 +216,7 @@ public class ObligacionController {
         Long usuarioId = usuarioId(auth);
 
         Obligacion guardada = obligaciones.save(new Obligacion(
-                form.concepto().trim().replaceAll("\\s+", " "), categoria, aQuien, form.monto(),
+                form.concepto().trim().replaceAll("\\s+", " "), categoria, aQuien, ruc, form.monto(),
                 form.fechaVencimiento(), observacion, usuarioId));
         return ObligacionResumen.de(guardada, Fechas.hoy());
     }
@@ -261,6 +273,36 @@ public class ObligacionController {
         return "Ya hay un recibo de " + servicio + " en " + nombreMes + ": «" + existente.getConcepto() + "» para "
                 + existente.getBeneficiarioNombre() + " (S/ " + soles(existente) + ", vence " + dia(existente)
                 + "). Solo se registra un recibo de " + servicio + " por mes.";
+    }
+
+    /**
+     * Revisa que el RUC/DNI y la empresa vayan juntos: el RUC no puede estar registrado para otra empresa y la empresa
+     * no puede tener otro RUC. Devuelve el nombre con el que se guarda (el ya registrado, si es la misma empresa).
+     */
+    public static String nombreSegunRuc(ObligacionRepository repo, String aQuien, String ruc) {
+        String empresa = Reglas.empresa(aQuien);
+        String tipo = ruc.length() == 11 ? "RUC" : "DNI";
+        for (Obligacion o : repo.findByActivoTrueAndBeneficiarioDocumentoIsNotNull()) {
+            boolean mismoRuc = ruc.equals(o.getBeneficiarioDocumento());
+            boolean mismaEmpresa = Reglas.empresa(o.getBeneficiarioNombre()).equals(empresa);
+            if (mismoRuc && !mismaEmpresa) {
+                throw new NegocioException(HttpStatus.CONFLICT, "El " + tipo + " " + ruc + " ya está registrado para «"
+                        + o.getBeneficiarioNombre() + "». Un " + tipo + " pertenece a una sola persona o empresa: "
+                        + "revisa el número o el nombre.", "ruc");
+            }
+            if (mismaEmpresa && !mismoRuc) {
+                String suyo = o.getBeneficiarioDocumento().length() == 11 ? "RUC" : "DNI";
+                throw new NegocioException(HttpStatus.CONFLICT, "«" + o.getBeneficiarioNombre() + "» ya está registrada con el "
+                        + suyo + " " + o.getBeneficiarioDocumento() + ". Una persona o empresa tiene un solo " + suyo
+                        + ": revisa el número.", "ruc");
+            }
+        }
+        for (Obligacion o : repo.findByActivoTrueAndBeneficiarioDocumentoIsNotNull()) {
+            if (ruc.equals(o.getBeneficiarioDocumento())) {
+                return o.getBeneficiarioNombre();
+            }
+        }
+        return aQuien;
     }
 
     /** Texto del aviso cuando ya existe la misma obligación. */

@@ -136,6 +136,24 @@ public class DocumentoController {
             aQuien = lectura.emisorNombre().trim().replaceAll("\\s+", " ");
         }
 
+        // RUC o DNI: si el leído ya está registrado, manda el nombre de esa empresa; si no se leyó, el ya registrado
+        String ruc = lectura.emisorDocumento() != null && Reglas.documento(lectura.emisorDocumento()) == null
+                ? lectura.emisorDocumento() : null;
+        for (Object[] fila : obligaciones.nombresConDocumento()) {
+            String nombre = (String) fila[0];
+            String doc = (String) fila[1];
+            if (doc == null) {
+                continue;
+            }
+            if (doc.equals(ruc)) {
+                aQuien = nombre;
+                break;
+            }
+            if (ruc == null && aQuien != null && Reglas.empresa(nombre).equals(Reglas.empresa(aQuien))) {
+                ruc = doc;
+            }
+        }
+
         // concepto y categoría sugeridos: los de su último pago registrado
         Long categoriaId = null;
         String concepto = null;
@@ -162,6 +180,6 @@ public class DocumentoController {
         // ¿ya está registrada? se avisa desde ahora; igual el servidor la rechazaría al guardar
         String avisoDuplicada = ObligacionController.avisoDuplicada(obligaciones, aQuien, concepto,
                 lectura.monto(), lectura.fechaVencimiento()).orElse(null);
-        return new DocumentoLeido(lectura.monto(), lectura.fechaVencimiento(), aQuien, categoriaId, concepto, avisoDuplicada);
+        return new DocumentoLeido(lectura.monto(), lectura.fechaVencimiento(), aQuien, ruc, categoriaId, concepto, avisoDuplicada);
     }
 }

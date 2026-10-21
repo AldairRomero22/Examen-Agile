@@ -94,6 +94,11 @@
       </div>
       <small class="ayuda">Si lees un documento, se rellena solo. Mientras escribes se sugieren los nombres a los que ya se pagó.</small>
 
+      <label for="ruc">RUC o DNI de a quién se paga *</label>
+      <input id="ruc" type="text" inputmode="numeric" maxlength="11" autocomplete="off" placeholder="RUC de 11 dígitos o DNI de 8">
+      <small class="error-campo" id="error-ruc" hidden></small>
+      <small class="ayuda">Un RUC pertenece a una sola empresa. Si la empresa ya tiene pagos, su RUC se completa solo.</small>
+
       <label for="monto">Monto (S/) *</label>
       <input id="monto" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off">
       <small class="error-campo" id="error-monto" hidden></small>

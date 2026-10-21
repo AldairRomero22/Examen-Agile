@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castillo · Nuevo préstamo</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <header id="barra"></header>
+
+  <main class="contenido">
+    <p class="volver"><a href="/prestamos.html">← Volver a Préstamos</a></p>
+    <div id="aviso" class="aviso" hidden></div>
+
+    <section id="formulario" class="formulario">
+      <div class="modulo-cabecera">
+        <div>
+          <span class="etiqueta-seccion">Módulo de registro</span>
+          <h2>Nuevo préstamo de capital</h2>
+        </div>
+      </div>
+
+      <!-- Lectura del cronograma: Excel directo; PDF o foto con IA. Se copia tal cual (con sus errores). -->
+      <div class="lectura-cronograma" id="zona-lectura">
+        <div>
+          <strong>¿Tienes el cronograma en un archivo?</strong>
+          <span class="nota">Excel (.xlsx), PDF o foto. Se copia tal cual: si el documento tiene errores, quedan marcados para que los corrijas. También puedes escribirlo a mano.</span>
+        </div>
+        <label class="boton boton-secundario" for="archivo-cronograma" id="elegir-archivo">Leer desde un archivo</label>
+        <input type="file" id="archivo-cronograma" class="solo-lector" accept=".xlsx,.pdf,.jpg,.jpeg,.png,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/pdf,image/jpeg,image/png">
+      </div>
+      <small class="error-campo" id="error-archivo" hidden></small>
+      <div id="leyendo" class="archivo-elegido" hidden>
+        <span class="girando"></span>
+        <div><strong>Leyendo el cronograma…</strong><small class="nota">Puede tardar unos segundos.</small></div>
+      </div>
+      <div id="aviso-leido" class="aviso aviso-info" hidden></div>
+
+      <div class="grid-prestamo">
+        <div><label for="entidad">Entidad *</label><input id="entidad" type="text" maxlength="100" placeholder="Por ejemplo BCP" autocomplete="off"><small class="error-campo" id="error-entidad" hidden></small></div>
+        <div><label for="nroCredito">N.º de crédito *</label><input id="nroCredito" type="text" maxlength="40" placeholder="102-30031-67" autocomplete="off"><small class="error-campo" id="error-nroCredito" hidden></small></div>
+        <div><label for="monto">Monto (S/) *</label><input id="monto" type="text" inputmode="decimal" placeholder="36000.00" autocomplete="off"><small class="error-campo" id="error-monto" hidden></small></div>
+        <div><label for="tasa">Interés anual (%) *</label><input id="tasa" type="text" inputmode="decimal" placeholder="17.02" autocomplete="off"><small class="error-campo" id="error-tasa" hidden></small></div>
+        <div><label for="plazo">Plazo (n.º de cuotas) *</label><input id="plazo" type="text" inputmode="numeric" maxlength="3" placeholder="24" autocomplete="off"><small class="error-campo" id="error-plazo" hidden></small></div>
+        <div><label for="fechaDesembolso">Fecha de desembolso *</label><input id="fechaDesembolso" type="date"><small class="error-campo" id="error-fechaDesembolso" hidden></small></div>
+      </div>
+
+      <div class="cronograma-cabecera">
+        <div>
+          <h3>Cronograma de pagos</h3>
+          <p class="nota">Se arma una fila por cuota según el plazo. Escribe cada fila o <strong>copia las filas desde Excel y pégalas</strong> en la primera celda.</p>
+        </div>
+        <div class="acciones-cronograma">
+          <button type="button" class="boton boton-secundario boton-chico" id="agregar-fila">+ Fila</button>
+          <button type="button" class="boton boton-secundario boton-chico" id="quitar-fila">− Última fila</button>
+        </div>
+      </div>
+      <div class="tabla-envoltorio">
+        <table class="tabla tabla-cronograma tabla-editable">
+          <thead>
+            <tr>
+              <th class="num">N.º</th><th>Vencimiento</th><th>Tipo de cuota</th><th class="num">Saldo inicial</th>
+              <th class="num">Interés</th><th class="num">Amortización</th><th class="num">Cuota a pagar</th><th class="num">Saldo final</th>
+            </tr>
+          </thead>
+          <tbody id="filas"></tbody>
+        </table>
+      </div>
+
+      <div class="revision" id="revision" role="status" aria-live="polite"></div>
+
+      <div class="acciones">
+        <button type="button" class="boton boton-primario" id="guardar">Guardar préstamo</button>
+        <a class="boton boton-secundario" href="/prestamos.html">Cancelar</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/vendor/gsap.min.js"></script>
+  <script src="/js/vendor/ScrollTrigger.min.js"></script>
+  <script src="/js/vendor/lenis.min.js"></script>
+  <script src="/js/animaciones.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/prestamo-reglas.js"></script>
+  <script src="/js/prestamo-nuevo.js"></script>
+</body>
+</html>

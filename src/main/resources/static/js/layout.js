@@ -17,6 +17,7 @@ async function iniciarPagina(activa) {
     panel: icono('<rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>'),
     pagos: icono('<path d="M8 6h12M8 12h12M8 18h12"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>'),
     obligacion: icono('<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'),
+    prestamos: icono('<path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6z"/>'),
     menu: icono('<path d="M4 7h16M4 12h16M4 17h16"/>')
   };
 
@@ -33,6 +34,7 @@ async function iniciarPagina(activa) {
     '<nav class="menu" aria-label="Menú principal">' +
       '<a href="/panel.html" data-pagina="panel">' + iconos.panel + '<span>Panel</span></a>' +
       '<a href="/pagos.html" data-pagina="pagos">' + iconos.pagos + '<span>Pagos</span></a>' +
+      '<a href="/prestamos.html" data-pagina="prestamos">' + iconos.prestamos + '<span>Préstamos</span></a>' +
       '<a href="/obligacion-nueva.html" data-pagina="obligacion" class="solo-asistente">' + iconos.obligacion + '<span>Nueva obligación</span></a>' +
     '</nav>' +
     '<div class="usuario">' +
