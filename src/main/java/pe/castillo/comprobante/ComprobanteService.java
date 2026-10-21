@@ -100,9 +100,13 @@ public class ComprobanteService {
         }
         String leidoPor = lectura.lector() != null ? lectura.lector() : lector.nombre();
 
+        // Pedido del Product Owner: un voucher ya usado no se puede subir otra vez (ni se guarda).
+        String hash = ArchivoVoucher.sha256(bytes);
+        rechazarSiYaSeUso(o, lectura.nroOperacion(), hash);
+
         // criterio 5: se guarda el archivo, lo leído, quién lo subió y cuándo
         Comprobante guardado = comprobantes.save(new Comprobante(
-                o.getId(), bytes, ArchivoVoucher.nombreSeguro(archivo.getOriginalFilename()), tipo, ArchivoVoucher.sha256(bytes),
+                o.getId(), bytes, ArchivoVoucher.nombreSeguro(archivo.getOriginalFilename()), tipo, hash,
                 leidoPor, lectura, usuarioId, OffsetDateTime.now(Fechas.LIMA)));
 
         return new ComprobanteLeido(guardado.getId(), guardado.getNombreArchivo(), guardado.getLector(),
@@ -240,6 +244,25 @@ public class ComprobanteService {
     // =====================================================================
     // Ayudas
     // =====================================================================
+
+    /**
+     * Rechaza el voucher si su número de operación o el mismo archivo ya pagaron un pago (quedaron aprobados),
+     * o si ya se envió a este mismo pago y quedó observado.
+     */
+    private void rechazarSiYaSeUso(Obligacion o, String nroOperacion, String hash) {
+        List<Long> usados = comprobantes.pagosQueYaUsaron(nroOperacion, hash);
+        if (!usados.isEmpty()) {
+            String concepto = obligaciones.findById(usados.get(0)).map(Obligacion::getConcepto).orElse("otro pago");
+            String donde = usados.get(0).equals(o.getId()) ? "este pago" : "el pago «" + concepto + "»";
+            throw new NegocioException(HttpStatus.CONFLICT, "Este voucher ya se usó para pagar " + donde
+                    + " (N.º de operación " + nroOperacion + "). Un voucher solo sirve para un pago: no se puede subir otra vez.",
+                    "archivo");
+        }
+        if (comprobantes.vecesObservadoEnEstePago(o.getId(), nroOperacion, hash) > 0) {
+            throw new NegocioException(HttpStatus.CONFLICT, "Ya subiste este voucher (N.º de operación " + nroOperacion
+                    + ") para este pago y quedó Observado. Sube el voucher correcto.", "archivo");
+        }
+    }
 
     private Obligacion buscarObligacion(Long id) {
         return obligaciones.findByIdAndActivoTrue(id)

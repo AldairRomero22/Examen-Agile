@@ -33,7 +33,7 @@ Avance por HU:
 | HU-05 Alertas de vencimiento | hecha |
 | HU-06 Detalle del pago | hecha (`pago.html`) |
 | HU-07 Subir voucher y leerlo | hecha con Tesseract (`comprobante-subir.html`) |
-| HU-08 Verificar con 4 reglas | hecha (Pagado u Observado) |
+| HU-08 Verificar con 4 reglas | hecha (Pagado u Observado). Un voucher que ya pagó otro pago (mismo N.º de operación o mismo archivo) se rechaza al subirlo |
 | HU-09 Ver comprobante | hecha (`comprobante-ver.html`) |
 | HU-10 Poner en espera | hecha (botones en `pago.html`) |
 
