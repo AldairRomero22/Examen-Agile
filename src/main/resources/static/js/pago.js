@@ -5,7 +5,8 @@
   const el = id => document.getElementById(id);
   const esGerente = yo.rol === 'GERENTE';
 
-  const id = new URLSearchParams(window.location.search).get('id');
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
   const r = await api('/api/obligaciones/' + encodeURIComponent(id || ''));
   if (!r.ok) {
     // HU-06 criterio 4
@@ -16,6 +17,11 @@
 
   pintar();
   pintarVerificacion();
+
+  // Viene de "Pagar cuota" en el cronograma de un préstamo
+  if (params.has('cuota')) {
+    mostrarAviso('Pago de la cuota registrado. Sube el voucher para verificarlo.', 'ok');
+  }
 
   // HU-06 criterio 2: a quién se paga
   el('beneficiario').textContent = p.beneficiario;

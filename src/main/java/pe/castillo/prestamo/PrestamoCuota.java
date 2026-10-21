@@ -50,6 +50,10 @@ public class PrestamoCuota {
     @Column(name = "saldo_final", nullable = false, precision = 12, scale = 2)
     private BigDecimal saldoFinal;
 
+    /** Obligación creada para pagar esta cuota (null mientras no se haya registrado su pago). */
+    @Column(name = "obligacion_id")
+    private Long obligacionId;
+
     protected PrestamoCuota() { }
 
     public PrestamoCuota(int numero, LocalDate vencimiento, String tipo, BigDecimal saldoInicial, BigDecimal interes,
@@ -65,6 +69,10 @@ public class PrestamoCuota {
     }
 
     void asignarPrestamo(Prestamo p) { this.prestamo = p; }
+
+    public void enlazarObligacion(Long id) { this.obligacionId = id; }
+
+    public Long getObligacionId() { return obligacionId; }
 
     public Long getId() { return id; }
     public int getNumero() { return numero; }

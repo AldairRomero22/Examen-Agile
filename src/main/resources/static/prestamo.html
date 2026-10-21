@@ -19,6 +19,8 @@
   <main class="contenido">
     <p class="volver"><a href="/prestamos.html">← Volver a Préstamos</a></p>
 
+    <div id="aviso" class="aviso" hidden></div>
+
     <div id="no-existe" class="vacio" hidden>Préstamo no encontrado. <a href="/prestamos.html">Volver a Préstamos</a></div>
 
     <section id="contenido" hidden>
@@ -39,14 +41,14 @@
       <section class="lista-tarjeta">
         <div class="lista-cabecera">
           <h2>Cronograma de pagos</h2>
-          <span class="lista-contador">Solo consulta · la fila resaltada es la próxima cuota</span>
+          <span class="lista-contador">La fila resaltada es la próxima cuota. Cada cuota se paga subiendo su voucher.</span>
         </div>
         <div class="tabla-envoltorio">
           <table class="tabla tabla-cronograma">
             <thead>
               <tr>
                 <th class="num">N.º</th><th>Vencimiento</th><th>Tipo de cuota</th><th class="num">Saldo inicial</th>
-                <th class="num">Interés</th><th class="num">Amortización</th><th class="num">Cuota a pagar</th><th class="num">Saldo final</th>
+                <th class="num">Interés</th><th class="num">Amortización</th><th class="num">Cuota a pagar</th><th class="num">Saldo final</th><th>Pago</th>
               </tr>
             </thead>
             <tbody id="filas"></tbody>
