@@ -737,6 +737,7 @@ html.con-animaciones .contenido { animation: none; }   /* GSAP se encarga de la 
 .fila-proxima td:first-child { box-shadow: inset 4px 0 0 var(--carbon); }
 .fila-pasada td { color: var(--texto-suave); }
 .enlace-pago-cuota { text-decoration: none; }
+.celda-voucher { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .tabla-cronograma .sin-pago { color: var(--texto-suave); font-size: .85rem; }
 
 .grid-prestamo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 18px; }

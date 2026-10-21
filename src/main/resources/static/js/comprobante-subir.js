@@ -78,10 +78,25 @@
     }
   });
 
+  /**
+   * Borra los datos leídos de la columna de la derecha. Se llama al elegir otro archivo y cuando una lectura
+   * no sale bien: así nunca quedan a la vista los datos de un voucher que no se aceptó.
+   */
+  function limpiarLectura() {
+    comprobante = null;
+    el('form-leido').hidden = true;
+    el('espera-lectura').hidden = false;
+    ['monto-leido', 'fecha-leida', 'nro-leido'].forEach(i => { el(i).value = ''; marcarError(i, ''); });
+    el('alerta-monto').hidden = true;
+    el('alerta-fecha').hidden = true;
+    el('enviar').disabled = true;
+  }
+
   function elegir(archivo) {
     marcarError('archivo', '');
     mostrarAviso('');
     liberarVistaPrevia();
+    limpiarLectura();
     el('elegido').hidden = true;
     el('leer').disabled = true;
     if (!archivo) return;
@@ -129,6 +144,8 @@
       const resp = await api('/api/obligaciones/' + p.id + '/comprobantes', { method: 'POST', body: datos });
       const cuerpo = await resp.json().catch(() => ({}));
       if (!resp.ok) {
+        // el voucher no se aceptó: no deben quedar a la vista los datos de la lectura anterior
+        limpiarLectura();
         if (cuerpo.campo === 'archivo') {
           marcarError('archivo', cuerpo.mensaje);
         } else {
@@ -139,6 +156,7 @@
       comprobante = cuerpo;
       mostrarLectura();
     } catch (err) {
+      limpiarLectura();
       mostrarAviso('No se pudo leer el voucher, intenta de nuevo', 'error');
     } finally {
       ocupado(false);
@@ -156,7 +174,7 @@
   function mostrarLectura() {
     // El servidor solo acepta vouchers leídos completos; si faltara algo, se pide otra imagen (nada se escribe a mano)
     if (comprobante.monto == null || !comprobante.fecha || !comprobante.nroOperacion) {
-      comprobante = null;
+      limpiarLectura();
       marcarError('archivo', 'No se pudieron leer todos los datos del voucher. Sube una imagen más clara.');
       return;
     }
@@ -274,13 +292,11 @@
   });
 
   el('otra-imagen').addEventListener('click', () => {
-    comprobante = null;
     el('archivo').value = '';
     el('elegido').hidden = true;
     liberarVistaPrevia();
     el('leer').disabled = true;
-    el('form-leido').hidden = true;
-    el('espera-lectura').hidden = false;
+    limpiarLectura();
     mostrarAviso('');
   });
 

@@ -23,13 +23,21 @@
 
   // El sistema no paga: solo verifica. El botón crea el pago de la cuota y lleva a subir su voucher
   const esAsistente = yo.rol !== 'GERENTE';
+  // Mientras la cuota no esté verificada se puede subir (o volver a subir) su voucher
+  const SIN_VOUCHER = ['PAGADO', 'EN_VERIFICACION', 'EN_ESPERA'];
+  const boton = (texto, atributos) => '<a class="boton boton-secundario boton-chico" ' + atributos + '>' + texto + '</a>';
   const celdaPago = c => {
-    if (c.obligacionId) {
-      return '<td data-label="Pago"><a class="enlace-pago-cuota" href="/pago.html?id=' + c.obligacionId + '">' +
-        insigniaEstado(c.estado, c.estadoEtiqueta) + '</a></td>';
+    const insignia = c.estado ? '<a class="enlace-pago-cuota" href="/pago.html?id=' + c.obligacionId + '">' +
+      insigniaEstado(c.estado, c.estadoEtiqueta) + '</a>' : '';
+    const faltaVoucher = !c.estado || !SIN_VOUCHER.includes(c.estado);
+    if (!esAsistente) {
+      return '<td data-label="Voucher"><span class="celda-voucher">' + (insignia || 'Sin voucher') + '</span></td>';
     }
-    if (!esAsistente) return '<td data-label="Pago" class="sin-pago">Sin voucher</td>';
-    return '<td data-label="Pago"><button type="button" class="boton boton-secundario boton-chico" data-cuota="' + c.numero + '">Subir voucher</button></td>';
+    // sin pago todavía: el botón lo crea primero; con pago: va directo a subir el voucher
+    const accion = c.obligacionId
+      ? boton(c.estado === 'OBSERVADO' ? 'Subir otro' : 'Subir voucher', 'href="/comprobante-subir.html?id=' + c.obligacionId + '&cuota=1"')
+      : '<button type="button" class="boton boton-secundario boton-chico" data-cuota="' + c.numero + '">Subir voucher</button>';
+    return '<td data-label="Voucher"><span class="celda-voucher">' + insignia + (faltaVoucher ? accion : '') + '</span></td>';
   };
 
   const hoy = hoyIso();
