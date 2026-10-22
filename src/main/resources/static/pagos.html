@@ -24,9 +24,18 @@
         <p id="subtitulo-lista">Todos los pagos, de todos los meses: busca, filtra y abre el detalle de cada uno.</p>
       </div>
       <div class="acciones-cabecera">
-        <label class="selector-mes" id="caja-mes">Mes
-          <select id="mes" aria-label="Elegir mes"><option value="">Todos los meses</option></select>
-        </label>
+        <div class="selector-mes" id="caja-mes">
+          <span id="etq-mes">Mes</span>
+          <div class="calendario-mes">
+            <input type="hidden" id="mes" value="">
+            <button type="button" class="campo-mes" id="mes-boton" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="etq-mes mes-texto">
+              <span id="mes-texto">Todos los meses</span>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
+            </button>
+            <div class="panel-mes" id="mes-panel" role="dialog" aria-label="Elegir mes" hidden></div>
+          </div>
+          <button type="button" class="boton boton-secundario" id="todos-meses" hidden>Ver todos los meses</button>
+        </div>
         <a href="/obligacion-nueva.html" class="boton boton-primario solo-asistente" id="nueva-obligacion">+ Nueva obligación</a>
         <a href="/pagos.html" id="volver-mes" class="boton boton-secundario" hidden>← Volver a todos los pagos</a>
       </div>

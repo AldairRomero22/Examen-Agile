@@ -723,8 +723,46 @@ html.con-animaciones .contenido { animation: none; }   /* GSAP se encarga de la 
 .acciones-sugerencia > [hidden] { display: none; }
 .boton-chico { min-height: 34px; padding: 6px 12px; font-size: .85rem; }
 
-/* Selector de mes: "Todos los meses" o un mes */
-.selector-mes select { cursor: pointer; text-transform: none; letter-spacing: 0; }
+/* Selector de mes con calendario (años y meses): cualquier mes, o "Todos los meses" */
+.selector-mes { flex-wrap: wrap; }
+.calendario-mes { position: relative; }
+.campo-mes {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 42px; padding: 9px 12px; cursor: pointer;
+  border: 1px solid var(--carbon); border-radius: 8px; background: var(--blanco); color: var(--carbon);
+  font-family: var(--fuente-titulo); font-weight: 600; font-size: .95rem; text-transform: none; letter-spacing: 0;
+  box-shadow: var(--sombra); min-width: 190px; justify-content: space-between;
+}
+.campo-mes:focus-visible { outline: none; box-shadow: var(--sombra), 0 0 0 3px rgba(85, 197, 190, .45); }
+.panel-mes {
+  position: absolute; z-index: 40; top: calc(100% + 8px); left: 0; width: 290px; max-width: 90vw; padding: 12px;
+  background: var(--blanco); border: 1px solid var(--carbon); border-radius: 12px; box-shadow: var(--sombra);
+  text-transform: none; letter-spacing: 0; font-weight: 500;
+}
+.panel-mes[hidden] { display: none; }
+.mes-cabecera { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.mes-cabecera select {
+  flex: 1; min-height: 38px; padding: 6px 10px; border: 1px solid var(--carbon); border-radius: 8px; background: var(--marfil);
+  font-family: var(--fuente-titulo); font-weight: 700; font-size: 1rem; text-align: center; cursor: pointer;
+}
+.mes-flecha {
+  width: 38px; height: 38px; border: 1px solid var(--carbon); border-radius: 8px; background: var(--blanco);
+  font-size: 1.3rem; line-height: 1; cursor: pointer; box-shadow: var(--sombra);
+}
+.mes-grilla { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.mes-opcion {
+  position: relative; min-height: 40px; border: 1px solid var(--linea); border-radius: 8px; background: var(--blanco);
+  font-family: var(--fuente-titulo); font-weight: 600; font-size: .9rem; cursor: pointer; color: var(--carbon);
+}
+.mes-opcion:hover { background: var(--marfil); border-color: var(--carbon); }
+.mes-opcion.actual { border-color: var(--carbon); }
+.mes-opcion.elegido { background: var(--carbon); color: var(--blanco); border-color: var(--carbon); }
+.mes-opcion.con-pagos::after {
+  content: ""; position: absolute; right: 6px; top: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--turquesa);
+  border: 1px solid var(--carbon);
+}
+.mes-pie { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--linea); }
+.mes-accion { background: none; border: 0; padding: 6px 4px; font-weight: 700; font-size: .85rem; text-decoration: underline; cursor: pointer; color: var(--carbon); }
+.selector-mes .boton { min-height: 42px; padding: 8px 14px; font-size: .85rem; }
 
 /* ---------- Préstamos de capital ---------- */
 .datos-prestamo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 18px 0 26px; }

@@ -133,16 +133,82 @@ function nombreMes(aaaaMm) {
   return n.charAt(0).toUpperCase() + n.slice(1) + ' de ' + a;
 }
 
+const MESES_CORTOS = ['Ene.', 'Feb.', 'Mar.', 'Abr.', 'May.', 'Jun.', 'Jul.', 'Ago.', 'Set.', 'Oct.', 'Nov.', 'Dic.'];
+
 /**
- * Llena el selector de mes: "Todos los meses" y cada mes que tiene pagos (más el mes actual), en orden.
- * Devuelve el mes que quedó elegido ('' = todos).
+ * Calendario para elegir el mes: con año (flechas y lista de años) y los 12 meses del año.
+ * Se puede elegir cualquier mes, tenga o no pagos; los meses con pagos llevan un punto.
+ * "input" es un campo oculto que guarda 'aaaa-mm' ('' = todos los meses) y avisa con el evento "change".
+ * Devuelve el mes elegido ('' = todos).
  */
-function llenarMeses(select, pagos, elegido) {
-  const meses = new Set(pagos.map(o => String(o.fechaVencimiento).slice(0, 7)));
-  meses.add(hoyIso().slice(0, 7));
-  if (elegido) meses.add(elegido);
-  select.innerHTML = '<option value="">Todos los meses</option>' +
-    [...meses].sort().map(m => '<option value="' + m + '">' + nombreMes(m) + '</option>').join('');
-  select.value = elegido || '';
-  return select.value;
+function prepararMes(input, elegido, pagos) {
+  const boton = document.getElementById('mes-boton');
+  const texto = document.getElementById('mes-texto');
+  const todosBtn = document.getElementById('todos-meses');
+  const panel = document.getElementById('mes-panel');
+  const valido = m => /^\d{4}-(0[1-9]|1[0-2])$/.test(m || '');
+  const hoy = hoyIso().slice(0, 7);
+  const conPagos = new Set((pagos || []).map(o => String(o.fechaVencimiento).slice(0, 7)));
+  let anio = Number((valido(elegido) ? elegido : hoy).slice(0, 4));
+
+  input.value = valido(elegido) ? elegido : '';
+
+  function mostrar() {
+    const m = input.value;
+    texto.textContent = m ? nombreMes(m) : 'Todos los meses';
+    todosBtn.hidden = !m;
+  }
+
+  function dibujar() {
+    const anioActual = Number(hoy.slice(0, 4));
+    const desde = Math.min(2020, anio), hasta = Math.max(anioActual + 15, anio);
+    let años = '';
+    for (let a = desde; a <= hasta; a++) años += '<option value="' + a + '"' + (a === anio ? ' selected' : '') + '>' + a + '</option>';
+    let meses = '';
+    MESES_CORTOS.forEach((nombre, i) => {
+      const m = anio + '-' + String(i + 1).padStart(2, '0');
+      const clases = 'mes-opcion' + (m === input.value ? ' elegido' : '') + (m === hoy ? ' actual' : '') + (conPagos.has(m) ? ' con-pagos' : '');
+      meses += '<button type="button" class="' + clases + '" data-mes="' + m + '" aria-pressed="' + (m === input.value) +
+        '" title="' + nombreMes(m) + (conPagos.has(m) ? ' · tiene pagos' : '') + '">' + nombre + '</button>';
+    });
+    panel.innerHTML =
+      '<div class="mes-cabecera">' +
+        '<button type="button" class="mes-flecha" data-anio="-1" aria-label="Año anterior">‹</button>' +
+        '<select id="mes-anio" aria-label="Año">' + años + '</select>' +
+        '<button type="button" class="mes-flecha" data-anio="1" aria-label="Año siguiente">›</button>' +
+      '</div>' +
+      '<div class="mes-grilla">' + meses + '</div>' +
+      '<div class="mes-pie">' +
+        '<button type="button" class="mes-accion" data-accion="todos">Todos los meses</button>' +
+        '<button type="button" class="mes-accion" data-accion="actual">Este mes</button>' +
+      '</div>';
+  }
+
+  function elegir(m) {
+    input.value = m;
+    mostrar();
+    cerrar();
+    input.dispatchEvent(new Event('change'));
+  }
+  function abrir() { dibujar(); panel.hidden = false; boton.setAttribute('aria-expanded', 'true'); }
+  function cerrar() { panel.hidden = true; boton.setAttribute('aria-expanded', 'false'); }
+
+  boton.addEventListener('click', () => { if (panel.hidden) abrir(); else cerrar(); });
+  panel.addEventListener('click', e => {
+    const x = e.target.closest('button');
+    if (!x) return;
+    if (x.dataset.mes) elegir(x.dataset.mes);
+    else if (x.dataset.anio) { anio += Number(x.dataset.anio); dibujar(); panel.querySelector('.mes-flecha[data-anio="' + x.dataset.anio + '"]').focus(); }
+    else if (x.dataset.accion === 'todos') elegir('');
+    else if (x.dataset.accion === 'actual') elegir(hoy);
+  });
+  panel.addEventListener('change', e => {
+    if (e.target.id === 'mes-anio') { anio = Number(e.target.value); dibujar(); document.getElementById('mes-anio').focus(); }
+  });
+  document.addEventListener('click', e => { if (!panel.hidden && !e.target.closest('.calendario-mes')) cerrar(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) { cerrar(); boton.focus(); } });
+  todosBtn.addEventListener('click', () => elegir(''));
+
+  mostrar();
+  return input.value;
 }

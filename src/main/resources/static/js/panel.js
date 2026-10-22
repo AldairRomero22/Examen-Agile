@@ -36,7 +36,7 @@
 
   // Pedido del Product Owner: por defecto se ven todos los pagos (meses anteriores, actual y futuros)
   await cargarTodos();
-  llenarMeses(campoMes, todos, params.get('mes') || '');
+  prepararMes(campoMes, params.get('mes') || '', todos);
   campoMes.addEventListener('change', filtrarMes);
   filtrarMes();
 

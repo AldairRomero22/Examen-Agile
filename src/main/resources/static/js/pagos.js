@@ -51,7 +51,7 @@
       return;
     }
     todos = await r.json();
-    llenarMeses(campoMes, todos, params.get('mes') || '');
+    prepararMes(campoMes, params.get('mes') || '', todos);
     campoMes.addEventListener('change', filtrarMes);
     filtrarMes();
   }
@@ -104,7 +104,7 @@
     const vacio = document.getElementById('vacio');
     if (!modoUrgentes) {
       vacio.textContent = lista.length === 0
-        ? 'Aún no hay pagos registrados este mes'
+        ? (campoMes.value ? 'No hay pagos con vencimiento en ' + nombreMes(campoMes.value).toLowerCase() : 'Aún no hay pagos registrados')
         : 'Ningún pago cumple los filtros elegidos';
     }
     vacio.hidden = visibles.length > 0;
