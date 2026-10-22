@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import pe.castillo.categoria.Categoria;
 import pe.castillo.categoria.CategoriaRepository;
+import pe.castillo.config.Empresa;
 import pe.castillo.config.Fechas;
 import pe.castillo.config.NegocioException;
 import pe.castillo.config.Reglas;
@@ -44,10 +45,13 @@ public class ObligacionController {
     private final ObligacionRepository obligaciones;
     private final CategoriaRepository categorias;
     private final UsuarioRepository usuarios;
+    private final Empresa empresa;
 
     public ObligacionController(ObligacionRepository obligaciones,
                                 CategoriaRepository categorias,
-                                UsuarioRepository usuarios) {
+                                UsuarioRepository usuarios,
+                                Empresa empresa) {
+        this.empresa = empresa;
         this.obligaciones = obligaciones;
         this.categorias = categorias;
         this.usuarios = usuarios;
@@ -162,6 +166,8 @@ public class ObligacionController {
         ValidacionException.agregar(errores, "beneficiario", Reglas.nombre(form.beneficiario()));
         ValidacionException.agregar(errores, "ruc", Reglas.documento(form.ruc()));
         ValidacionException.agregar(errores, "fechaVencimiento", Reglas.vencimiento(form.fechaVencimiento(), Fechas.hoy()));
+        ValidacionException.agregar(errores, "confirmaEmpresa", Boolean.TRUE.equals(form.confirmaEmpresa())
+                ? null : "Confirma que esta deuda es de " + empresa.nombre());
         ValidacionException.lanzarSiHay(errores);
 
         Categoria categoria = categorias.findById(form.categoriaId())

@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import pe.castillo.categoria.Categoria;
 import pe.castillo.categoria.CategoriaRepository;
 import pe.castillo.comprobante.ArchivoVoucher;
+import pe.castillo.config.Empresa;
 import pe.castillo.config.NegocioException;
 import pe.castillo.config.Reglas;
 import pe.castillo.lector.CoincidenciaBeneficiario;
@@ -68,8 +69,11 @@ public class DocumentoController {
     private final LectorDocumento lector;
     private final ObligacionRepository obligaciones;
     private final CategoriaRepository categorias;
+    private final Empresa empresa;
 
-    public DocumentoController(LectorDocumento lector, ObligacionRepository obligaciones, CategoriaRepository categorias) {
+    public DocumentoController(LectorDocumento lector, ObligacionRepository obligaciones, CategoriaRepository categorias,
+                               Empresa empresa) {
+        this.empresa = empresa;
         this.lector = lector;
         this.obligaciones = obligaciones;
         this.categorias = categorias;
@@ -111,6 +115,15 @@ public class DocumentoController {
         }
         if ("BOLETA".equals(tipoDocumento)) {
             throw new NegocioException(HttpStatus.UNPROCESSABLE_ENTITY, ES_BOLETA, "archivo");
+        }
+
+        // "Solo mis deudas": el documento debe estar a nombre de la empresa. Si está a nombre de otro, no se rellena nada.
+        // Si no se pudo leer el titular (por ejemplo sin IA), se sigue y el asistente confirma a mano al guardar.
+        String titular = lectura.titularNombre() == null ? null : lectura.titularNombre().trim().replaceAll("\\s+", " ");
+        Boolean titularEsMio = titular == null || titular.isEmpty() ? null : empresa.esMia(titular);
+        if (Boolean.FALSE.equals(titularEsMio)) {
+            throw new NegocioException(HttpStatus.UNPROCESSABLE_ENTITY, "Este documento está a nombre de «" + titular
+                    + "», no de " + empresa.nombre() + ". Solo se registran deudas de la empresa.", "archivo");
         }
 
         // A quién se paga: si el nombre leído (o el texto del documento) coincide con alguien a quien ya se le pagó,
@@ -180,6 +193,7 @@ public class DocumentoController {
         // ¿ya está registrada? se avisa desde ahora; igual el servidor la rechazaría al guardar
         String avisoDuplicada = ObligacionController.avisoDuplicada(obligaciones, aQuien, concepto,
                 lectura.monto(), lectura.fechaVencimiento()).orElse(null);
-        return new DocumentoLeido(lectura.monto(), lectura.fechaVencimiento(), aQuien, ruc, categoriaId, concepto, avisoDuplicada);
+        return new DocumentoLeido(lectura.monto(), lectura.fechaVencimiento(), aQuien, ruc, categoriaId, concepto, avisoDuplicada,
+                titular, titularEsMio);
     }
 }

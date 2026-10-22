@@ -52,6 +52,8 @@ Avance por HU:
 
 ## Lector de vouchers (IA y Tesseract)
 
+**Solo mis deudas:** el recibo o la factura debe estar a nombre de la empresa (`castillo.empresa.nombre`, por defecto *Castillo SAC*; se cambia con la variable `EMPRESA_NOMBRE`). La IA lee a nombre de quién está el documento y el código lo compara sin mayúsculas, tildes ni "S.A.C."; si es de otro, se rechaza. Si no se pudo leer el titular, o se escribe a mano, el asistente marca "Confirmo que esta deuda es de la empresa".
+
 El voucher se lee con **IA** (la misma `ANTHROPIC_API_KEY` de la lectura de documentos), que entiende Yape, Plin y cualquier banco.
 Si no hay clave o la IA no responde, se lee con **Tesseract** (OCR gratuito). Los datos del voucher **no se escriben a mano**:
 si no se lee el monto, la fecha o el número de operación, se pide una imagen más clara.

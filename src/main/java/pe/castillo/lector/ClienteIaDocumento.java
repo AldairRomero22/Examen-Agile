@@ -37,7 +37,7 @@ public final class ClienteIaDocumento {
     static final String INSTRUCCION = """
             Eres un lector de documentos de cobro de Perú: recibos (luz, agua, teléfono, internet), facturas y cuotas de \
             préstamos. Lee el documento y responde SOLO con un objeto JSON, sin texto adicional, con exactamente estos campos:
-            {"tipo": texto, "monto": número o null, "fecha_vencimiento": "AAAA-MM-DD" o null, "emisor_nombre": texto o null, "emisor_ruc": texto o null, "concepto": texto o null, "categoria": texto o null}
+            {"tipo": texto, "monto": número o null, "fecha_vencimiento": "AAAA-MM-DD" o null, "emisor_nombre": texto o null, "emisor_ruc": texto o null, "concepto": texto o null, "categoria": texto o null, "titular_nombre": texto o null}
             Reglas:
             - tipo: exactamente uno de "RECIBO", "FACTURA", "CUOTA", "BOLETA", "VOUCHER" u "OTRO".
               "VOUCHER" es la prueba de un pago ya hecho: captura de Yape o Plin, constancia de transferencia o depósito, \
@@ -49,6 +49,8 @@ public final class ClienteIaDocumento {
             - fecha_vencimiento: la fecha límite de pago, no la de emisión ni la del periodo de consumo.
             - emisor_nombre y emisor_ruc: a quién se le paga: la empresa o persona que cobra o emite el documento \
               (arriba del documento), no el cliente.
+            - titular_nombre: a nombre de quién está el documento: el cliente o titular del servicio (por ejemplo "Cliente", \
+              "Titular", "Señor(es)" o "Razón social del adquirente"), NO quien cobra. Cópialo tal como aparece. Si no aparece, null.
             - concepto: descripción corta (máximo 60 caracteres) de qué se paga, con el mes o periodo si aparece. \
               Ejemplos: "Recibo de luz - setiembre 2026", "Cuota de préstamo 5 de 36", "Factura F001-458 cemento".
             - categoria: exactamente una de estas cuatro: "Servicios" (luz, agua, teléfono, internet, alquiler), \
@@ -180,6 +182,7 @@ public final class ClienteIaDocumento {
         }
         // el texto lleva el RUC primero (lo busca CoincidenciaBeneficiario) y luego el nombre
         String textoEmisor = ((ruc != null ? "RUC " + ruc + "\n" : "") + (nombre != null ? nombre : "")).trim();
+        String titular = limpio(datos.path("titular_nombre"), 150);
         String concepto = limpio(datos.path("concepto"), 150);
         String categoria = categoriaFija(limpio(datos.path("categoria"), 40));
         String tipo = limpio(datos.path("tipo"), 20);
@@ -187,7 +190,7 @@ public final class ClienteIaDocumento {
         if (tipo != null && !List.of("RECIBO", "FACTURA", "CUOTA", "BOLETA", "VOUCHER", "OTRO").contains(tipo)) {
             tipo = null;
         }
-        return new LecturaDocumento(fecha, monto, textoEmisor, nombre, ruc, concepto, categoria, tipo);
+        return new LecturaDocumento(fecha, monto, textoEmisor, nombre, ruc, concepto, categoria, tipo, titular);
     }
 
     private static final List<String> CATEGORIAS = List.of("Servicios", "Impuestos", "Proveedores", "Préstamos de capital");

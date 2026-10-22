@@ -1,7 +1,7 @@
 (async () => {
   await iniciarPagina('obligacion');
 
-  const campos = ['concepto', 'categoriaId', 'beneficiario', 'ruc', 'monto', 'fechaVencimiento', 'observacion'];
+  const campos = ['concepto', 'categoriaId', 'beneficiario', 'ruc', 'monto', 'fechaVencimiento', 'observacion', 'confirmaEmpresa'];
   const el = id => document.getElementById(id);
 
   // ----- Criterio 2: categorías fijas. "A quién se paga" se escribe; se sugieren los nombres a los que ya se pagó -----
@@ -10,6 +10,34 @@
   // [{nombre, ruc}]: a quién ya se le pagó y su RUC o DNI (ruc null si se registró antes de pedirlo)
   const conocidos = rDest.ok ? await rDest.json() : [];
   const destinatarios = conocidos.map(d => d.nombre);
+
+  // ----- Solo mis deudas: nombre de la empresa dueña del sistema -----
+  const rEmpresa = await api('/api/empresa');
+  const empresaNombre = rEmpresa.ok ? ((await rEmpresa.json()).nombre || 'la empresa') : 'la empresa';
+  el('empresa-nombre').textContent = empresaNombre;
+
+  /** Sin documento leído (a mano): la casilla se marca a mano y no hay mensaje de titular. */
+  function sinTitular() {
+    el('confirmaEmpresa').checked = false;
+    el('confirmaEmpresa').disabled = false;
+    el('titular-leido').hidden = true;
+    el('titular-leido').className = 'titular-leido';
+  }
+  /** Con documento leído: si está a nombre de la empresa se confirma solo; si no se pudo leer, se confirma a mano. */
+  function mostrarTitular(d) {
+    sinTitular();
+    const caja = el('titular-leido');
+    if (d.titularEsMio === true && d.titular) {
+      caja.textContent = 'Titular: ' + d.titular + ' ✔ El documento está a nombre de ' + empresaNombre + '.';
+      caja.className = 'titular-leido titular-ok';
+      el('confirmaEmpresa').checked = true;
+      el('confirmaEmpresa').disabled = true;
+    } else {
+      caja.textContent = 'No se pudo leer a nombre de quién está el documento. Revísalo y confirma abajo que es de ' + empresaNombre + '.';
+      caja.className = 'titular-leido titular-aviso';
+    }
+    caja.hidden = false;
+  }
 
   el('categoriaId').innerHTML = '<option value="">Elige una categoría</option>' +
     categorias.map(c => '<option value="' + c.id + '">' + esc(c.nombre) + '</option>').join('');
@@ -107,10 +135,10 @@
   const pantallas = ['eleccion', 'lectura', 'formulario'];
   function ver(cual) { pantallas.forEach(id => { el(id).hidden = id !== cual; }); }
 
-  el('elegir-mano').addEventListener('click', () => ver('formulario'));
+  el('elegir-mano').addEventListener('click', () => { sinTitular(); ver('formulario'); });
   el('elegir-documento').addEventListener('click', () => { limpiarLectura(); ver('lectura'); });
   el('lectura-volver').addEventListener('click', () => ver('eleccion'));
-  el('lectura-mano').addEventListener('click', () => ver('formulario'));
+  el('lectura-mano').addEventListener('click', () => { sinTitular(); ver('formulario'); });
   el('cambiar-modo').addEventListener('click', () => ver('eleccion'));
 
   function limpiarLectura() {
@@ -206,6 +234,7 @@
     if (d.categoriaId != null && categorias.some(c => c.id === d.categoriaId)) poner('categoriaId', String(d.categoriaId));
     if (d.concepto) poner('concepto', d.concepto);
     revisarCategoria();
+    mostrarTitular(d);
     el('aviso-leido').hidden = false;
     // el documento ya está registrado: se avisa de entrada (el servidor igual lo rechazaría al guardar)
     if (d.avisoDuplicada) mostrarAviso(d.avisoDuplicada, 'error');
@@ -229,6 +258,8 @@
   el('observacion').addEventListener('input', () => {
     el('contador').textContent = el('observacion').value.length;
   });
+
+  el('confirmaEmpresa').addEventListener('change', () => marcarError('confirmaEmpresa', ''));
 
   ver('eleccion');
 
@@ -273,6 +304,10 @@
         hayErrores = true;
       }
     }
+    if (!el('confirmaEmpresa').checked) {
+      marcarError('confirmaEmpresa', 'Confirma que esta deuda es de ' + empresaNombre);
+      hayErrores = true;
+    }
     if (hayErrores) return;
 
     const botones = [el('guardar'), el('guardar-otra')];
@@ -287,7 +322,8 @@
           ruc: el('ruc').value.trim(),
           monto: monto,
           fechaVencimiento: el('fechaVencimiento').value,
-          observacion: el('observacion').value.trim() || null
+          observacion: el('observacion').value.trim() || null,
+          confirmaEmpresa: el('confirmaEmpresa').checked
         })
       });
       const datos = await r.json().catch(() => ({}));
@@ -302,6 +338,7 @@
         if (registrarOtra) {
           // Criterio 6: formulario vacío y listo para el siguiente gasto
           el('formulario').reset();
+          sinTitular();
           quitarMarcasLeido();
           el('sugerencia-nombre').hidden = true;
           el('aviso-categoria').hidden = true;

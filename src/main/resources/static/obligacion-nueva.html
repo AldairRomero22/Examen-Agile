@@ -124,6 +124,16 @@
       <small class="ayuda"><span id="contador">0</span>/200</small>
       <small class="error-campo" id="error-observacion" hidden></small>
 
+      <!-- Solo mis deudas: el documento leído debe estar a nombre de la empresa; a mano, el asistente lo confirma -->
+      <div class="confirma-empresa" id="caja-titular">
+        <p class="titular-leido" id="titular-leido" role="status" hidden></p>
+        <label class="casilla-confirma" for="confirmaEmpresa">
+          <input type="checkbox" id="confirmaEmpresa">
+          <span>Confirmo que esta deuda es de <strong id="empresa-nombre">la empresa</strong> *</span>
+        </label>
+        <small class="error-campo" id="error-confirmaEmpresa" hidden></small>
+      </div>
+
       <div class="acciones">
         <button type="button" class="boton boton-primario" id="guardar">Guardar</button>
         <button type="button" class="boton boton-secundario" id="guardar-otra">Guardar y registrar otra</button>

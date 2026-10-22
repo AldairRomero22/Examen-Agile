@@ -820,3 +820,16 @@ html.con-animaciones .contenido { animation: none; }   /* GSAP se encarga de la 
 .solo-lector { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .deshabilitado { opacity: .55; pointer-events: none; }
 #leyendo, #aviso-leido { margin-bottom: 14px; }
+
+/* ---------- Solo mis deudas: titular del documento y confirmación ---------- */
+.confirma-empresa { margin-top: 22px; display: flex; flex-direction: column; gap: 8px; }
+.titular-leido { margin: 0; padding: 10px 12px; border: 1px solid var(--carbon); border-radius: 8px; font-size: .9rem; font-weight: 600; }
+.titular-leido[hidden] { display: none; }
+.titular-ok { background: var(--turquesa-claro); }
+.titular-aviso { background: var(--amarillo-claro, #fbf0c8); }
+.formulario .casilla-confirma {
+  display: flex; align-items: flex-start; gap: 10px; margin: 0; text-transform: none; letter-spacing: 0;
+  font-size: .95rem; font-weight: 500; cursor: pointer;
+}
+.formulario .casilla-confirma input { width: 20px; min-height: 0; height: 20px; padding: 0; margin: 2px 0 0; flex: none; accent-color: var(--carbon); }
+.formulario .casilla-confirma input:disabled { cursor: not-allowed; }

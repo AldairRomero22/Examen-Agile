@@ -13,15 +13,16 @@ import java.time.LocalDate;
  * @param concepto         descripción corta sugerida, por ejemplo "Recibo de luz - setiembre 2026" (solo IA)
  * @param categoria        una de las cuatro categorías fijas, por su nombre (solo IA)
  * @param tipo             RECIBO, FACTURA, CUOTA, BOLETA, VOUCHER u OTRO; null si no se supo (solo IA)
+ * @param titularNombre    a nombre de quién está el documento (el cliente o titular del servicio, no quien cobra); solo IA
  */
 public record LecturaDocumento(LocalDate fechaVencimiento, BigDecimal monto, String texto,
                                String emisorNombre, String emisorDocumento, String concepto, String categoria,
-                               String tipo) {
+                               String tipo, String titularNombre) {
 
-    public static final LecturaDocumento VACIA = new LecturaDocumento(null, null, "");
+    public static final LecturaDocumento VACIA = new LecturaDocumento(null, null, "", null, null, null, null, null, null);
 
     public LecturaDocumento(LocalDate fechaVencimiento, BigDecimal monto, String texto) {
-        this(fechaVencimiento, monto, texto, null, null, null, null, null);
+        this(fechaVencimiento, monto, texto, null, null, null, null, null, null);
     }
 
     public boolean tieneMontoYFecha() {
@@ -38,6 +39,7 @@ public record LecturaDocumento(LocalDate fechaVencimiento, BigDecimal monto, Str
                 emisorDocumento != null ? emisorDocumento : otra.emisorDocumento,
                 concepto != null ? concepto : otra.concepto,
                 categoria != null ? categoria : otra.categoria,
-                tipo != null ? tipo : otra.tipo);
+                tipo != null ? tipo : otra.tipo,
+                titularNombre != null ? titularNombre : otra.titularNombre);
     }
 }
