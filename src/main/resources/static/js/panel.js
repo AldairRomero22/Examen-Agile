@@ -5,11 +5,11 @@
 
   const ORDEN_ESTADOS = [
     ['PAGADO', 'Pagado'], ['POR_PAGAR', 'Por pagar'], ['POR_VENCER', 'Por vencer'],
-    ['VENCIDO', 'Vencido'], ['EN_ESPERA', 'En espera'],
+    ['VENCIDO', 'Vencido'],
     // Solo aparecen si hay pagos en ese estado (llegan con HU-07/08)
     ['EN_VERIFICACION', 'En verificación'], ['OBSERVADO', 'Observado']
   ];
-  const SIEMPRE_VISIBLES = 5;
+  const SIEMPRE_VISIBLES = 4;
 
   const svg = trazos => '<svg viewBox="0 0 24 24" fill="none" stroke="#171918" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + trazos + '</svg>';
   const ICONOS = {
@@ -17,7 +17,6 @@
     POR_PAGAR: svg('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
     POR_VENCER: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
     VENCIDO: svg('<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>'),
-    EN_ESPERA: svg('<circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/>'),
     EN_VERIFICACION: svg('<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>'),
     OBSERVADO: svg('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 115 0c0 1.7-2.5 2-2.5 3.5M12 17v.5"/>')
   };

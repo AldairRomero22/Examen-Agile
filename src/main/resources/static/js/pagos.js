@@ -4,11 +4,11 @@
 
   const ORDEN_ESTADOS = [
     ['PAGADO', 'Pagado'], ['POR_PAGAR', 'Por pagar'], ['POR_VENCER', 'Por vencer'],
-    ['VENCIDO', 'Vencido'], ['EN_ESPERA', 'En espera'],
+    ['VENCIDO', 'Vencido'],
     // Solo aparecen si hay pagos en ese estado
     ['EN_VERIFICACION', 'En verificación'], ['OBSERVADO', 'Observado']
   ];
-  const SIEMPRE_VISIBLES = 5;
+  const SIEMPRE_VISIBLES = 4;
 
   const params = new URLSearchParams(window.location.search);
   const modoUrgentes = params.has('urgentes');
@@ -87,7 +87,7 @@
       b.addEventListener('click', () => { estadoElegido = b.dataset.estado; pintar(); }));
 
     document.getElementById('filas').innerHTML = visibles.map(o =>
-      '<tr class="fila-click' + (o.estado === 'EN_ESPERA' ? ' fila-en-espera' : '') + '" data-id="' + o.id + '" tabindex="0">' +
+      '<tr class="fila-click' + '' + '" data-id="' + o.id + '" tabindex="0">' +
         '<td data-label="Concepto"><a href="/pago.html?id=' + o.id + '">' + esc(o.concepto) + '</a></td>' +
         '<td data-label="Categoría">' + esc(o.categoria) + '</td>' +
         '<td data-label="A quién se paga">' + esc(o.beneficiario) + '</td>' +

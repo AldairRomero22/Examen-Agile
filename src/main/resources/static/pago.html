@@ -59,16 +59,8 @@
           </div>
         </div>
 
-        <!-- Columna derecha: acciones según el rol (HU-10) -->
+        <!-- Columna derecha: acciones según el rol -->
         <div class="pago-derecha">
-          <!-- HU-10 criterios 2 y 3: el pago en espera se distingue y muestra la nota del gerente -->
-          <div id="caja-espera" class="caja-espera" hidden>
-            <strong>El gerente puso este pago en espera</strong>
-            <p id="nota-espera" class="nota-espera"></p>
-            <small id="espera-info" class="nota"></small>
-          </div>
-          <p id="liberado-info" class="nota" hidden></p>
-
           <!-- HU-09: resumen de la verificación y acceso al comprobante (PAGADO / OBSERVADO, ambos roles) -->
           <div id="caja-verificacion" class="caja-verificacion" hidden>
             <div id="verif-insignia"></div>
@@ -77,15 +69,9 @@
           </div>
 
           <div class="acciones-pago">
-            <!-- Asistente: subir comprobante (HU-07); bloqueado mientras esté en espera -->
+            <!-- Asistente: subir comprobante (HU-07) -->
             <div class="solo-asistente accion-con-ayuda">
               <button type="button" class="boton boton-primario" id="subir">Subir comprobante</button>
-              <small id="subir-bloqueado" class="ayuda-bloqueo" hidden>El gerente puso este pago en espera</small>
-            </div>
-            <!-- Gerente: su única acción (HU-01 criterio 3) -->
-            <div class="solo-gerente">
-              <button type="button" class="boton boton-espera" id="poner-espera" hidden>Poner en espera</button>
-              <button type="button" class="boton boton-primario" id="liberar" hidden>Liberar pago</button>
             </div>
           </div>
 
@@ -94,16 +80,6 @@
 
           <p class="nota" id="sin-acciones" hidden>No hay acciones pendientes para este pago.</p>
 
-          <form id="form-espera" class="formulario solo-gerente form-espera" hidden novalidate>
-            <label for="nota">Nota para el asistente</label>
-            <textarea id="nota" rows="3" maxlength="200" placeholder="Ejemplo: Espera hasta que confirme el monto con el proveedor"></textarea>
-            <small class="ayuda"><span id="contador-nota">0</span>/200</small>
-            <small class="error-campo" id="error-nota" hidden></small>
-            <div class="acciones">
-              <button type="submit" class="boton boton-espera" id="confirmar-espera">Confirmar</button>
-              <button type="button" class="boton boton-secundario" id="cancelar-espera">Cancelar</button>
-            </div>
-          </form>
         </div>
       </div>
     </section>

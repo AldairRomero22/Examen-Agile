@@ -2,7 +2,6 @@ package pe.castillo.obligacion;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -34,7 +33,6 @@ import pe.castillo.usuario.UsuarioRepository;
 /**
  * HU-03 registrar obligaciones (solo asistente; lo exige SecurityConfig).
  * HU-04 lista del mes, HU-05 urgentes, HU-06 detalle.
- * HU-10 poner en espera y liberar (solo gerente; lo exige SecurityConfig).
  */
 @RestController
 @RequestMapping("/api/obligaciones")
@@ -106,35 +104,6 @@ public class ObligacionController {
     @GetMapping("/{id}")
     public ObligacionDetalle detalle(@PathVariable Long id) {
         return detalleDe(buscar(id));
-    }
-
-    /**
-     * HU-10 criterios 1 y 2: el gerente pone en espera un pago que no esté Pagado, con nota obligatoria.
-     * Se guardan la nota, el usuario y la fecha. Un pago en espera deja de ser vencido o urgente.
-     */
-    @PostMapping("/{id}/espera")
-    public ObligacionDetalle ponerEnEspera(@PathVariable Long id, @Valid @RequestBody EsperaForm form,
-                                           Authentication auth) {
-        Obligacion o = buscar(id);
-        if ("PAGADO".equals(o.getEstadoPago())) {
-            throw new NegocioException(HttpStatus.CONFLICT, "Un pago Pagado no se puede poner en espera");
-        }
-        if (o.isEnEspera()) {
-            throw new NegocioException(HttpStatus.CONFLICT, "Este pago ya está en espera");
-        }
-        o.ponerEnEspera(form.nota().trim(), usuarioId(auth), OffsetDateTime.now(Fechas.LIMA));
-        return detalleDe(obligaciones.save(o));
-    }
-
-    /** HU-10 criterio 4: "Liberar pago"; vuelve al estado que le toca por su fecha. */
-    @PostMapping("/{id}/liberar")
-    public ObligacionDetalle liberar(@PathVariable Long id, Authentication auth) {
-        Obligacion o = buscar(id);
-        if (!o.isEnEspera()) {
-            throw new NegocioException(HttpStatus.CONFLICT, "Este pago no está en espera");
-        }
-        o.liberar(usuarioId(auth), OffsetDateTime.now(Fechas.LIMA));
-        return detalleDe(obligaciones.save(o));
     }
 
     private Obligacion buscar(Long id) {

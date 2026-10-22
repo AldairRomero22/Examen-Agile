@@ -11,7 +11,7 @@ src/main/java/pe/castillo/
 ├─ config/                      seguridad, CSRF, errores en JSON, fecha de "hoy" en Lima
 ├─ usuario/                     HU-01: usuarios, roles, cuentas iniciales, /api/me
 ├─ categoria/                   las 4 categorías fijas
-├─ obligacion/                  HU-03 a HU-06 y HU-10 (en espera)
+├─ obligacion/                  HU-03 a HU-06
 ├─ lector/                      HU-07: lee el voucher (IA con respaldo de Tesseract), los documentos y los cronogramas (Excel o IA)
 ├─ documento/                   Nueva obligación: leer un recibo/factura/cuota (monto, vencimiento, a quién se paga); rechaza vouchers y boletas
 ├─ comprobante/                 HU-07/08/09: subir, verificar con 4 reglas, ver
@@ -36,7 +36,7 @@ Avance por HU:
 | HU-07 Subir voucher y leerlo | hecha con Tesseract (`comprobante-subir.html`) |
 | HU-08 Verificar con 4 reglas | hecha (Pagado u Observado). Un voucher que ya pagó otro pago (mismo N.º de operación o mismo archivo) se rechaza al subirlo |
 | HU-09 Ver comprobante | hecha (`comprobante-ver.html`) |
-| HU-10 Poner en espera | hecha (botones en `pago.html`) |
+| HU-10 Poner en espera | retirada a pedido del Product Owner (no se implementa) |
 | Préstamos de capital | hecha (`prestamos.html`): se registra el préstamo con su cronograma a mano (o pegado desde Excel) y el sistema revisa que sea coherente: cuota = interés + amortización, saldo final = saldo inicial − amortización, el saldo pasa de una cuota a otra, empieza en el monto y termina en 0, tantas cuotas como el plazo, vencimientos en orden, cuotas Normal y Doble con su valor, N.º de crédito único. El cronograma también se puede leer: Excel (.xlsx) directo, sin IA; PDF o foto con IA. Lo leído se copia tal cual (con sus errores) para que se marquen. El sistema no paga: solo verifica. Desde el cronograma, el botón «Subir voucher» crea el pago de esa cuota (categoría Préstamos de capital, con el monto y el vencimiento de la cuota) y lleva a subir el voucher, como cualquier otro pago; la cuota queda enlazada a ese pago y muestra su estado |
 
 ## Ejecutar en tu PC (VS Code)
